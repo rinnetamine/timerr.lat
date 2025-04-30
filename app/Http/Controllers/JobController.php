@@ -57,7 +57,9 @@ class JobController extends Controller
                 Job::create($attributes);
 
                 // Deduct time credits from user's account
-                $user->decrement('time_credits', $attributes['time_credits']);
+                $user->update([
+                    'time_credits' => $user->time_credits - $attributes['time_credits']
+                ]);
 
                 // Create a transaction record
                 DB::table('transactions')->insert([
