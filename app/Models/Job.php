@@ -12,8 +12,8 @@ class Job extends Model {
 
     protected $guarded = [];
 
-    public function employer()
+    public function user()
     {
-        return $this->belongsTo(Employer::class);
+        return $this->belongsTo(User::class);
     }
 }

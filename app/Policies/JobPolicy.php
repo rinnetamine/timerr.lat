@@ -10,6 +10,6 @@ class JobPolicy
 {
     public function edit(User $user, Job $job): bool
     {
-        return $job->employer->user->is($user);
+        return $job->user->is($user);
     }
 }

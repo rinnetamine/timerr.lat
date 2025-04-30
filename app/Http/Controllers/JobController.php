@@ -11,7 +11,7 @@ class JobController extends Controller
 {
     public function index()
     {
-        $jobs = Job::with('employer')->latest()->simplePaginate(3);
+        $jobs = Job::with('user')->latest()->simplePaginate(3);
 
         return view('jobs.index', [
             'jobs' => $jobs
@@ -38,7 +38,7 @@ class JobController extends Controller
         Job::create([
             'title' => request('title'),
             'salary' => request('salary'),
-            'employer_id' => 1
+            'user_id' => auth()->id()
         ]);
 
         return redirect('/jobs');
