@@ -13,7 +13,15 @@ class JobController extends Controller
 {
     public function index()
     {
-        $jobs = Job::with('user')->latest()->simplePaginate(3);
+        // Get the current user's ID if logged in
+        $userId = auth()->check() ? auth()->id() : null;
+        
+        // Start building the query - only show jobs with NO submissions
+        $jobsQuery = Job::with('user')
+            ->whereDoesntHave('submissions');
+        
+        // Get jobs with no submissions
+        $jobs = $jobsQuery->latest()->simplePaginate(3);
 
         return view('jobs.index', [
             'jobs' => $jobs
@@ -109,9 +117,39 @@ class JobController extends Controller
     public function destroy(Job $job)
     {
         Gate::authorize('edit-job', $job);
-
-        $job->delete();
-
-        return redirect('/jobs')->with('success', 'Service deleted successfully!');
+        
+        try {
+            DB::transaction(function () use ($job) {
+                // Get the job owner
+                $jobOwner = User::find($job->user_id);
+                
+                if ($jobOwner) {
+                    // Return credits to the job owner
+                    $jobOwner->update([
+                        'time_credits' => $jobOwner->time_credits + $job->time_credits
+                    ]);
+                    
+                    // Create a transaction record for returned credits
+                    DB::table('transactions')->insert([
+                        'user_id' => $jobOwner->id,
+                        'amount' => $job->time_credits,
+                        'description' => "Credits returned from deleted job: {$job->title}",
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+                }
+                
+                // Delete the job
+                $job->delete();
+            });
+            
+            return redirect('/jobs')->with('success', 'Service deleted successfully and credits have been returned!');
+        } catch (\Exception $e) {
+            Log::error(message: 'Job deletion failed: ' . $e->getMessage());
+            
+            return back()->withErrors([
+                'error' => 'Failed to delete listing: ' . $e->getMessage()
+            ]);
+        }
     }
 }

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Models\Job;
+use App\Models\Transaction;
 
 class User extends Authenticatable
 {
@@ -17,11 +18,13 @@ class User extends Authenticatable
         'last_name',
         'email',
         'password',
-        'time_credits'
+        'time_credits',
+        'role'
     ];
 
     protected $attributes = [
-        'time_credits' => 0
+        'time_credits' => 0,
+        'role' => 'user'
     ];
 
     protected $guarded = [];
@@ -52,5 +55,15 @@ class User extends Authenticatable
     public function jobs()
     {
         return $this->hasMany(Job::class);
+    }
+    
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+    
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
     }
 }

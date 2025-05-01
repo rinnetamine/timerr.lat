@@ -65,6 +65,9 @@
                             @endguest
 
                             @auth
+                                <x-nav-link href="/submissions" :active="request()->is('submissions')" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">
+                                    Submissions
+                                </x-nav-link>
                                 <x-nav-link href="/profile" :active="request()->is('profile')" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">
                                     Profile
                                     <span class="ml-2 text-sm text-neon-accent">{{ auth()->user()->time_credits }} credits</span>
@@ -109,6 +112,8 @@
                     <a href="/contact"
                        class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Contact</a>
                     @auth
+                        <a href="/submissions"
+                           class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Submissions</a>
                         <a href="/profile"
                            class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Profile</a>
                     @endauth
