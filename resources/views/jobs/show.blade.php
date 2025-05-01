@@ -90,7 +90,7 @@
                                             accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.zip,.gif,.mp4,.mp3,.avi,.psd,.ai,.sketch,.xd,.fig">
                                         <p class="mt-1 text-sm text-gray-400">Upload relevant files to support your application (max 50MB each)</p>
                                         @error('files.*')
-                                            <div class="mt-1 text-red-500 text-sm">{{ $message }}</div>
+                                            <div class="mt-1 text-red-500 text-sm">{{ $message ?? 'Invalid file' }}</div>
                                         @enderror
                                     </div>
                                 </div>
