@@ -4,8 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\JobSubmission;
 
-class SubmissionFile extends Model {
+class SubmissionFile extends Model
+{
     use HasFactory;
 
     protected $table = 'submission_files';
@@ -18,6 +20,7 @@ class SubmissionFile extends Model {
         'file_size'
     ];
 
+    // belongs to a job submission
     public function jobSubmission()
     {
         return $this->belongsTo(JobSubmission::class);

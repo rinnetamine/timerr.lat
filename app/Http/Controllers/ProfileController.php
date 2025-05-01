@@ -13,15 +13,15 @@ class ProfileController extends Controller
     {
         $user = auth()->user();
         
-        // Get user's services (jobs they created)
+        // get jobs users created
         $services = $user->jobs()->latest()->get();
         
-        // Get submissions for jobs created by the user
+        // get submissions for jobs created by the user
         $receivedSubmissions = JobSubmission::whereHas('jobListing', function ($query) use ($user) {
             $query->where('user_id', $user->id);
         })->with(['jobListing', 'user'])->latest()->get();
         
-        // Get submissions made by the user
+        // get submissions made by the user
         $sentSubmissions = JobSubmission::where('user_id', $user->id)
             ->with('jobListing.user')
             ->latest()
@@ -29,7 +29,7 @@ class ProfileController extends Controller
             
         $transactions = $user->transactions()->latest()->get();
         
-        // Get admin review submissions if user is admin
+        // get admin review submissions if user is admin
         $adminReviewSubmissions = [];
         if ($user->isAdmin()) {
             $adminReviewSubmissions = JobSubmission::where('status', JobSubmission::STATUS_ADMIN_REVIEW)

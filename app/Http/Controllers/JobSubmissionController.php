@@ -19,32 +19,31 @@ class JobSubmissionController extends Controller
      */
     public function downloadFile(SubmissionFile $file)
     {
-        // Check if user is authorized to download this file
+        // check if user is authorized to download this file
         $submission = $file->jobSubmission;
         
-        // Allow download if user is either:
-        // 1. The job author, or
-        // 2. The applicant who uploaded the file
+        // only allow download for job owner or the applicant who uploaded it
         if (auth()->id() !== $submission->jobListing->user_id && auth()->id() !== $submission->user_id) {
             abort(403, 'You are not authorized to download this file.');
         }
         
-        // Check if file exists in storage
+        // verify file exists in storage
         if (!Storage::disk('public')->exists($file->file_path)) {
             abort(404, 'File not found.');
         }
         
-        // Get the file from storage
+        // get the file from storage and prepare for download
         $path = Storage::disk('public')->path($file->file_path);
         $content = file_get_contents($path);
         $filename = $file->file_name;
         
-        // Return file as download response
+        // send file as download response with proper headers
         return Response::make($content, 200, [
             'Content-Type' => $file->mime_type,
             'Content-Disposition' => 'attachment; filename="' . $filename . '"'
         ]);
     }
+    
     public function claim()
     {
         if (!auth()->check()) {
@@ -57,14 +56,14 @@ class JobSubmissionController extends Controller
 
         $job = Job::findOrFail($attributes['job_id']);
 
-        // Check if user is trying to apply to their own job
+        // prevent users from claiming their own jobs
         if (auth()->id() === $job->user_id) {
             return back()->withErrors([
                 'error' => 'You cannot apply to your own help request.'
             ]);
         }
 
-        // Check if this job is already claimed by someone else
+        // check if job is already claimed or in progress
         $existingClaim = JobSubmission::where('job_listing_id', $job->id)
             ->whereIn('status', [JobSubmission::STATUS_CLAIMED, JobSubmission::STATUS_PENDING, JobSubmission::STATUS_APPROVED])
             ->exists();
@@ -75,20 +74,20 @@ class JobSubmissionController extends Controller
             ]);
         }
 
-        // Check if user has already claimed or applied to this job
+        // check if user already has a submission for this job
         $userSubmission = JobSubmission::where('job_listing_id', $job->id)
             ->where('user_id', auth()->id())
             ->first();
 
         if ($userSubmission) {
-            // If the user already has a declined submission, they can try again
+            // allow re-claiming if previous submission was declined
             if ($userSubmission->status === JobSubmission::STATUS_DECLINED) {
                 $userSubmission->update([
                     'status' => JobSubmission::STATUS_CLAIMED,
                     'message' => null
                 ]);
                 
-                // Delete any existing files
+                // clean up any previous files
                 foreach ($userSubmission->files as $file) {
                     Storage::disk('public')->delete($file->file_path);
                     $file->delete();
@@ -103,11 +102,11 @@ class JobSubmissionController extends Controller
         }
 
         try {
-            // Create the job submission with CLAIMED status
+            // create new submission with claimed status
             JobSubmission::create([
                 'job_listing_id' => $job->id,
                 'user_id' => auth()->id(),
-                'message' => null, // Will be filled in later
+                'message' => null, // will be filled in during complete step
                 'status' => JobSubmission::STATUS_CLAIMED,
                 'admin_approved' => false
             ]);
@@ -136,12 +135,12 @@ class JobSubmissionController extends Controller
 
         $submission = JobSubmission::findOrFail($attributes['submission_id']);
 
-        // Check if this submission belongs to the current user
+        // verify submission belongs to current user
         if ($submission->user_id !== auth()->id()) {
             abort(403, 'Unauthorized action.');
         }
 
-        // Check if the submission is in CLAIMED status
+        // only claimed submissions can be completed
         if ($submission->status !== JobSubmission::STATUS_CLAIMED) {
             return back()->withErrors([
                 'error' => 'This application cannot be completed because it is not in the claimed state.'
@@ -150,13 +149,13 @@ class JobSubmissionController extends Controller
 
         try {
             DB::transaction(function () use ($submission, $attributes) {
-                // Update the submission with the message and change status to PENDING
+                // update submission with message and change status to pending review
                 $submission->update([
                     'message' => $attributes['message'],
                     'status' => JobSubmission::STATUS_PENDING
                 ]);
 
-                // Handle file uploads if any
+                // handle file uploads if any were provided
                 if (request()->hasFile('files')) {
                     foreach (request()->file('files') as $file) {
                         $path = $file->store('submission-files', 'public');
@@ -188,12 +187,12 @@ class JobSubmissionController extends Controller
             return redirect('/login');
         }
 
-        // Get submissions for jobs created by the current user
+        // get submissions for jobs the user created (received applications)
         $receivedSubmissions = JobSubmission::whereHas('jobListing', function ($query) {
             $query->where('user_id', auth()->id());
         })->with(['jobListing', 'user'])->latest()->get();
 
-        // Get submissions made by the current user
+        // get submissions the user made to other jobs (sent applications)
         $sentSubmissions = JobSubmission::where('user_id', auth()->id())
             ->with('jobListing.user')
             ->latest()
@@ -207,7 +206,7 @@ class JobSubmissionController extends Controller
 
     public function show(JobSubmission $submission)
     {
-        // Check if user is authorized to view this submission
+        // only allow job owner or applicant to view submission details
         if (auth()->id() !== $submission->user_id && 
             auth()->id() !== $submission->jobListing->user_id) {
             abort(403, 'Unauthorized action.');
@@ -220,12 +219,12 @@ class JobSubmissionController extends Controller
 
     public function approve(JobSubmission $submission)
     {
-        // Check if user is the job owner
+        // verify user is the job owner
         if (auth()->id() !== $submission->jobListing->user_id) {
             abort(403, 'Unauthorized action.');
         }
 
-        // Only pending submissions can be approved
+        // only pending submissions can be approved
         if ($submission->status !== JobSubmission::STATUS_PENDING) {
             return back()->withErrors([
                 'error' => 'Only pending applications can be approved.'
@@ -234,21 +233,21 @@ class JobSubmissionController extends Controller
 
         try {
             DB::transaction(function () use ($submission) {
-                // Update submission status
+                // mark submission as approved
                 $submission->update([
                     'status' => JobSubmission::STATUS_APPROVED
                 ]);
 
-                // Get the job and the helper user
+                // get job and helper user
                 $job = $submission->jobListing;
                 $helper = $submission->user;
 
-                // Transfer credits to the helper
+                // transfer credits to the helper
                 $helper->update([
                     'time_credits' => $helper->time_credits + $job->time_credits
                 ]);
 
-                // Create a transaction record for the helper
+                // record the transaction for audit purposes
                 DB::table('transactions')->insert([
                     'user_id' => $helper->id,
                     'amount' => $job->time_credits,
@@ -257,12 +256,12 @@ class JobSubmissionController extends Controller
                     'updated_at' => now()
                 ]);
 
-                // Mark other submissions as declined
+                // mark all other submissions for this job as declined
                 JobSubmission::where('job_listing_id', $job->id)
                     ->where('id', '!=', $submission->id)
                     ->update(['status' => JobSubmission::STATUS_DECLINED]);
                     
-                // Delete the job since it's been completed
+                // delete the job since it's been completed
                 $job->delete();
             });
 
@@ -278,12 +277,12 @@ class JobSubmissionController extends Controller
 
     public function decline(JobSubmission $submission)
     {
-        // Check if user is the job owner
+        // verify user is the job owner
         if (auth()->id() !== $submission->jobListing->user_id) {
             abort(403, 'Unauthorized action.');
         }
         
-        // Only pending submissions can be declined
+        // only pending submissions can be declined
         if ($submission->status !== JobSubmission::STATUS_PENDING) {
             return back()->withErrors([
                 'error' => 'Only pending applications can be declined.'
@@ -291,7 +290,7 @@ class JobSubmissionController extends Controller
         }
 
         try {
-            // Update submission status to admin_review
+            // send to admin review instead of direct decline
             $submission->update([
                 'status' => JobSubmission::STATUS_ADMIN_REVIEW,
                 'admin_notes' => request('admin_notes') ?? 'Declined by job owner, pending admin review.'
@@ -309,12 +308,12 @@ class JobSubmissionController extends Controller
 
     public function cancel(JobSubmission $submission)
     {
-        // Check if user is the applicant
+        // verify user is the applicant
         if (auth()->id() !== $submission->user_id) {
             abort(403, 'Unauthorized action.');
         }
 
-        // Only claimed submissions can be canceled
+        // only claimed submissions can be canceled
         if ($submission->status !== JobSubmission::STATUS_CLAIMED) {
             return back()->withErrors([
                 'error' => 'Only claimed applications can be canceled.'
@@ -322,19 +321,19 @@ class JobSubmissionController extends Controller
         }
 
         try {
-            // Store job ID before deleting submission
+            // save job id before deleting the submission
             $jobId = $submission->job_listing_id;
             
-            // Delete any files associated with this submission
+            // clean up any files associated with this submission
             foreach ($submission->files as $file) {
                 Storage::disk('public')->delete($file->file_path);
                 $file->delete();
             }
             
-            // Delete the submission
+            // delete the submission entirely
             $submission->delete();
 
-            // Redirect to the job page so they can claim it again if desired
+            // redirect to job page so user can claim again if desired
             return redirect('/jobs/' . $jobId)->with('success', 'Your claim has been canceled. You can now claim this help request again if you wish.');
         } catch (\Exception $e) {
             Log::error('Job claim cancellation failed: ' . $e->getMessage());

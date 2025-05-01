@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\JobSubmission;
 use App\Models\User;
 use App\Models\Transaction;
+use App\Models\ContactMessage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 
@@ -37,6 +38,7 @@ class AdminController extends Controller
         }
         
         try {
+            // start a database transaction so that all related updates either all succeed or all fail
             DB::beginTransaction();
             
             // Get the job and users involved
@@ -44,11 +46,11 @@ class AdminController extends Controller
             $applicant = $submission->user;
             $jobCreator = $job->user;
             
-            // Transfer credits from job to applicant
+            // transfer the reserved credits from the job to the applicant
             $applicant->time_credits += $job->time_credits;
             $applicant->save();
             
-            // Create a transaction record
+            // create an audit transaction record
             Transaction::create([
                 'user_id' => $applicant->id,
                 'amount' => $job->time_credits,
@@ -56,12 +58,12 @@ class AdminController extends Controller
                 'type' => 'credit'
             ]);
             
-            // Update submission status
+            // mark submission as approved by admin
             $submission->status = JobSubmission::STATUS_APPROVED;
             $submission->admin_approved = true;
             $submission->save();
             
-            // Delete the job as it's now completed
+            // delete the job because it has been completed
             $job->delete();
             
             DB::commit();
@@ -93,7 +95,7 @@ class AdminController extends Controller
         }
         
         try {
-            // Update submission status
+            // update submission status to declined (admin decision) but keep job open
             $submission->status = JobSubmission::STATUS_DECLINED;
             $submission->admin_approved = false;
             $submission->save();
@@ -104,6 +106,75 @@ class AdminController extends Controller
             Log::error('Admin rejection failed: ' . $e->getMessage());
             return back()->withErrors([
                 'error' => 'Failed to reject submission: ' . $e->getMessage()
+            ]);
+        }
+    }
+    
+    /**
+     * Show all contact messages (admin only)
+     */
+    public function contactMessages()
+    {
+        // check if user is admin
+        $this->checkAdmin();
+        
+        // get all messages, newest first
+        $messages = ContactMessage::latest()->get();
+        
+        return view('auth.profile', [
+            'activeTab' => 'contact-messages',
+            'messages' => $messages,
+            'user' => auth()->user(),
+            'services' => auth()->user()->jobs()->latest()->get(),
+            'receivedSubmissions' => JobSubmission::whereHas('jobListing', function ($query) {
+                $query->where('user_id', auth()->id());
+            })->with(['jobListing', 'user'])->latest()->get(),
+            'sentSubmissions' => JobSubmission::where('user_id', auth()->id())
+                ->with('jobListing.user')
+                ->latest()
+                ->get(),
+            'adminReviewSubmissions' => JobSubmission::where('status', JobSubmission::STATUS_ADMIN_REVIEW)
+                ->with(['jobListing', 'user'])
+                ->latest()
+                ->get(),
+            'transactions' => auth()->user()->transactions()->latest()->get()
+        ]);
+    }
+    
+    /**
+     * Delete a contact message
+     */
+    public function deleteContactMessage(ContactMessage $message)
+    {
+        // check if user is admin
+        $this->checkAdmin();
+        
+        try {
+            $message->delete();
+            return back()->with('success', 'Message deleted successfully.');
+        } catch (\Exception $e) {
+            Log::error('Contact message deletion failed: ' . $e->getMessage());
+            return back()->withErrors([
+                'error' => 'Failed to delete message: ' . $e->getMessage()
+            ]);
+        }
+    }
+    
+    /**
+     * Mark a contact message as read
+     */
+    public function markContactMessageAsRead(ContactMessage $message)
+    {
+        // check if user is admin
+        $this->checkAdmin();
+        
+        try {
+            $message->update(['is_read' => true]);
+            return back()->with('success', 'Message marked as read.');
+        } catch (\Exception $e) {
+            Log::error('Contact message update failed: ' . $e->getMessage());
+            return back()->withErrors([
+                'error' => 'Failed to update message: ' . $e->getMessage()
             ]);
         }
     }

@@ -22,6 +22,7 @@ class User extends Authenticatable
         'role'
     ];
 
+    // default values for new users
     protected $attributes = [
         'time_credits' => 0,
         'role' => 'user'
@@ -52,18 +53,24 @@ class User extends Authenticatable
         ];
     }
 
+    // user has many job listings they've created
     public function jobs()
     {
+        // one-to-many relationship with job model
         return $this->hasMany(Job::class);
     }
     
+    // check if user has admin role
     public function isAdmin()
     {
+        // returns true if user role is 'admin', false otherwise
         return $this->role === 'admin';
     }
     
+    // user has many credit transactions
     public function transactions()
     {
+        // one-to-many relationship with transaction model
         return $this->hasMany(Transaction::class);
     }
 }

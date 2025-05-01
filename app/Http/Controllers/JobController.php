@@ -13,14 +13,14 @@ class JobController extends Controller
 {
     public function index()
     {
-        // Get the current user's ID if logged in
+        // get the current user's id if logged in
         $userId = auth()->check() ? auth()->id() : null;
         
-        // Start building the query - only show jobs with NO submissions
+        // only show jobs that don't have any submissions yet
         $jobsQuery = Job::with('user')
             ->whereDoesntHave('submissions');
         
-        // Get jobs with no submissions
+        // paginate results for the view
         $jobs = $jobsQuery->latest()->simplePaginate(3);
 
         return view('jobs.index', [
@@ -52,7 +52,7 @@ class JobController extends Controller
 
         $user = auth()->user();
 
-        // Check if user has enough credits
+        // verify user has enough credits before creating job
         if ($user->time_credits < $attributes['time_credits']) {
             return back()->withErrors([
                 'time_credits' => 'You don\'t have enough time credits. Please add more credits or reduce the required amount.'
@@ -61,16 +61,16 @@ class JobController extends Controller
 
         try {
             $job = DB::transaction(function () use ($attributes, $user) {
-                // Create the job listing
+                // create the job listing
                 $attributes['user_id'] = $user->id;
                 $job = Job::create($attributes);
 
-                // Deduct time credits from user's account
+                // deduct time credits from user's account
                 $user->update([
                     'time_credits' => $user->time_credits - $attributes['time_credits']
                 ]);
 
-                // Create a transaction record
+                // record the transaction for audit purposes
                 DB::table('transactions')->insert([
                     'user_id' => $user->id,
                     'amount' => -$attributes['time_credits'],
@@ -84,7 +84,7 @@ class JobController extends Controller
 
             return redirect('/jobs')->with('success', 'Service listing created successfully! ' . $attributes['time_credits'] . ' credits have been reserved for this job.');
         } catch (\Exception $e) {
-            // Log the actual error for debugging
+            // log the actual error for debugging
             Log::error('Job creation failed: ' . $e->getMessage());
             
             return back()->withErrors([
@@ -120,16 +120,16 @@ class JobController extends Controller
         
         try {
             DB::transaction(function () use ($job) {
-                // Get the job owner
+                // get the job owner
                 $jobOwner = User::find($job->user_id);
                 
                 if ($jobOwner) {
-                    // Return credits to the job owner
+                    // return the reserved credits back to the job owner
                     $jobOwner->update([
                         'time_credits' => $jobOwner->time_credits + $job->time_credits
                     ]);
                     
-                    // Create a transaction record for returned credits
+                    // record the returned credits transaction
                     DB::table('transactions')->insert([
                         'user_id' => $jobOwner->id,
                         'amount' => $job->time_credits,
@@ -139,7 +139,7 @@ class JobController extends Controller
                     ]);
                 }
                 
-                // Delete the job
+                // delete the job listing
                 $job->delete();
             });
             
