@@ -11,15 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Schema::create('job_listings', function (Blueprint $table) {
-        //     $table->id();
-        //     $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
-        //     $table->string('title');
-        //     $table->text('description');
-        //     $table->integer('time_credits');
-        //     $table->string('category');
-        //     $table->timestamps();
-        // });
+        Schema::create('job_listings', function (Blueprint $table) {
+            $table->id();
+            $table->foreignIdFor(App\Models\User::class)->constrained()->cascadeOnDelete();
+            $table->string('title');
+            $table->text('description');
+            $table->integer('time_credits');
+            $table->string('category');
+            $table->timestamps();
+        });
     }
 
     /**
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Schema::dropIfExists('job_listings');
+        Schema::dropIfExists('job_listings');
     }
 };

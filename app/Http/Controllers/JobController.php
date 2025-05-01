@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class JobController extends Controller
 {
@@ -51,10 +52,10 @@ class JobController extends Controller
         }
 
         try {
-            DB::transaction(function () use ($attributes, $user) {
+            $job = DB::transaction(function () use ($attributes, $user) {
                 // Create the job listing
                 $attributes['user_id'] = $user->id;
-                Job::create($attributes);
+                $job = Job::create($attributes);
 
                 // Deduct time credits from user's account
                 $user->update([
@@ -69,12 +70,17 @@ class JobController extends Controller
                     'created_at' => now(),
                     'updated_at' => now()
                 ]);
+                
+                return $job;
             });
 
             return redirect('/jobs')->with('success', 'Service listing created successfully! ' . $attributes['time_credits'] . ' credits have been reserved for this job.');
         } catch (\Exception $e) {
+            // Log the actual error for debugging
+            Log::error('Job creation failed: ' . $e->getMessage());
+            
             return back()->withErrors([
-                'error' => 'Failed to create listing. Please try again.'
+                'error' => 'Failed to create listing: ' . $e->getMessage()
             ])->withInput();
         }
     }
