@@ -113,69 +113,15 @@ class AdminController extends Controller
     /**
      * Show all contact messages (admin only)
      */
-    public function contactMessages()
-    {
-        // check if user is admin
-        $this->checkAdmin();
-        
-        // get all messages, newest first
-        $messages = ContactMessage::latest()->get();
-        
-        return view('auth.profile', [
-            'activeTab' => 'contact-messages',
-            'messages' => $messages,
-            'user' => auth()->user(),
-            'services' => auth()->user()->jobs()->latest()->get(),
-            'receivedSubmissions' => JobSubmission::whereHas('jobListing', function ($query) {
-                $query->where('user_id', auth()->id());
-            })->with(['jobListing', 'user'])->latest()->get(),
-            'sentSubmissions' => JobSubmission::where('user_id', auth()->id())
-                ->with('jobListing.user')
-                ->latest()
-                ->get(),
-            'adminReviewSubmissions' => JobSubmission::where('status', JobSubmission::STATUS_ADMIN_REVIEW)
-                ->with(['jobListing', 'user'])
-                ->latest()
-                ->get(),
-            'transactions' => auth()->user()->transactions()->latest()->get()
-        ]);
-    }
+    
     
     /**
      * Delete a contact message
      */
-    public function deleteContactMessage(ContactMessage $message)
-    {
-        // check if user is admin
-        $this->checkAdmin();
-        
-        try {
-            $message->delete();
-            return back()->with('success', 'Message deleted successfully.');
-        } catch (\Exception $e) {
-            Log::error('Contact message deletion failed: ' . $e->getMessage());
-            return back()->withErrors([
-                'error' => 'Failed to delete message: ' . $e->getMessage()
-            ]);
-        }
-    }
+    
     
     /**
      * Mark a contact message as read
      */
-    public function markContactMessageAsRead(ContactMessage $message)
-    {
-        // check if user is admin
-        $this->checkAdmin();
-        
-        try {
-            $message->update(['is_read' => true]);
-            return back()->with('success', 'Message marked as read.');
-        } catch (\Exception $e) {
-            Log::error('Contact message update failed: ' . $e->getMessage());
-            return back()->withErrors([
-                'error' => 'Failed to update message: ' . $e->getMessage()
-            ]);
-        }
-    }
+
 }

@@ -14,9 +14,7 @@ use Illuminate\Support\Facades\Storage;
 
 class JobSubmissionController extends Controller
 {
-    /**
-     * Download a submission file securely
-     */
+    // download a submission file securely
     public function downloadFile(SubmissionFile $file)
     {
         // check if user is authorized to download this file
@@ -44,6 +42,7 @@ class JobSubmissionController extends Controller
         ]);
     }
     
+    // claim a job to indicate interest in completing it 
     public function claim()
     {
         if (!auth()->check()) {
@@ -121,6 +120,7 @@ class JobSubmissionController extends Controller
         }
     }
 
+    // complete a claimed job by submitting work details and files
     public function complete()
     {
         if (!auth()->check()) {
@@ -181,6 +181,7 @@ class JobSubmissionController extends Controller
         }
     }
 
+    // display a list of all submissions for the current user
     public function index()
     {
         if (!auth()->check()) {
@@ -204,6 +205,7 @@ class JobSubmissionController extends Controller
         ]);
     }
 
+    // show details of a specific submission
     public function show(JobSubmission $submission)
     {
         // only allow job owner or applicant to view submission details
@@ -217,6 +219,7 @@ class JobSubmissionController extends Controller
         ]);
     }
 
+    // approve a submission and transfer credits to the helper
     public function approve(JobSubmission $submission)
     {
         // verify user is the job owner
@@ -275,6 +278,7 @@ class JobSubmissionController extends Controller
         }
     }
 
+    // decline a submission and send it for admin review
     public function decline(JobSubmission $submission)
     {
         // verify user is the job owner
@@ -306,6 +310,7 @@ class JobSubmissionController extends Controller
         }
     }
 
+    // cancel a claimed job submission
     public function cancel(JobSubmission $submission)
     {
         // verify user is the applicant

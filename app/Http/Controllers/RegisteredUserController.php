@@ -7,13 +7,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rules\Password;
 
+// handles user registration functionality
 class RegisteredUserController extends Controller
 {
+    // display the registration form
     public function create()
     {
         return view('auth.register');
     }
 
+    // process the registration form submission and create a new user
     public function store()
     {
         $attributes = request()->validate([

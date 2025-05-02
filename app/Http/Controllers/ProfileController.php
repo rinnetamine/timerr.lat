@@ -7,8 +7,10 @@ use App\Models\User;
 use App\Models\Transaction;
 use App\Models\JobSubmission;
 
+// handles user profile functionality and dashboard data
 class ProfileController extends Controller
 {
+    // display the user profile with related jobs, submissions, and transactions
     public function show()
     {
         $user = auth()->user();

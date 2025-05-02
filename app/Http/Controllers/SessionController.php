@@ -5,13 +5,16 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
+// handles user authentication and session management
 class SessionController extends Controller
 {
+    // display the login form
     public function create()
     {
         return view('auth.login');
     }
 
+    // process login attempt and create user session
     public function store()
     {
         $attributes = request()->validate([
@@ -30,6 +33,7 @@ class SessionController extends Controller
         return redirect('/jobs');
     }
 
+    // log out the user and end their session
     public function destroy()
     {
         Auth::logout();

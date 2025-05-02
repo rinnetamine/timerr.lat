@@ -28,6 +28,7 @@ class JobController extends Controller
         ]);
     }
 
+    // show the form to create a new job listing
     public function create()
     {
         if (!auth()->check()) {
@@ -36,11 +37,13 @@ class JobController extends Controller
         return view('jobs.create');
     }
 
+    // display details of a specific job
     public function show(Job $job)
     {
         return view('jobs.show', ['job' => $job]);
     }
 
+    // validates input, deducts credits from user, and creates job
     public function store()
     {
         $attributes = request()->validate([
@@ -93,11 +96,13 @@ class JobController extends Controller
         }
     }
 
+    // show the form to edit an existing job
     public function edit(Job $job)
     {
         return view('jobs.edit', ['job' => $job]);
     }
 
+    // update an existing job listing
     public function update(Job $job)
     {
         Gate::authorize('edit-job', $job);
@@ -114,6 +119,7 @@ class JobController extends Controller
         return redirect('/jobs/' . $job->id)->with('success', 'Service updated successfully!');
     }
 
+    // delete a job listing and return credits to the owner
     public function destroy(Job $job)
     {
         Gate::authorize('edit-job', $job);
