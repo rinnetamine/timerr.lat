@@ -8,10 +8,10 @@ use Illuminate\Auth\Access\Response;
 
 class JobPolicy
 {
-    // determine if the user can edit the job
+    // check if user can edit a job
     public function edit(User $user, Job $job): bool
     {
-        // only allow editing if the user is the job owner
+        // verify user is the job owner
         return $job->user->is($user);
     }
 }

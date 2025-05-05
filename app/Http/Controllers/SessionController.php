@@ -5,35 +5,39 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
-// handles user authentication and session management
+// controller for user authentication
 class SessionController extends Controller
 {
-    // display the login form
+    // show login form
     public function create()
     {
         return view('auth.login');
     }
 
-    // process login attempt and create user session
+    // handle user login
     public function store()
     {
+        // validate login credentials
         $attributes = request()->validate([
             'email' => ['required', 'email'],
             'password' => ['required']
         ]);
 
+        // attempt to authenticate user
         if (! Auth::attempt($attributes)) {
             throw ValidationException::withMessages([
                 'email' => 'Sorry, those credentials do not match.'
             ]);
         }
 
+        // regenerate session for security
         request()->session()->regenerate();
 
+        // redirect to jobs page after successful login
         return redirect('/jobs');
     }
 
-    // log out the user and end their session
+    // handle user logout
     public function destroy()
     {
         Auth::logout();

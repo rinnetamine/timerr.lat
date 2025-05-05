@@ -7,31 +7,32 @@ use App\Models\User;
 use App\Models\Transaction;
 use App\Models\JobSubmission;
 
-// handles user profile functionality and dashboard data
+// controller for user profile and dashboard
 class ProfileController extends Controller
 {
-    // display the user profile with related jobs, submissions, and transactions
+    // display user profile with all related data
     public function show()
     {
         $user = auth()->user();
         
-        // get jobs users created
+        // fetch user's job listings
         $services = $user->jobs()->latest()->get();
         
-        // get submissions for jobs created by the user
+        // fetch submissions for user's jobs
         $receivedSubmissions = JobSubmission::whereHas('jobListing', function ($query) use ($user) {
             $query->where('user_id', $user->id);
         })->with(['jobListing', 'user'])->latest()->get();
         
-        // get submissions made by the user
+        // fetch user's job submissions
         $sentSubmissions = JobSubmission::where('user_id', $user->id)
             ->with('jobListing.user')
             ->latest()
             ->get();
             
+        // fetch user's transaction history
         $transactions = $user->transactions()->latest()->get();
         
-        // get admin review submissions if user is admin
+        // fetch admin review submissions if user is admin
         $adminReviewSubmissions = [];
         if ($user->isAdmin()) {
             $adminReviewSubmissions = JobSubmission::where('status', JobSubmission::STATUS_ADMIN_REVIEW)

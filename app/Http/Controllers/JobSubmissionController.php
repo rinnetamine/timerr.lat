@@ -12,57 +12,59 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
 
+// controller for managing job submissions
 class JobSubmissionController extends Controller
 {
-    // download a submission file securely
+    // handle secure file downloads for submissions
     public function downloadFile(SubmissionFile $file)
     {
-        // check if user is authorized to download this file
+        // verify user has permission to download
         $submission = $file->jobSubmission;
         
-        // only allow download for job owner or the applicant who uploaded it
+        // only allow job owner or applicant to download
         if (auth()->id() !== $submission->jobListing->user_id && auth()->id() !== $submission->user_id) {
             abort(403, 'You are not authorized to download this file.');
         }
         
-        // verify file exists in storage
+        // verify file exists
         if (!Storage::disk('public')->exists($file->file_path)) {
             abort(404, 'File not found.');
         }
         
-        // get the file from storage and prepare for download
+        // prepare file for download
         $path = Storage::disk('public')->path($file->file_path);
         $content = file_get_contents($path);
         $filename = $file->file_name;
         
-        // send file as download response with proper headers
+        // send file with proper headers
         return Response::make($content, 200, [
             'Content-Type' => $file->mime_type,
             'Content-Disposition' => 'attachment; filename="' . $filename . '"'
         ]);
     }
     
-    // claim a job to indicate interest in completing it 
+    // handle job claiming process
     public function claim()
     {
         if (!auth()->check()) {
             return redirect('/login');
         }
 
+        // validate job ID
         $attributes = request()->validate([
             'job_id' => ['required', 'exists:job_listings,id'],
         ]);
 
         $job = Job::findOrFail($attributes['job_id']);
 
-        // prevent users from claiming their own jobs
+        // prevent self-claiming
         if (auth()->id() === $job->user_id) {
             return back()->withErrors([
                 'error' => 'You cannot apply to your own help request.'
             ]);
         }
 
-        // check if job is already claimed or in progress
+        // check for existing claims
         $existingClaim = JobSubmission::where('job_listing_id', $job->id)
             ->whereIn('status', [JobSubmission::STATUS_CLAIMED, JobSubmission::STATUS_PENDING, JobSubmission::STATUS_APPROVED])
             ->exists();
@@ -73,20 +75,20 @@ class JobSubmissionController extends Controller
             ]);
         }
 
-        // check if user already has a submission for this job
+        // check for existing user submission
         $userSubmission = JobSubmission::where('job_listing_id', $job->id)
             ->where('user_id', auth()->id())
             ->first();
 
         if ($userSubmission) {
-            // allow re-claiming if previous submission was declined
+            // handle re-claiming for declined submissions
             if ($userSubmission->status === JobSubmission::STATUS_DECLINED) {
                 $userSubmission->update([
                     'status' => JobSubmission::STATUS_CLAIMED,
                     'message' => null
                 ]);
                 
-                // clean up any previous files
+                // clean up previous files
                 foreach ($userSubmission->files as $file) {
                     Storage::disk('public')->delete($file->file_path);
                     $file->delete();

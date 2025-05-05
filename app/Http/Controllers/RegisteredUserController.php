@@ -7,18 +7,19 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rules\Password;
 
-// handles user registration functionality
+// controller for user registration
 class RegisteredUserController extends Controller
 {
-    // display the registration form
+    // show registration form
     public function create()
     {
         return view('auth.register');
     }
 
-    // process the registration form submission and create a new user
+    // handle user registration
     public function store()
     {
+        // validate registration input
         $attributes = request()->validate([
             'first_name' => ['required'],
             'last_name'  => ['required'],
@@ -26,10 +27,13 @@ class RegisteredUserController extends Controller
             'password'   => ['required', Password::min(6), 'confirmed']
         ]);
 
+        // create new user
         $user = User::create($attributes);
 
+        // log in the new user
         Auth::login($user);
 
+        // redirect to jobs page
         return redirect('/jobs');
     }
 }

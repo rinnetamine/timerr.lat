@@ -11,28 +11,24 @@ use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
-        //
     }
 
-    /**
-     * Bootstrap any application services.
-     */
+    // bootstrap application services
     public function boot(): void
     {
+        // prevent lazy loading of models
         Model::preventLazyLoading();
 
+        // define gates for authorization
         Gate::define('edit-job', function (User $user, Job $job) {
-            // Allow admins to edit any job listing
+            // allow admins to edit any job
             if ($user->role === 'admin') {
                 return true;
             }
             
-            // Allow users to edit their own job listings
+            // allow users to edit their own jobs
             return $user->id === $job->user_id;
         });
     }

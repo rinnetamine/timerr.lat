@@ -9,8 +9,10 @@ class JobSubmission extends Model
 {
     use HasFactory;
 
+    // table name for job submissions
     protected $table = 'job_submissions';
 
+    // fillable attributes for job submissions
     protected $fillable = [
         'job_listing_id',
         'user_id',
@@ -27,19 +29,19 @@ class JobSubmission extends Model
     const STATUS_DECLINED = 'declined';   // job owner or admin declined the submission
     const STATUS_ADMIN_REVIEW = 'admin_review'; // submission needs admin decision
 
-    // belongs to a job listing
+    // relationship to the job listing
     public function jobListing()
     {
         return $this->belongsTo(Job::class, 'job_listing_id');
     }
 
-    // belongs to the user who submitted the application
+    // relationship to the user who submitted the application
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    // has many attached files
+    // relationship to submission files
     public function files()
     {
         return $this->hasMany(SubmissionFile::class);

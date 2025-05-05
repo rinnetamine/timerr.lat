@@ -10,8 +10,10 @@ class SubmissionFile extends Model
 {
     use HasFactory;
 
+    // table name for submission files
     protected $table = 'submission_files';
 
+    // fillable attributes for submission files
     protected $fillable = [
         'job_submission_id',
         'file_name',
@@ -20,7 +22,7 @@ class SubmissionFile extends Model
         'file_size'
     ];
 
-    // belongs to a job submission
+    // relationship to the job submission
     public function jobSubmission()
     {
         return $this->belongsTo(JobSubmission::class);

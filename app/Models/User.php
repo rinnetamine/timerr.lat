@@ -2,17 +2,18 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Models\Job;
 use App\Models\Transaction;
 
+
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+    // fillable attributes for user model
     protected $fillable = [
         'first_name',
         'last_name',
@@ -28,23 +29,16 @@ class User extends Authenticatable
         'role' => 'user'
     ];
 
+    // guarded attributes (empty array means all attributes are fillable)
     protected $guarded = [];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
+    // hidden attributes for serialization
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
+    // attribute casts for data type conversion
     protected function casts(): array
     {
         return [
@@ -53,24 +47,21 @@ class User extends Authenticatable
         ];
     }
 
-    // user has many job listings they've created
+    // relationship to job listings created by user
     public function jobs()
     {
-        // one-to-many relationship with job model
         return $this->hasMany(Job::class);
     }
     
-    // check if user has admin role
+    // check if user has admin privileges
     public function isAdmin()
     {
-        // returns true if user role is 'admin', false otherwise
         return $this->role === 'admin';
     }
     
-    // user has many credit transactions
+    // relationship to user's credit transactions
     public function transactions()
     {
-        // one-to-many relationship with transaction model
         return $this->hasMany(Transaction::class);
     }
 }

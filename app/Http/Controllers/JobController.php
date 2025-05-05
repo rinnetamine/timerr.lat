@@ -9,18 +9,20 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
+// controller for managing job listings and credits
 class JobController extends Controller
 {
+    // display list of available jobs
     public function index()
     {
-        // get the current user's id if logged in
+        // get current user id if logged in
         $userId = auth()->check() ? auth()->id() : null;
         
-        // only show jobs that don't have any submissions yet
+        // get jobs without submissions
         $jobsQuery = Job::with('user')
             ->whereDoesntHave('submissions');
         
-        // paginate results for the view
+        // paginate results
         $jobs = $jobsQuery->latest()->simplePaginate(3);
 
         return view('jobs.index', [
@@ -28,7 +30,7 @@ class JobController extends Controller
         ]);
     }
 
-    // show the form to create a new job listing
+    // show job creation form
     public function create()
     {
         if (!auth()->check()) {
@@ -37,15 +39,16 @@ class JobController extends Controller
         return view('jobs.create');
     }
 
-    // display details of a specific job
+    // display job details
     public function show(Job $job)
     {
         return view('jobs.show', ['job' => $job]);
     }
 
-    // validates input, deducts credits from user, and creates job
+    // create a new job listing
     public function store()
     {
+        // validate job creation input
         $attributes = request()->validate([
             'title' => ['required', 'min:3'],
             'description' => ['required', 'min:10'],
@@ -55,7 +58,7 @@ class JobController extends Controller
 
         $user = auth()->user();
 
-        // verify user has enough credits before creating job
+        // check if user has enough credits
         if ($user->time_credits < $attributes['time_credits']) {
             return back()->withErrors([
                 'time_credits' => 'You don\'t have enough time credits. Please add more credits or reduce the required amount.'
@@ -63,17 +66,18 @@ class JobController extends Controller
         }
 
         try {
+            // create job in a transaction
             $job = DB::transaction(function () use ($attributes, $user) {
-                // create the job listing
+                // create job listing
                 $attributes['user_id'] = $user->id;
                 $job = Job::create($attributes);
 
-                // deduct time credits from user's account
+                // deduct credits from user
                 $user->update([
                     'time_credits' => $user->time_credits - $attributes['time_credits']
                 ]);
 
-                // record the transaction for audit purposes
+                // log transaction
                 DB::table('transactions')->insert([
                     'user_id' => $user->id,
                     'amount' => -$attributes['time_credits'],
@@ -87,7 +91,7 @@ class JobController extends Controller
 
             return redirect('/jobs')->with('success', 'Service listing created successfully! ' . $attributes['time_credits'] . ' credits have been reserved for this job.');
         } catch (\Exception $e) {
-            // log the actual error for debugging
+            // log error and show user-friendly message
             Log::error('Job creation failed: ' . $e->getMessage());
             
             return back()->withErrors([
@@ -96,7 +100,7 @@ class JobController extends Controller
         }
     }
 
-    // show the form to edit an existing job
+    // show job edit form
     public function edit(Job $job)
     {
         return view('jobs.edit', ['job' => $job]);
@@ -105,8 +109,10 @@ class JobController extends Controller
     // update an existing job listing
     public function update(Job $job)
     {
+        // authorize job editing
         Gate::authorize('edit-job', $job);
 
+        // validate update input
         $attributes = request()->validate([
             'title' => ['required', 'min:3'],
             'description' => ['required', 'min:10'],
@@ -114,6 +120,7 @@ class JobController extends Controller
             'category' => ['required', 'in:creative,education,professional,technology,other']
         ]);
 
+        // update job listing
         $job->update($attributes);
 
         return redirect('/jobs/' . $job->id)->with('success', 'Service updated successfully!');
@@ -122,6 +129,7 @@ class JobController extends Controller
     // delete a job listing and return credits to the owner
     public function destroy(Job $job)
     {
+        // authorize job deletion
         Gate::authorize('edit-job', $job);
         
         try {
@@ -130,12 +138,12 @@ class JobController extends Controller
                 $jobOwner = User::find($job->user_id);
                 
                 if ($jobOwner) {
-                    // return the reserved credits back to the job owner
+                    // return credits to job owner
                     $jobOwner->update([
                         'time_credits' => $jobOwner->time_credits + $job->time_credits
                     ]);
                     
-                    // record the returned credits transaction
+                    // record credit return transaction
                     DB::table('transactions')->insert([
                         'user_id' => $jobOwner->id,
                         'amount' => $job->time_credits,
@@ -151,6 +159,7 @@ class JobController extends Controller
             
             return redirect('/jobs')->with('success', 'Service deleted successfully and credits have been returned!');
         } catch (\Exception $e) {
+            // log error and show user-friendly message
             Log::error(message: 'Job deletion failed: ' . $e->getMessage());
             
             return back()->withErrors([

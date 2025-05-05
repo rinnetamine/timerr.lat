@@ -10,11 +10,10 @@ use App\Models\ContactMessage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 
+// admin controller for handling admin-specific actions
 class AdminController extends Controller
 {
-    /**
-     * Check if the current user is an admin
-     */
+    // check if current user has admin privileges
     private function checkAdmin()
     {
         if (!auth()->check() || !auth()->user()->isAdmin()) {
@@ -22,15 +21,12 @@ class AdminController extends Controller
         }
     }
     
-    /**
-     * Approve a submission from admin review and transfer credits to the applicant
-     */
+    // approve a job submission and transfer credits to the applicant
     public function approveSubmission(JobSubmission $submission)
     {
-        // Check if user is admin
         $this->checkAdmin();
         
-        // Ensure submission is in admin_review status
+        // validate submission status
         if ($submission->status !== JobSubmission::STATUS_ADMIN_REVIEW) {
             return back()->withErrors([
                 'error' => 'This submission is not in admin review status.'
@@ -38,19 +34,19 @@ class AdminController extends Controller
         }
         
         try {
-            // start a database transaction so that all related updates either all succeed or all fail
+            // start database transaction
             DB::beginTransaction();
             
-            // Get the job and users involved
+            // get job and user information
             $job = $submission->jobListing;
             $applicant = $submission->user;
             $jobCreator = $job->user;
             
-            // transfer the reserved credits from the job to the applicant
+            // transfer credits to applicant
             $applicant->time_credits += $job->time_credits;
             $applicant->save();
             
-            // create an audit transaction record
+            // log transaction
             Transaction::create([
                 'user_id' => $applicant->id,
                 'amount' => $job->time_credits,
@@ -58,19 +54,21 @@ class AdminController extends Controller
                 'type' => 'credit'
             ]);
             
-            // mark submission as approved by admin
+            // update submission status
             $submission->status = JobSubmission::STATUS_APPROVED;
             $submission->admin_approved = true;
             $submission->save();
             
-            // delete the job because it has been completed
+            // complete job by deleting it
             $job->delete();
             
+            // commit transaction
             DB::commit();
             
             return redirect('/profile')->with('success', 'Submission approved and credits transferred to applicant.');
             
         } catch (\Exception $e) {
+            // rollback transaction on error
             DB::rollBack();
             Log::error('Admin approval failed: ' . $e->getMessage());
             return back()->withErrors([
@@ -79,15 +77,13 @@ class AdminController extends Controller
         }
     }
     
-    /**
-     * Reject a submission from admin review and return credits to the job creator
-     */
+    // reject a job submission and keep job open
     public function rejectSubmission(JobSubmission $submission)
     {
-        // Check if user is admin
+        // verify admin access
         $this->checkAdmin();
         
-        // Ensure submission is in admin_review status
+        // validate submission status
         if ($submission->status !== JobSubmission::STATUS_ADMIN_REVIEW) {
             return back()->withErrors([
                 'error' => 'This submission is not in admin review status.'
@@ -95,33 +91,26 @@ class AdminController extends Controller
         }
         
         try {
-            // update submission status to declined (admin decision) but keep job open
+            // update submission status
             $submission->status = JobSubmission::STATUS_DECLINED;
             $submission->admin_approved = false;
             $submission->save();
             
-            return redirect('/profile')->with('success', 'Submission rejected. The job remains available for others to claim.');
+            return redirect('/profile')->with('success', 'submission rejected. the job remains available for others to claim.');
             
         } catch (\Exception $e) {
-            Log::error('Admin rejection failed: ' . $e->getMessage());
+            Log::error('admin rejection failed: ' . $e->getMessage());
             return back()->withErrors([
-                'error' => 'Failed to reject submission: ' . $e->getMessage()
+                'error' => 'failed to reject submission: ' . $e->getMessage()
             ]);
         }
     }
     
-    /**
-     * Show all contact messages (admin only)
-     */
-    
-    
-    /**
-     * Delete a contact message
-     */
-    
-    
-    /**
-     * Mark a contact message as read
-     */
+    //show all contact messages (admin only)
 
+    public function contactMessages()
+    {
+        $messages = ContactMessage::with('user')->orderBy('created_at', 'desc')->get();
+        return view('admin.contact-messages', compact('messages'));
+    }
 }
