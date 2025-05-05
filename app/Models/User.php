@@ -25,7 +25,7 @@ class User extends Authenticatable
 
     // default values for new users
     protected $attributes = [
-        'time_credits' => 0,
+        'time_credits' => 10,
         'role' => 'user'
     ];
 

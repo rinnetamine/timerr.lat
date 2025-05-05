@@ -8,6 +8,7 @@
     <title>My Website</title>
     <link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/rinnetamine/Timerr/refs/heads/main/favicon.ico">
     <script src="https://cdn.tailwindcss.com"></script>
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -40,11 +41,11 @@
     </style>
 </head>
 
-<body class="min-h-screen text-gray-100">
-    <div class="min-h-screen">
+<body class="min-h-screen text-gray-100" x-data="{ mobileMenuOpen: false }">
+    <div class="min-h-screen px-4 sm:px-6 lg:px-8">
         <nav class="sticky top-0 z-50 backdrop-blur-md bg-gray-900/60 border-b border-gray-800">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div class="flex h-16 items-center justify-between">
+                <div class="flex h-16 items-center justify-between" @click.away="mobileMenuOpen = false" @keydown.escape="mobileMenuOpen = false">
                     <div class="flex items-center">
                         <div class="flex-shrink-0">
                             <img class="h-8 w-8" src="https://raw.githubusercontent.com/rinnetamine/Timerr/refs/heads/main/favicon.ico">
@@ -68,13 +69,13 @@
                                 <x-nav-link href="/submissions" :active="request()->is('submissions')" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">
                                     Submissions
                                 </x-nav-link>
-                                <x-nav-link href="/profile" :active="request()->is('profile')" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">
+                                <a href="/profile" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">
                                     Profile
                                     <span class="ml-2 text-sm text-neon-accent">{{ auth()->user()->time_credits }} credits</span>
-                                </x-nav-link>
-                                <form method="POST" action="/logout" class="ml-3">
+                                </a>
+                                <form method="POST" action="/logout" class="w-full">
                                     @csrf
-                                    <x-form-button class="text-gray-300 hover:text-neon-accent hover:bg-gray-800/80 border border-gray-700 transition-all duration-300">Log Out</x-form-button>
+                                    <x-form-button class="w-full text-gray-300 hover:text-neon-accent hover:bg-gray-800/80 border border-gray-700 transition-all duration-300">Log Out</x-form-button>
                                 </form>
                             @endauth
                         </div>
@@ -83,7 +84,9 @@
                         <!-- Mobile menu button -->
                         <button type="button"
                                 class="relative inline-flex items-center justify-center rounded-md bg-gray-800 p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
-                                aria-controls="mobile-menu" aria-expanded="false">
+                                aria-controls="mobile-menu" 
+                                :aria-expanded="mobileMenuOpen"
+                                @click="mobileMenuOpen = !mobileMenuOpen">
                             <span class="absolute -inset-0.5"></span>
                             <span class="sr-only">Open main menu</span>
                             <!-- Menu open: "hidden", Menu closed: "block" -->
@@ -103,26 +106,46 @@
             </div>
 
             <!-- Mobile menu, show/hide based on menu state. -->
-            <div class="md:hidden" id="mobile-menu">
-                <div class="space-y-1 px-2 pb-3 pt-2 sm:px-3">
+            <div class="md:hidden" id="mobile-menu" x-show="mobileMenuOpen" x-transition.duration.300ms
+                x-cloak
+                class="fixed inset-0 z-50 bg-black bg-opacity-50"
+                x-on:click="mobileMenuOpen = false">
+                <div class="space-y-1 px-2 pb-3 pt-2 sm:px-3"
+                    x-on:click.stop
+                    class="fixed inset-y-0 right-0 z-50 w-full max-w-md transform translate-x-0 bg-gray-800/95 p-6 transition-transform duration-300 ease-in-out
+                    md:relative md:static md:inset-0 md:max-w-none md:translate-x-0 md:p-0">
+                    <!-- Menu items -->
+                    <div class="space-y-1">
                     <a href="/" class="bg-gray-900 text-white block rounded-md px-3 py-2 text-base font-medium"
                        aria-current="page">Home</a>
                     <a href="/jobs"
                        class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Jobs</a>
                     <a href="/contact"
                        class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Contact</a>
+                    @guest
+                        <a href="/login"
+                           class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Log In</a>
+                        <a href="/register"
+                           class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Register</a>
+                    @endguest
                     @auth
                         <a href="/submissions"
                            class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Submissions</a>
                         <a href="/profile"
                            class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Profile</a>
+                        <form method="POST" action="/logout" class="w-full">
+                            @csrf
+                            <button type="submit" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium w-full text-left">
+                                Log Out
+                            </button>
+                        </form>
                     @endauth
                 </div>  
             </div>
         </nav>
 
         <header class="backdrop-blur-md bg-gray-800/40 border-b border-gray-700">
-            <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 sm:flex sm:justify-between">
+            <div class="mx-auto max-w-7xl py-6 sm:py-8">
                 <h1 class="text-3xl font-bold tracking-tight text-white/90">{{ $heading }}</h1>
 
                 @if(request()->is('jobs'))
