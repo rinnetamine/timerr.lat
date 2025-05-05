@@ -1,5 +1,5 @@
 <?php
-
+// php artisan tinker --execute="App\Models\User::factory(X)->create()"
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -22,6 +22,7 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'time_credits' => fake()->numberBetween(10, 100),
         ];
     }
 

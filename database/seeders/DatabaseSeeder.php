@@ -2,10 +2,11 @@
 
 namespace Database\Seeders;
 
-use App\Models\Job;
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\User;
+use App\Models\Job;
+use App\Models\JobSubmission;
+use App\Models\SubmissionFile;
 
 class DatabaseSeeder extends Seeder
 {
@@ -14,12 +15,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory()->create([
-            'first_name' => 'John',
-            'last_name' => 'Doe',
-            'email' => 'test@example.com',
-        ]);
+        // Create users
+        $users = User::factory(10)->create();
 
-        $this->call(JobSeeder::class);
+        // Create job listings with relationships
+        $jobs = Job::factory(20)
+            ->for($users->random())
+            ->create();
     }
 }
