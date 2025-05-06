@@ -38,7 +38,7 @@ Timerr is a modern web application built with Laravel that enables users to:
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/your-username/timerr.lat.git
+git clone https://github.com/rinnetamine/timerr.lat.git
 cd timerr.lat
 ```
 
