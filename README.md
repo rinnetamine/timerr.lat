@@ -3,6 +3,10 @@
 A Laravel-based web platform that combines the ideas of Fiverr (freelance services) and TimeBank (using time as currency).
 Timerr allows users to offer and exchange services using time credits instead of traditional currency.
 
+## 🌐 Site is currently available at:
+
+[Visit Timerr](https://timerr.lat) 🚀
+
 ## Overview
 
 Timerr is a modern web application built with Laravel that enables users to:
