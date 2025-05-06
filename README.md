@@ -1,29 +1,73 @@
 # Timerr
-**Author: Artjoms Dvils DP 3-4**
 
-**Timerr** is a web platform that combines the ideas of Fiverr (freelance services) and TimeBank (using time as currency).
+A Laravel-based web platform that combines the ideas of Fiverr (freelance services) and TimeBank (using time as currency).
+Timerr allows users to offer and exchange services using time credits instead of traditional currency.
 
-On **Timerr**, users can offer their services in various fields such as tutoring, design, art, music, animation, translation, and more.
+## Overview
 
-## How It Works:
-1. **Offer Services**: Users create and post service listings on the platform.
-2. **Requests and Discussion**: When someone is interested in a service, they respond to the listing and discuss requirements with the seller.
-3. **Verification and Approval**: Completed services are sent to administrators for verification. If the service meets the requirements, the seller receives time credits.
-4. **Time Exchange**: The earned time can be used to obtain other services on the platform.
+Timerr is a modern web application built with Laravel that enables users to:
+- Create and manage job listings
+- Submit job applications with attachments
+- Exchange services using time credits
+- Administer and moderate submissions
 
-## Key Features:
-- **Profile Management**: Create and edit your profile, add/edit/delete your services.
-- **Search and Request Services**: Find needed service or make a request if you cant find one.
-- **Service Verification**: Administrators review and approve completed services.
-- **Time Management**: Manage and utilize your time credits for obtaining services.
+## Key Features
 
-## Advantages:
-- **Convenient for students or those on a limited budget**: Engage in skill and service exchange without monetary transactions.
-- **Flexibility**: The range of services provided is limited only by your imagination.
-- **Safety**: A straightforward system for service verification by the site administration.
+- **User Authentication**: Secure login system with role-based access control
+- **Job Listings**: Create, edit, and manage service listings
+- **Submission System**: Users can submit applications with attachments
+- **Admin Dashboard**: Manage submissions, approve/reject applications
+- **File Management**: File upload and storage system
+- **Credit System**: Credit system for service exchange
 
-## Current progress
-- **Login system**: users can register and login in account which is stored in local storage
-- **Profile management**: user can check his profile after logging in and his information
-- **Advertisement creating**: user can create advertisements with his own name and description
-- !!!!WIP!!!!   **Credit system**: user can earn,store credits and use them creating the ad.
+## System Requirements
+
+- PHP >= 8.1
+- Composer
+- Laravel >= 10.0
+- MySQL >= 8.0
+- Node.js and npm
+- Git
+
+## Installation Guide
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/your-username/timerr.lat.git
+cd timerr.lat
+```
+
+### 2. Install PHP Dependencies
+```bash
+composer install
+```
+
+### 3. Install JavaScript Dependencies
+```bash
+npm install
+```
+
+### 4. Configure Database
+1. Create a new MySQL database
+2. Update the database configuration in `.env`:
+```
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=timerr
+DB_USERNAME=your_username
+DB_PASSWORD=your_password
+```
+
+### 5. Run Database Migrations
+```bash
+php artisan migrate
+```
+
+### 6. Start the Development Server
+```bash
+php artisan serve
+```
+
+The application will be available at `http://localhost:8000`
+
