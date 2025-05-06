@@ -30,6 +30,6 @@ class Job extends Model
     // relationship to job submissions
     public function submissions()
     {
-        return $this->hasMany(JobSubmission::class, 'job_listing_id');
+        return $this->hasMany('App\Models\JobSubmission', 'job_listing_id');
     }
 }

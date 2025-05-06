@@ -20,13 +20,62 @@ class JobController extends Controller
         
         // get jobs without submissions
         $jobsQuery = Job::with('user')
-            ->whereDoesntHave('submissions');
+            ->whereDoesntHave('submissions')
+            ->from('job_listings');
+
+        // handle search
+        if ($search = request('search')) {
+            $search = strtolower($search);
+            $jobsQuery->where(function ($query) use ($search) {
+                $query->whereRaw("LOWER(title) LIKE ?", ["%{$search}%"])
+                    ->orWhereRaw("LOWER(description) LIKE ?", ["%{$search}%"])
+                    ->orWhereHas('user', function ($query) use ($search) {
+                        $query->whereRaw("LOWER(first_name) LIKE ?", ["%{$search}%"])
+                            ->orWhereRaw("LOWER(last_name) LIKE ?", ["%{$search}%"]);
+                    });
+            });
+        }
+
+        // handle category filter
+        if ($category = request('category')) {
+            $jobsQuery->where('category', $category);
+        }
+
+        // handle status filter
+        if ($status = request('status')) {
+            $jobsQuery->whereHas('submissions', function ($query) use ($status) {
+                $query->where('status', $status);
+            });
+        }
+
+        // handle sorting
+        $sort = request('sort', 'latest');
         
+        switch ($sort) {
+            case 'latest':
+                $jobsQuery->orderBy('created_at', 'desc');
+                break;
+            case 'created_asc':
+                $jobsQuery->orderBy('created_at', 'asc');
+                break;
+            case 'title_asc':
+                $jobsQuery->orderBy('title', 'asc');
+                break;
+            case 'title_desc':
+                $jobsQuery->orderBy('title', 'desc');
+                break;
+            default:
+                $jobsQuery->orderBy('created_at', 'desc');
+                break;
+        }
+
         // paginate results
-        $jobs = $jobsQuery->latest()->simplePaginate(3);
+        $jobs = $jobsQuery->paginate(10);
 
         return view('jobs.index', [
-            'jobs' => $jobs
+            'jobs' => $jobs,
+            'search' => request('search'),
+            'sort' => $sort
         ]);
     }
 

@@ -1,4 +1,5 @@
 # Timerr
+**Author: Artjoms Dvils DP 3-4**
 
 A Laravel-based web platform that combines the ideas of Fiverr (freelance services) and TimeBank (using time as currency).
 Timerr allows users to offer and exchange services using time credits instead of traditional currency.
