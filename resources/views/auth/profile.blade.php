@@ -37,18 +37,27 @@
             @if($services->count() > 0)
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     @foreach($services as $service)
-                        <div class="bg-gray-800/40 backdrop-blur-sm p-6 rounded-lg border border-gray-700 hover:border-neon-accent transition-colors duration-300">
-                            <h4 class="text-lg font-medium text-white/90">{{ $service->title }}</h4>
-                            <p class="mt-2 text-gray-400 line-clamp-3">{{ $service->description }}</p>
-                            <!-- service metadata showing credits and creation time -->
-                            <div class="mt-4 flex justify-between items-center">
-                                <div class="inline-flex items-center px-3 py-1 rounded-full bg-gray-900/60 border border-gray-700">
-                                    <span class="text-neon-accent font-medium">{{ $service->time_credits }}</span>
-                                    <span class="ml-2 text-gray-400 text-sm">Credits</span>
+                        <a href="/jobs/{{ $service->id }}" class="block group">
+                            <div class="bg-gray-800/40 backdrop-blur-sm p-6 rounded-lg border border-gray-700 group-hover:border-neon-accent transition-colors duration-300">
+                                <h4 class="text-lg font-medium text-white/90 group-hover:text-neon-accent transition-colors duration-300">{{ $service->title }}</h4>
+                                <p class="mt-2 text-gray-400 line-clamp-3">{{ $service->description }}</p>
+                                <div class="mt-4 flex justify-between items-center">
+                                    <div class="inline-flex items-center px-3 py-1 rounded-full bg-gray-900/60 border border-gray-700">
+                                        <span class="text-neon-accent font-medium">{{ $service->time_credits }}</span>
+                                        <span class="ml-2 text-gray-400 text-sm">Credits</span>
+                                    </div>
+                                    <span class="text-sm text-gray-500">{{ $service->created_at->diffForHumans() }}</span>
                                 </div>
-                                <span class="text-sm text-gray-500">{{ $service->created_at->diffForHumans() }}</span>
+                                <div class="mt-4 flex justify-end">
+                                    <span class="text-neon-accent/80 text-sm font-medium group-hover:text-neon-accent transition-colors duration-300 flex items-center">
+                                        View Details
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                        </svg>
+                                    </span>
+                                </div>
                             </div>
-                        </div>
+                        </a>
                     @endforeach
                 </div>
             @else

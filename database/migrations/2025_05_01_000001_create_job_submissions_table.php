@@ -17,8 +17,6 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->text('message')->nullable();
             $table->string('status')->default('claimed'); // claimed, pending, approved, declined, admin_review
-            $table->text('admin_notes')->nullable();
-            $table->boolean('admin_approved')->default(false);
             $table->timestamps();
         });
     }

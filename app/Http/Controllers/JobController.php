@@ -169,10 +169,72 @@ class JobController extends Controller
             'category' => ['required', 'in:creative,education,professional,technology,other']
         ]);
 
-        // update job listing
-        $job->update($attributes);
+        $user = auth()->user();
+        $originalCredits = $job->time_credits;
+        $newCredits = $attributes['time_credits'];
 
-        return redirect('/jobs/' . $job->id)->with('success', 'Service updated successfully!');
+        // check if the credits amount has changed
+        if ($originalCredits != $newCredits) {
+            $netChange = $newCredits - $originalCredits;
+
+            // if the user needs more credits than before
+            if ($netChange > 0) {
+                if ($user->time_credits < $netChange) {
+                    return back()->withErrors([
+                        'time_credits' => 'You don\'t have enough time credits. Your current balance is ' . $user->time_credits . ' credits.'
+                    ])->withInput();
+                }
+            }
+
+            try {
+                // process the credit adjustment in a transaction
+                DB::transaction(function () use ($job, $attributes, $user, $originalCredits, $newCredits) {
+                    // first return the original credits to the user
+                    $user->update([
+                        'time_credits' => $user->time_credits + $originalCredits
+                    ]);
+
+                    // record the credit return transaction
+                    DB::table('transactions')->insert([
+                        'user_id' => $user->id,
+                        'amount' => $originalCredits,
+                        'description' => "Credits returned from updated job: {$job->title}",
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+
+                    // then deduct the new amount of credits
+                    $user->update([
+                        'time_credits' => $user->time_credits - $newCredits
+                    ]);
+
+                    // record the new credit deduction transaction
+                    DB::table('transactions')->insert([
+                        'user_id' => $user->id,
+                        'amount' => -$newCredits,
+                        'description' => "Credits allocated for updated job: {$attributes['title']}",
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+
+                    // update the job listing
+                    $job->update($attributes);
+                });
+
+                return redirect('/jobs/' . $job->id)->with('success', 'Service updated successfully! Credit adjustment has been processed.');
+            } catch (\Exception $e) {
+                // log error and show message
+                Log::error('Job update failed: ' . $e->getMessage());
+                
+                return back()->withErrors([
+                    'error' => 'Failed to update listing: ' . $e->getMessage()
+                ])->withInput();
+            }
+        } else {
+            // if credits haven't changed, just update the job
+            $job->update($attributes);
+            return redirect('/jobs/' . $job->id)->with('success', 'Service updated successfully!');
+        }
     }
 
     // delete a job listing and return credits to the owner
