@@ -4,9 +4,7 @@
 A Laravel-based web platform that combines the ideas of Fiverr (freelance services) and TimeBank (using time as currency).
 Timerr allows users to offer and exchange services using time credits instead of traditional currency.
 
-## 🌐 Site is currently available at:
 
-[Visit Timerr](https://timerr.lat) 🚀
 
 ## Overview
 
@@ -47,29 +45,25 @@ cd timerr.lat
 composer install
 ```
 
-### 3. Install JavaScript Dependencies
-```bash
-npm install
-```
-
-### 4. Configure Database
-1. Create a new MySQL database
-2. Update the database configuration in `.env`:
+### 3. Configure Database
+1. Create a new MySQL database (i am using xampp for this)
+2. Rename .env.example to .env
+3. Update the database configuration in `.env`:
 ```
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=timerr
-DB_USERNAME=your_username
-DB_PASSWORD=your_password
+DB_DATABASE=TimerrDB
+DB_USERNAME=your_username (standart: "root")
+DB_PASSWORD=your_password (standart: "empty")
 ```
 
-### 5. Run Database Migrations
+### 4. Run Database Migrations
 ```bash
 php artisan migrate
 ```
 
-### 6. Start the Development Server
+### 5. Start the Development Server
 ```bash
 php artisan serve
 ```
