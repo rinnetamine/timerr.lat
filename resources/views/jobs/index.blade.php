@@ -37,7 +37,7 @@
         <!-- jobs list -->
         <div class="space-y-4">
             @foreach ($jobs as $job)
-                <a href="/jobs/{{ $job['id'] }}" class="block px-4 py-6 border border-gray-700 rounded-lg bg-gray-800/40 backdrop-blur-sm hover:bg-gray-700/40 transition-colors duration-200">
+                <a href="/jobs/{{ $job['id'] }}" class="block px-4 py-6 border border-gray-700 rounded-lg bg-gray-800/40 backdrop-blur-sm hover:bg-gray-700/40 transition-colors duration-200 hover-card">
                     <div class="font-bold text-neon-accent text-sm">{{ $job->user->first_name }} {{ $job->user->last_name }} needs help</div>
 
                     <div class="mt-2 text-white/90 font-semibold">

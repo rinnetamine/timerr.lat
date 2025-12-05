@@ -5,8 +5,8 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>My Website</title>
-    <link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/rinnetamine/Timerr/refs/heads/main/favicon.ico">
+    <title>Timerr</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('clock.svg') }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -37,24 +37,180 @@
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
+
+        html.light body {
+            background: linear-gradient(135deg,
+                rgba(255,255,255,1) 0%,
+                rgba(250,250,250,1) 50%,
+                rgba(255,255,255,1) 100%
+            );
+            color: #0f172a; 
+        }
+
+        html.light nav,
+        html.light header,
+        html.light .backdrop-blur-sm,
+        html.light .backdrop-blur-md {
+            background: rgba(255,255,255,0.85) !important;
+            color: #0f172a !important;
+            -webkit-backdrop-filter: blur(6px);
+            backdrop-filter: blur(6px);
+            border-color: #e6eef5 !important;
+        }
+
+        html.light .bg-gray-900,
+        html.light .bg-gray-900\/60,
+        html.light .bg-gray-800,
+        html.light .bg-gray-800\/40,
+        html.light .bg-gray-800\/80 {
+            background-color: rgba(250,250,250,0.9) !important;
+            color: #0f172a !important;
+        }
+
+        html.light .text-white,
+        html.light .text-white\/90,
+        html.light .text-gray-100 {
+            color: #0f172a !important;
+        }
+        html.light .text-gray-300 {
+            color: #475569 !important; 
+        }
+
+        html.light .border-gray-700,
+        html.light .border-gray-800,
+        html.light .border {
+            border-color: #e6eef5 !important;
+        }
+
+        html.light .hover\:bg-gray-700:hover,
+        html.light .hover\:bg-gray-800:hover {
+            background-color: rgba(241,245,249,1) !important; 
+        }
+
+        html.light .text-neon-accent {
+            color: #0da67a !important; 
+        }
+        html.light .text-neon-accent\/\* {
+            color: #0da67a !important;
+        }
+
+        html.light .x-button,
+        html.light .btn,
+        html.light button {
+            color: inherit !important;
+            background-color: transparent !important;
+        }
+
+        html.light .text-gray-400 {
+            color: #64748b !important; 
+        }
+
+        html.light .hover\:text-neon-accent:hover {
+            color: #0da67a !important;
+        }
+
+        html.light input,
+        html.light textarea,
+        html.light select {
+            background-color: #fffefc !important;
+            color: #0f172a !important;
+            border-color: #e6eef5 !important;
+        }
+
+        html.light .bg-gray-800\/40,
+        html.light .bg-gray-800\/50 {
+            background-color: rgba(255,255,255,0.92) !important;
+            border-color: #e6eef5 !important;
+        }
+
+        .hover-card {
+            transition: transform 220ms cubic-bezier(.2,.8,.2,1), box-shadow 220ms, border-color 220ms;
+            transform: translateY(0);
+            will-change: transform, box-shadow;
+        }
+        .hover-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 14px 30px rgba(0,255,157,0.08); 
+            border-color: rgba(0,255,157,0.28) !important;
+        }
+
+        html.light .hover-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(13,166,122,0.06);
+            border-color: rgba(13,166,122,0.18) !important;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .hover-card,
+            .hover-card:hover {
+                transition: none !important;
+                transform: none !important;
+                box-shadow: none !important;
+            }
+        }
     </style>
 </head>
 
 <body class="min-h-screen text-gray-100">
     <script>
+        // mobile menu toggle
         function toggleMobileMenu() {
             const menu = document.getElementById('mobile-menu');
             const button = document.querySelector('[aria-controls="mobile-menu"]');
             const menuIcon = button.querySelector('svg:first-child');
             const closeIcon = button.querySelector('svg:last-child');
-            
+
             menu.classList.toggle('hidden');
             menuIcon.classList.toggle('hidden');
             closeIcon.classList.toggle('hidden');
-            
+
             const isExpanded = !menu.classList.contains('hidden');
             button.setAttribute('aria-expanded', isExpanded);
         }
+
+        // theme handling
+        function setTheme(theme) {
+            const html = document.documentElement;
+            if (theme === 'light') html.classList.add('light'); else html.classList.remove('light');
+            try { localStorage.setItem('theme', theme); } catch (e) {}
+            updateThemeButtonIcons(theme);
+        }
+
+        function initTheme() {
+            let theme = 'dark';
+            try { theme = localStorage.getItem('theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'); } catch (e) {}
+            setTheme(theme);
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isLight = html.classList.contains('light');
+            setTheme(isLight ? 'dark' : 'light');
+        }
+
+        function updateThemeButtonIcons(theme) {
+            const btns = document.querySelectorAll('.theme-toggle');
+            btns.forEach(btn => {
+                const sun = btn.querySelector('.icon-sun');
+                const moon = btn.querySelector('.icon-moon');
+                if (!sun || !moon) return;
+                if (theme === 'light') { sun.classList.remove('hidden'); moon.classList.add('hidden'); btn.setAttribute('aria-pressed', 'true'); }
+                else { sun.classList.add('hidden'); moon.classList.remove('hidden'); btn.setAttribute('aria-pressed', 'false'); }
+            });
+
+            // toggle logos
+            const darkLogos = document.querySelectorAll('.dark-logo');
+            const lightLogos = document.querySelectorAll('.light-logo');
+            if (theme === 'light') {
+                darkLogos.forEach(n => n.classList.add('hidden'));
+                lightLogos.forEach(n => n.classList.remove('hidden'));
+            } else {
+                darkLogos.forEach(n => n.classList.remove('hidden'));
+                lightLogos.forEach(n => n.classList.add('hidden'));
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', initTheme);
     </script>
     <div class="min-h-screen px-4 md:px-0">
         <nav class="sticky top-0 z-50 backdrop-blur-md bg-gray-900/60 border-b border-gray-800">
@@ -62,7 +218,8 @@
                 <div class="flex h-16 items-center justify-between">
                     <div class="flex items-center">
                         <div class="flex-shrink-0">
-                            <img class="h-8 w-8" src="https://raw.githubusercontent.com/rinnetamine/Timerr/refs/heads/main/favicon.ico">
+                            <img class="h-8 w-8 dark-logo" src="{{ asset('clock.svg') }}" alt="Timerr logo - clock">
+                            <img class="h-8 w-8 light-logo hidden" src="{{ asset('clock-light.svg') }}" alt="Timerr logo - clock light">
                         </div>
                         <div class="hidden md:block">
                             <div class="ml-10 flex items-baseline space-x-4">
@@ -74,6 +231,16 @@
                     </div>
                     <div class="hidden md:block">
                         <div class="ml-4 flex items-center md:ml-6">
+                            <!-- theme toggle button -->
+                            <button type="button" onclick="toggleTheme()" class="theme-toggle ml-3 inline-flex items-center rounded-md p-2 text-gray-300 hover:text-neon-accent hover:bg-gray-800/80 border border-gray-700 transition-all duration-200" aria-pressed="false" title="toggle theme">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon-moon h-5 w-5" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon-sun hidden h-5 w-5" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.36 6.36l-1.42-1.42M7.05 6.05 5.64 4.64m12.02 0-1.41 1.41M7.05 17.95l-1.41 1.41" />
+                                    <circle cx="12" cy="12" r="3" stroke-width="1.5"></circle>
+                                </svg>
+                            </button>
                             @guest
                                 <x-nav-link href="/login" :active="request()->is('login')" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Log In</x-nav-link>
                                 <x-nav-link href="/register" :active="request()->is('register')" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Register</x-nav-link>
@@ -95,7 +262,7 @@
                         </div>
                     </div>
                     <div class="-mr-2 flex md:hidden">
-                        <!-- Mobile menu button -->
+                        <!-- mobile menu button -->
                         <button type="button" onclick="toggleMobileMenu()"
                                 class="relative inline-flex items-center justify-center rounded-md bg-gray-800 p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
                                 aria-controls="mobile-menu" aria-expanded="false">
@@ -115,11 +282,22 @@
                 </div>
             </div>
 
-            <!-- Mobile menu, show/hide based on menu state. -->
+            <!-- mobile menu, show/hide based on menu state -->
             <div class="md:hidden hidden" id="mobile-menu">
                 <div class="space-y-1 px-2 pb-3 pt-2 sm:px-3">
                     <a href="/" class="bg-gray-900 text-white block rounded-md px-3 py-2 text-base font-medium"
                        aria-current="page">Home</a>
+                    <!-- mobile theme toggle -->
+                    <button type="button" onclick="toggleTheme()" class="theme-toggle w-full text-left inline-flex items-center rounded-md p-2 text-gray-300 hover:text-neon-accent hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium" aria-pressed="false" title="toggle theme">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon-moon h-5 w-5 mr-2" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon-sun hidden h-5 w-5 mr-2" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.36 6.36l-1.42-1.42M7.05 6.05 5.64 4.64m12.02 0-1.41 1.41M7.05 17.95l-1.41 1.41" />
+                            <circle cx="12" cy="12" r="3" stroke-width="1.5"></circle>
+                        </svg>
+                        toggle theme
+                    </button>
                     <a href="/jobs"
                        class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Jobs</a>
                     <a href="/contact"
