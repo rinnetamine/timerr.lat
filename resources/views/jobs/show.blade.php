@@ -45,15 +45,15 @@
                         </div>
                     @elseif(!$userSubmission)
                         <!-- Step 1: Claim the job -->
-                        <form method="POST" action="/job-submissions/claim">
+                        <form method="POST" action="{{ route('job-submissions.claim') }}">
                             @csrf
                             <input type="hidden" name="job_id" value="{{ $job->id }}">
-                            
+
                             <p class="text-gray-300 mb-4">To apply for this help request, you need to claim it first. This reserves the request for you while you prepare your application.</p>
-                            
-                            <x-form-button>
+
+                            <button type="submit" class="rounded-md px-4 py-2 text-sm font-medium text-gray-300 border border-gray-700 hover:text-neon-accent hover:bg-gray-800/80 transition-all duration-300">
                                 Claim This Help Request
-                            </x-form-button>
+                            </button>
                         </form>
                     @elseif($userSubmission->status === 'claimed')
                         <!-- Step 2: Complete the application -->
@@ -122,13 +122,13 @@
                             <p>Your application was declined. You can claim this help request again if you'd like to try again.</p>
                         </div>
                         
-                        <form method="POST" action="/job-submissions/claim">
+                        <form method="POST" action="{{ route('job-submissions.claim') }}">
                             @csrf
                             <input type="hidden" name="job_id" value="{{ $job->id }}">
-                            
-                            <x-form-button>
+
+                            <button type="submit" class="rounded-md px-4 py-2 text-sm font-medium text-gray-300 border border-gray-700 hover:text-neon-accent hover:bg-gray-800/80 transition-all duration-300">
                                 Claim Again
-                            </x-form-button>
+                            </button>
                         </form>
                     @endif
                 </div>

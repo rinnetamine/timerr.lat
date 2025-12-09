@@ -94,7 +94,7 @@ class JobSubmissionController extends Controller
                     $file->delete();
                 }
                 
-                return redirect('/jobs/' . $job->id)->with('success', 'You have claimed this help request. Please complete your application.');
+                return redirect('/submissions')->with('success', 'You have claimed this help request. Please complete your application.');
             }
             
             return back()->withErrors([
@@ -112,7 +112,7 @@ class JobSubmissionController extends Controller
                 'admin_approved' => false
             ]);
 
-            return redirect('/jobs/' . $job->id)->with('success', 'You have claimed this help request. Please complete your application.');
+                return redirect('/submissions')->with('success', 'You have claimed this help request. Please complete your application.');
         } catch (\Exception $e) {
             Log::error('Job claim failed: ' . $e->getMessage());
             
@@ -218,6 +218,25 @@ class JobSubmissionController extends Controller
 
         return view('submissions.show', [
             'submission' => $submission->load(['jobListing', 'user', 'files'])
+        ]);
+    }
+
+    // export submission details as an html file
+    public function exportHtml(JobSubmission $submission)
+    {
+        // only allow job owner or applicant to export
+        if (auth()->id() !== $submission->user_id && auth()->id() !== $submission->jobListing->user_id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $submission->load(['jobListing', 'user', 'files']);
+
+        $html = view('submissions.pdf', ['submission' => $submission])->render();
+        $filename = 'submission-' . $submission->id . '.html';
+
+        return Response::make($html, 200, [
+            'Content-Type' => 'text/html; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"'
         ]);
     }
 

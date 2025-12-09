@@ -92,6 +92,7 @@
                         <a href="/submissions" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm font-medium transition-colors duration-200">
                             Back to Applications
                         </a>
+                        <a href="{{ route('submissions.export', $submission->id) }}" class="ml-3 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm font-medium transition-colors duration-200">Download HTML</a>
                         <div class="flex space-x-3">
                             <form method="POST" action="/submissions/{{ $submission->id }}/decline" id="declineForm" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
                                 @csrf
@@ -132,9 +133,12 @@
                 </div>
             @else
                 <div class="border-t border-gray-700 pt-6 mt-6">
-                    <a href="/submissions" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm font-medium transition-colors duration-200">
-                        Back to Applications
-                    </a>
+                    <div class="flex items-center space-x-3">
+                        <a href="/submissions" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm font-medium transition-colors duration-200">
+                            Back to Applications
+                        </a>
+                        <a href="{{ route('submissions.export', $submission->id) }}" class="ml-2 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm font-medium transition-colors duration-200">Download HTML</a>
+                    </div>
                 </div>
             @endif
         </div>

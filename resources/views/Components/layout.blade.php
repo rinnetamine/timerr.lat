@@ -330,6 +330,29 @@
 
         <main>
             <div class="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
+                <!-- flash messages -->
+                @if(session('success'))
+                    <div class="mb-4 rounded-md p-3 bg-green-700/10 border border-green-700 text-green-200">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                @if(session('error'))
+                    <div class="mb-4 rounded-md p-3 bg-red-700/10 border border-red-700 text-red-200">
+                        {{ session('error') }}
+                    </div>
+                @endif
+
+                @if($errors->any())
+                    <div class="mb-4 rounded-md p-3 bg-yellow-500/10 border border-yellow-500 text-yellow-200">
+                        <ul class="list-disc pl-5">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 {{ $slot }}
             </div>
         </main>

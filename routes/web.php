@@ -45,7 +45,7 @@ Route::get('/profile', [ProfileController::class, 'show'])->middleware('auth')->
 // job submission routes (protected by auth middleware)
 Route::middleware('auth')->group(function () {
     // job claiming routes
-    Route::post('/job-submissions/claim', [JobSubmissionController::class, 'claim']);
+    Route::post('/job-submissions/claim', [JobSubmissionController::class, 'claim'])->name('job-submissions.claim');
     
     // job application completion route
     Route::post('/job-submissions/complete', [JobSubmissionController::class, 'complete']);
@@ -59,6 +59,8 @@ Route::middleware('auth')->group(function () {
     
     // single submission view route
     Route::get('/submissions/{submission}', [JobSubmissionController::class, 'show'])->middleware('auth');
+    // export submission as html
+    Route::get('/submissions/{submission}/export', [JobSubmissionController::class, 'exportHtml'])->middleware('auth')->name('submissions.export');
     
     // file download route
     Route::get('/files/{file}/download', [JobSubmissionController::class, 'downloadFile'])->middleware('auth')->name('file.download');
