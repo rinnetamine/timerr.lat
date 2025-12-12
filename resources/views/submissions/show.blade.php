@@ -5,7 +5,7 @@
 
     <div class="max-w-3xl mx-auto">
         <div class="bg-gray-800/40 backdrop-blur-sm p-8 rounded-lg border border-gray-700">
-            <!-- Help Request Info -->
+            <!-- help request info-->
             <div class="mb-6">
                 <h2 class="text-xl font-semibold text-white/90">{{ $submission->jobListing->title }}</h2>
                 <p class="text-gray-400 text-sm mt-1">
@@ -21,7 +21,7 @@
                 </div>
             </div>
 
-            <!-- Application Status -->
+            <!-- application Status -->
             <div class="border-t border-gray-700 pt-4 mb-6">
                 <div class="flex items-center">
                     <span class="text-gray-400 text-sm">Status: </span>
@@ -46,13 +46,49 @@
                 <p class="text-gray-400 text-sm">{{ $submission->user->email }}</p>
             </div>
 
-            <!-- Application Message -->
             <div class="border-t border-gray-700 pt-4 mb-6">
                 <h3 class="font-semibold text-white/90 mb-2">Message</h3>
                 <div class="text-gray-300 whitespace-pre-line">{{ $submission->message }}</div>
             </div>
+
+            @if(auth()->check() && auth()->id() === $submission->user_id && $submission->status === 'claimed')
+                <div class="border-t border-gray-700 pt-4 mb-6">
+                    <h3 class="font-semibold text-white/90 mb-2">Complete Your Application</h3>
+
+                    @if($errors->any())
+                        <div class="bg-red-900/40 border border-red-700 p-3 rounded mb-4">
+                            <ul class="text-sm text-red-200 list-disc list-inside">
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    <form method="POST" action="/job-submissions/complete" enctype="multipart/form-data" class="space-y-4">
+                        @csrf
+                        <input type="hidden" name="submission_id" value="{{ $submission->id }}">
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Message to the job owner</label>
+                            <textarea name="message" rows="6" required placeholder="Describe what you will do, timeframe, or attach any proof files..." class="w-full rounded-md bg-gray-900/60 border border-gray-700 text-gray-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-neon-accent/50 focus:border-neon-accent">{{ old('message') }}</textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Attach files (optional)</label>
+                            <input type="file" name="files[]" multiple class="text-sm text-gray-300">
+                            <p class="text-xs text-gray-500 mt-1">You can attach files to support your application. Max 50MB per file.</p>
+                        </div>
+
+                        <div class="flex justify-end">
+                            <a href="/submissions" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm font-medium mr-3">Cancel</a>
+                            <button type="submit" class="bg-neon-accent text-black px-4 py-2 rounded text-sm font-medium">Submit Application</button>
+                        </div>
+                    </form>
+                </div>
+            @endif
             
-            <!-- Admin Notes (if in admin review) -->
+            <!-- admin notes -->
             @if($submission->status === 'admin_review' && $submission->admin_notes)
                 <div class="border-t border-gray-700 pt-4 mb-6">
                     <h3 class="font-semibold text-white/90 mb-2">Admin Notes</h3>
@@ -63,7 +99,7 @@
                 </div>
             @endif
 
-            <!-- Attached Files -->
+            <!-- attached files -->
             @if($submission->files->count() > 0)
                 <div class="border-t border-gray-700 pt-4 mb-6">
                     <h3 class="font-semibold text-white/90 mb-2">Attached Files</h3>
@@ -85,7 +121,7 @@
                 </div>
             @endif
 
-            <!-- Actions -->
+            <!-- actions -->
             @if(auth()->id() === $submission->jobListing->user_id && $submission->status === 'pending')
                 <div class="border-t border-gray-700 pt-6 mt-6">
                     <div class="flex justify-between">
