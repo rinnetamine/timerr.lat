@@ -336,7 +336,13 @@
         
         <!-- transaction history -->
         <div class="space-y-6">
-            <h3 class="text-xl font-semibold text-white/90">Transaction History</h3>
+            <div class="flex items-center justify-between">
+                <h3 class="text-xl font-semibold text-white/90">Transaction History</h3>
+                <div class="flex items-center space-x-2">
+                    <a href="{{ route('transactions.export') }}" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm font-medium">View as HTML</a>
+                    <a href="{{ route('transactions.download') }}" class="bg-neon-accent text-black px-3 py-1 rounded text-sm font-medium">Download PDF</a>
+                </div>
+            </div>
             <div class="bg-gray-800/40 backdrop-blur-sm rounded-lg border border-gray-700 overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-700">

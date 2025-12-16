@@ -7,6 +7,7 @@ use App\Http\Controllers\RegisteredUserController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
 
 // home page route
@@ -64,6 +65,12 @@ Route::middleware('auth')->group(function () {
     
     // file download route
     Route::get('/files/{file}/download', [JobSubmissionController::class, 'downloadFile'])->middleware('auth')->name('file.download');
+
+    // export transactions PDF/HTML
+    Route::get('/transactions/export', [TransactionController::class, 'exportPdf'])->name('transactions.export');
+
+    // export transactions PDF/HTML download route
+    Route::get('/transactions/download', [TransactionController::class, 'download'])->name('transactions.download');
 
     // admin routes
     Route::get('/admin/contact', [AdminController::class, 'contactMessages'])->middleware('auth');
