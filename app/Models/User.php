@@ -64,4 +64,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(Transaction::class);
     }
+
+    // count unread messages where this user is the recipient
+    public function unreadMessagesCount()
+    {
+        return \App\Models\Message::where('recipient_id', $this->id)->whereNull('read_at')->count();
+    }
 }

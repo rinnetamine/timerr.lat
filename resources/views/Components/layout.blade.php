@@ -225,6 +225,7 @@
                             <div class="ml-10 flex items-baseline space-x-4">
                                 <x-nav-link href="/" :active="request()->is('/')" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Home</x-nav-link>
                                 <x-nav-link href="/jobs" :active="request()->is('jobs')" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Jobs</x-nav-link>
+                                <x-nav-link href="/people" :active="request()->is('people*')" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">People</x-nav-link>
                                 <x-nav-link href="/contact" :active="request()->is('contact')" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Contact</x-nav-link>
                             </div>
                         </div>
@@ -247,6 +248,12 @@
                             @endguest
 
                             @auth
+                                <x-nav-link href="/messages" :active="request()->is('messages*')" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">
+                                    Messages
+                                    @if(auth()->user()->unreadMessagesCount() > 0)
+                                        <span class="ml-2 inline-block w-2 h-2 rounded-full bg-neon-accent" aria-hidden="true"></span>
+                                    @endif
+                                </x-nav-link>
                                 <x-nav-link href="/submissions" :active="request()->is('submissions')" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">
                                     Submissions
                                 </x-nav-link>
@@ -300,6 +307,8 @@
                     </button>
                     <a href="/jobs"
                        class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Jobs</a>
+                          <a href="/people"
+                              class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">People</a>
                     <a href="/contact"
                        class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Contact</a>
                     @guest
@@ -307,6 +316,7 @@
                         <a href="/register" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Register</a>
                     @endguest
                     @auth
+                        <a href="/messages" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Messages @if(auth()->user()->unreadMessagesCount() > 0)<span class="ml-2 inline-block w-2 h-2 rounded-full bg-neon-accent" aria-hidden="true"></span>@endif</a>
                         <a href="/submissions" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Submissions</a>
                         <a href="/profile" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Profile</a>
                         <form method="POST" action="/logout">

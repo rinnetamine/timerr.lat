@@ -8,6 +8,8 @@ use App\Http\Controllers\SessionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\PeopleController;
+use App\Http\Controllers\MessagesController;
 use Illuminate\Support\Facades\Route;
 
 // home page route
@@ -80,4 +82,15 @@ Route::middleware('auth')->group(function () {
     // submission approval and rejection routes
     Route::post('/submissions/{submission}/approve', [JobSubmissionController::class, 'approve']);
     Route::post('/submissions/{submission}/decline', [JobSubmissionController::class, 'decline']);
+});
+
+// people listing and profile 
+Route::get('/people', [PeopleController::class, 'index'])->name('people.index');
+Route::get('/people/{user}', [PeopleController::class, 'show'])->name('people.show');
+
+// messaging
+Route::middleware('auth')->group(function () {
+    Route::get('/messages', [MessagesController::class, 'index'])->name('messages.index');
+    Route::get('/messages/{user}', [MessagesController::class, 'conversation'])->name('messages.conversation');
+    Route::post('/messages', [MessagesController::class, 'store'])->name('messages.store');
 });
