@@ -109,6 +109,50 @@
             color: #0da67a !important;
         }
 
+    /* neon backgrounds for light theme */
+        html.light .bg-neon-accent {
+            background-color: rgba(13,166,122,0.14) !important;
+            color: #0f172a !important;
+        }
+
+        html.light .bg-neon-accent.text-black {
+            color: #0f172a !important;
+        }
+
+        html.light .border-neon-accent {
+            border-color: #0da67a !important;
+        }
+
+        html.light .hover\:border-neon-accent:hover {
+            border-color: #0da67a !important;
+        }
+
+    /* message panels light */
+        html.light .bg-gray-800\/30,
+        html.light .bg-gray-800\/40,
+        html.light .bg-gray-900\/60 {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+            border-color: #e6eef5 !important;
+        }
+
+    /* lighten message bubble backgrounds */
+        html.light .bg-gray-900 {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+        }
+
+    /* stronger neon bg for sent messages */
+        html.light .bg-neon-accent.text-black {
+            background-color: rgba(13,166,122,0.18) !important;
+            color: #0f172a !important;
+        }
+
+    /* tweak muted text color */
+        html.light .text-gray-400 {
+            color: #64748b !important;
+        }
+
         html.light input,
         html.light textarea,
         html.light select {
@@ -257,6 +301,11 @@
                                 <x-nav-link href="/submissions" :active="request()->is('submissions')" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">
                                     Submissions
                                 </x-nav-link>
+                                @if(auth()->user()->isAdmin())
+                                    <x-nav-link href="/admin" :active="request()->is('admin*')" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">
+                                        Admin
+                                    </x-nav-link>
+                                @endif
                                 <x-nav-link href="/profile" :active="request()->is('profile')" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">
                                     Profile
                                     <span class="ml-2 text-sm text-neon-accent">{{ auth()->user()->time_credits }} credits</span>
@@ -318,6 +367,9 @@
                     @auth
                         <a href="/messages" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Messages @if(auth()->user()->unreadMessagesCount() > 0)<span class="ml-2 inline-block w-2 h-2 rounded-full bg-neon-accent" aria-hidden="true"></span>@endif</a>
                         <a href="/submissions" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Submissions</a>
+                        @if(auth()->user()->isAdmin())
+                            <a href="/admin" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Admin</a>
+                        @endif
                         <a href="/profile" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Profile</a>
                         <form method="POST" action="/logout">
                             @csrf

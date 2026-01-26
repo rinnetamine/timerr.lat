@@ -7,6 +7,7 @@ use App\Models\JobSubmission;
 use App\Models\User;
 use App\Models\Transaction;
 use App\Models\ContactMessage;
+use App\Models\Job;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 
@@ -110,7 +111,62 @@ class AdminController extends Controller
 
     public function contactMessages()
     {
+        $this->checkAdmin();
+
         $messages = ContactMessage::with('user')->orderBy('created_at', 'desc')->get();
         return view('admin.contact-messages', compact('messages'));
+    }
+
+    // delete a contact message
+    public function deleteContact(ContactMessage $message)
+    {
+        $this->checkAdmin();
+
+        try {
+            $message->delete();
+            return back()->with('success', 'Message deleted.');
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to delete contact message: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'Failed to delete message.']);
+        }
+    }
+
+    // admin dashboard
+    public function index()
+    {
+        $this->checkAdmin();
+
+        // core admin stats
+        $totalUsers = User::count();
+        $newUsersWeek = User::where('created_at', '>=', now()->subDays(7))->count();
+
+        $totalJobs = Job::count();
+        $recentJobs = Job::latest()->take(5)->with('user')->get();
+
+        $totalSubmissions = JobSubmission::count();
+        $pendingAdmin = JobSubmission::where('status', JobSubmission::STATUS_ADMIN_REVIEW)->count();
+
+        $recentSignups = User::latest()->take(5)->get();
+        $recentTransactions = Transaction::latest()->take(5)->get();
+
+        $contactMessagesCount = ContactMessage::count();
+
+        $adminReviewSubmissions = JobSubmission::where('status', JobSubmission::STATUS_ADMIN_REVIEW)
+            ->with(['jobListing', 'user', 'jobListing.user', 'files'])
+            ->latest()
+            ->get();
+
+        return view('admin.dashboard', compact(
+            'adminReviewSubmissions',
+            'totalUsers',
+            'newUsersWeek',
+            'totalJobs',
+            'recentJobs',
+            'totalSubmissions',
+            'pendingAdmin',
+            'recentSignups',
+            'recentTransactions',
+            'contactMessagesCount'
+        ));
     }
 }

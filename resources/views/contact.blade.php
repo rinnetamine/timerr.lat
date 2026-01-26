@@ -2,11 +2,6 @@
     <x-slot:heading>Contact Us</x-slot:heading>
 
     <div class="max-w-2xl mx-auto">
-        @if(session('success'))
-            <div class="bg-green-900/40 backdrop-blur-sm p-4 rounded-lg mb-6 border border-green-800 text-green-300">
-                {{ session('success') }}
-            </div>
-        @endif
 
         <div class="bg-gray-800/40 backdrop-blur-sm p-8 rounded-lg border border-gray-700">
             <form action="/contact" method="POST" class="space-y-6">

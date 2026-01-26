@@ -37,18 +37,13 @@
                                     {{ ucfirst($message->status) }}
                                 </span>
                                 <div class="flex space-x-2">
-                                    <form action="{{ route('admin.contact.mark-read', $message) }}" method="POST" class="inline">
+                                    <form action="{{ route('admin.contact.delete', $message) }}" method="POST" class="inline">
                                         @csrf
+                                        @method('DELETE')
                                         <button type="submit" 
-                                                class="text-gray-300 hover:text-green-300 hover:bg-gray-800/80 p-2 rounded-md border border-gray-700">
-                                            Mark Read
-                                        </button>
-                                    </form>
-                                    <form action="{{ route('admin.contact.mark-unread', $message) }}" method="POST" class="inline">
-                                        @csrf
-                                        <button type="submit" 
+                                                onclick="return confirm('Delete this message? This action cannot be undone.')"
                                                 class="text-gray-300 hover:text-red-300 hover:bg-gray-800/80 p-2 rounded-md border border-gray-700">
-                                            Mark Unread
+                                            Delete
                                         </button>
                                     </form>
                                 </div>

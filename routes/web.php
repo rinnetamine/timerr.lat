@@ -75,7 +75,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/transactions/download', [TransactionController::class, 'download'])->name('transactions.download');
 
     // admin routes
-    Route::get('/admin/contact', [AdminController::class, 'contactMessages'])->middleware('auth');
+    Route::get('/admin', [AdminController::class, 'index'])->middleware('auth')->name('admin.dashboard');
+    Route::get('/admin/contact', [AdminController::class, 'contactMessages'])->middleware('auth')->name('admin.contact');
+    // mark contact messages read/unread
+    Route::post('/admin/contact/{message}/mark-read', [AdminController::class, 'markContactRead'])->middleware('auth')->name('admin.contact.mark-read');
+    Route::post('/admin/contact/{message}/mark-unread', [AdminController::class, 'markContactUnread'])->middleware('auth')->name('admin.contact.mark-unread');
+    Route::delete('/admin/contact/{message}', [AdminController::class, 'deleteContact'])->middleware('auth')->name('admin.contact.delete');
     Route::post('/admin/submissions/{submission}/approve', [AdminController::class, 'approveSubmission'])->middleware('auth');
     Route::post('/admin/submissions/{submission}/reject', [AdminController::class, 'rejectSubmission'])->middleware('auth');
     

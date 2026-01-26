@@ -24,16 +24,56 @@ class MessagesController extends Controller
             return redirect('/profile');
         }
 
-        // load messages between the two users
+        // mark unread messages addressed to user from the other user as read
+        Message::where('sender_id', $user->id)
+            ->where('recipient_id', $me->id)
+            ->whereNull('read_at')
+            ->update(['read_at' => now()]);
+
+        // load messages between the two users (after marking read)
         $messages = Message::where(function ($q) use ($me, $user) {
             $q->where('sender_id', $me->id)->where('recipient_id', $user->id);
         })->orWhere(function ($q) use ($me, $user) {
             $q->where('sender_id', $user->id)->where('recipient_id', $me->id);
         })->orderBy('created_at')->get();
 
+        // build conversations list so the view can render a sidebar
+        $all = Message::where('sender_id', $me->id)
+            ->orWhere('recipient_id', $me->id)
+            ->orderByDesc('created_at')
+            ->get();
+
+        $convos = [];
+        foreach ($all as $m) {
+            $otherId = $m->sender_id === $me->id ? $m->recipient_id : $m->sender_id;
+            if (!isset($convos[$otherId])) {
+                $convos[$otherId] = [
+                    'other' => User::find($otherId),
+                    'latest' => $m,
+                    'unread' => 0
+                ];
+            }
+        }
+
+        $unreads = Message::where('recipient_id', $me->id)
+            ->whereNull('read_at')
+            ->select('sender_id', DB::raw('count(*) as cnt'))
+            ->groupBy('sender_id')
+            ->get()
+            ->keyBy('sender_id');
+
+        foreach ($convos as $id => &$c) {
+            $c['unread'] = $unreads->has($id) ? $unreads->get($id)->cnt : 0;
+        }
+
+        $conversations = collect($convos)->sortByDesc(function ($c) {
+            return $c['latest']->created_at;
+        })->values();
+
         return view('messages.conversation', [
             'other' => $user,
-            'messages' => $messages
+            'messages' => $messages,
+            'conversations' => $conversations
         ]);
     }
 

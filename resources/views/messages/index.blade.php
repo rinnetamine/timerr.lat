@@ -1,28 +1,48 @@
 <x-layout>
     <x-slot:heading>Messages</x-slot:heading>
 
-    <div class="max-w-3xl mx-auto">
-        <div class="bg-gray-800/40 p-6 rounded-lg border border-gray-700 mb-6">
-            <h3 class="text-lg font-semibold text-white/90">Inbox</h3>
-            <div class="mt-4 space-y-3">
+    <div class="mx-auto max-w-7xl grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Conversations sidebar -->
+        <aside class="lg:col-span-1 bg-gray-800/30 rounded-lg border border-gray-700 p-4 h-[70vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-white/90">Inbox</h3>
+                <a href="/messages" class="text-sm text-gray-400 hover:text-neon-accent">Refresh</a>
+            </div>
+
+            <div class="space-y-3">
                 @forelse($conversations as $c)
-                    <a href="{{ route('messages.conversation', $c['other']->id) }}" class="block bg-gray-900/60 p-3 rounded border border-gray-700 hover:border-neon-accent">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <div class="text-white/90 font-medium">{{ $c['other']->first_name }} {{ $c['other']->last_name }}</div>
-                                <div class="text-gray-400 text-sm">{{ $c['latest']->body }}</div>
+                    <a href="{{ route('messages.conversation', $c['other']->id) }}" class="flex items-center gap-3 p-3 rounded hover:bg-gray-900/60 border border-transparent hover:border-neon-accent transition">
+                        <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-white text-sm font-medium">{{ strtoupper(substr($c['other']->first_name,0,1) ?: 'U') }}</div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between items-center">
+                                <div class="truncate font-medium text-white/90">{{ $c['other']->first_name }} {{ $c['other']->last_name }}</div>
+                                <div class="text-xs text-gray-400">{{ $c['latest']->created_at->diffForHumans() }}</div>
                             </div>
-                            <div class="text-right text-sm">
-                                <div class="text-gray-400">{{ $c['latest']->created_at->diffForHumans() }}</div>
-                                @if($c['unread'] > 0)
-                                    <div class="mt-1 inline-block bg-neon-accent text-black px-2 py-0.5 rounded text-xs">{{ $c['unread'] }}</div>
-                                @endif
-                            </div>
+                            <div class="text-sm text-gray-400 truncate">{{ $c['latest']->body }}</div>
                         </div>
+                        @if($c['unread'] > 0)
+                            <div class="ml-2">
+                                <span class="inline-block w-2 h-2 rounded-full bg-neon-accent" aria-hidden="true"></span>
+                            </div>
+                        @endif
                     </a>
                 @empty
                     <div class="text-gray-400">No conversations yet</div>
                 @endforelse
+            </div>
+        </aside>
+
+        <!-- Welcome / empty state or instructions -->
+        <div class="lg:col-span-2 bg-gray-800/30 rounded-lg border border-gray-700 p-6">
+            <div class="flex items-start gap-6">
+                <div class="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center text-white text-xl font-semibold">M</div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white/90">Your messages</h2>
+                    <p class="text-gray-400 mt-1">Select a conversation on the left to view and reply. Messages are end-to-end encrypted and will show here once you open a chat.</p>
+                    <div class="mt-4">
+                        <a href="/people" class="inline-block bg-neon-accent text-black px-4 py-2 rounded">Message someone</a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
