@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Review;
 
 class JobSubmission extends Model
 {
@@ -45,5 +46,10 @@ class JobSubmission extends Model
     public function files()
     {
         return $this->hasMany(SubmissionFile::class);
+    }
+
+    public function review()
+    {
+        return $this->hasOne(Review::class, 'job_submission_id');
     }
 }

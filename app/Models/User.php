@@ -7,6 +7,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Models\Job;
 use App\Models\Transaction;
+use App\Models\Review;
 
 
 class User extends Authenticatable
@@ -51,6 +52,18 @@ class User extends Authenticatable
     public function jobs()
     {
         return $this->hasMany(Job::class);
+    }
+
+    // reviews that this user has received
+    public function reviewsReceived()
+    {
+        return $this->hasMany(Review::class, 'reviewee_id');
+    }
+
+    // reviews that this user has given
+    public function reviewsGiven()
+    {
+        return $this->hasMany(Review::class, 'reviewer_id');
     }
     
     // check if user has admin privileges

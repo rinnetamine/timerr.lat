@@ -284,12 +284,11 @@ class JobSubmissionController extends Controller
                 JobSubmission::where('job_listing_id', $job->id)
                     ->where('id', '!=', $submission->id)
                     ->update(['status' => JobSubmission::STATUS_DECLINED]);
-                    
-                // delete the job since it's been completed
-                $job->delete();
+                
             });
 
-            return redirect('/submissions')->with('success', 'Application approved and credits transferred! The help request has been completed.');
+            // redirect to the submission detail so the job owner can leave a review
+            return redirect('/submissions/' . $submission->id)->with('success', 'Application approved and credits transferred! You can leave a review for the helper below.');
         } catch (\Exception $e) {
             Log::error('Job submission approval failed: ' . $e->getMessage());
             

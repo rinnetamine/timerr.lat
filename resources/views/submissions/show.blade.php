@@ -177,6 +177,61 @@
                     </div>
                 </div>
             @endif
+
+            {{-- Review form: allow job owner to leave a review after approval/completion --}}
+            @if(auth()->check() && auth()->id() === $submission->jobListing->user_id && $submission->status === 'approved')
+                <div class="border-t border-gray-700 pt-6 mt-6">
+                    <h3 class="font-semibold text-white/90 mb-3">Leave a review for {{ $submission->user->first_name }}</h3>
+
+                    @if(session('success'))
+                        <div class="bg-green-900/30 border border-green-700 p-3 rounded mb-4 text-green-200">{{ session('success') }}</div>
+                    @endif
+
+                    @if($submission->review)
+                        <div class="bg-gray-900/60 p-4 rounded border border-gray-700">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <div class="text-sm text-gray-300">Rating: <strong class="text-neon-accent">{{ $submission->review->rating }}/5</strong></div>
+                                    <div class="mt-2 text-gray-300 whitespace-pre-line">{{ $submission->review->comment }}</div>
+                                    <div class="text-xs text-gray-500 mt-2">Left on {{ $submission->review->created_at->format('M j, Y') }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    @else
+                        @if($errors->any())
+                            <div class="bg-red-900/40 border border-red-700 p-3 rounded mb-4">
+                                <ul class="text-sm text-red-200 list-disc list-inside">
+                                    @foreach($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
+                        <form method="POST" action="/submissions/{{ $submission->id }}/reviews" class="space-y-4">
+                            @csrf
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-1">Rating</label>
+                                <select name="rating" required class="w-32 rounded-md bg-gray-900/60 border border-gray-700 text-gray-100 px-3 py-2">
+                                    <option value="">Select</option>
+                                    @for($i=5; $i>=1; $i--)
+                                        <option value="{{ $i }}">{{ $i }} star{{ $i>1? 's':'' }}</option>
+                                    @endfor
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-1">Comment (optional)</label>
+                                <textarea name="comment" rows="4" placeholder="Share what went well or any notes..." class="w-full rounded-md bg-gray-900/60 border border-gray-700 text-gray-100 px-3 py-2 focus:outline-none">{{ old('comment') }}</textarea>
+                            </div>
+
+                            <div class="flex justify-end">
+                                <button type="submit" class="bg-neon-accent text-black px-4 py-2 rounded text-sm font-medium">Submit Review</button>
+                            </div>
+                        </form>
+                    @endif
+                </div>
+            @endif
         </div>
     </div>
 </x-layout>

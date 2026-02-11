@@ -87,6 +87,8 @@ Route::middleware('auth')->group(function () {
     // submission approval and rejection routes
     Route::post('/submissions/{submission}/approve', [JobSubmissionController::class, 'approve']);
     Route::post('/submissions/{submission}/decline', [JobSubmissionController::class, 'decline']);
+    // reviews
+    Route::post('/submissions/{submission}/reviews', [\App\Http\Controllers\ReviewController::class, 'store']);
 });
 
 // people listing and profile 

@@ -48,6 +48,30 @@
                     </div>
                 </div>
             @endif
+            
+            {{-- Reviews received --}}
+            <div class="mt-6">
+                <h3 class="font-semibold text-white/90 mb-2">Reviews</h3>
+                @if($user->reviewsReceived()->count() === 0)
+                    <div class="text-gray-400 text-sm">No reviews yet.</div>
+                @else
+                    <div class="space-y-3">
+                        @foreach($user->reviewsReceived as $review)
+                            <div class="bg-gray-900/60 p-3 rounded border border-gray-700">
+                                <div class="flex items-start justify-between">
+                                    <div>
+                                        <div class="text-sm text-gray-300">{{ $review->reviewer->first_name }} {{ $review->reviewer->last_name }} — <span class="text-neon-accent">{{ $review->rating }}/5</span></div>
+                                        @if($review->comment)
+                                            <div class="mt-2 text-gray-300 whitespace-pre-line">{{ $review->comment }}</div>
+                                        @endif
+                                        <div class="text-xs text-gray-500 mt-2">{{ $review->created_at->format('M j, Y') }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
         </div>
     </div>
 </x-layout>
