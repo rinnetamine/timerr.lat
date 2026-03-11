@@ -13,8 +13,9 @@ class PeopleController extends Controller
     public function index(Request $request)
     {
         $q = trim($request->query('q', ''));
+        $sort = $request->query('sort', 'name_asc');
 
-        $users = User::query()
+        $usersQuery = User::query()
             ->when($q !== '', function ($query) use ($q) {
                 $like = "%{$q}%";
                 $query->where(function ($sub) use ($like) {
@@ -23,13 +24,44 @@ class PeopleController extends Controller
                         ->orWhere('email', 'like', $like);
                 });
             })
-            ->orderBy('first_name')
-            ->paginate(15)
-            ->withQueryString();
+            ;
+
+        // add helpful aggregates
+        $usersQuery->withCount('jobs')->withAvg('reviewsReceived', 'rating');
+
+        // sorting options for people listing
+        switch ($sort) {
+            case 'newest':
+                $usersQuery->orderBy('created_at', 'desc');
+                break;
+            case 'oldest':
+                $usersQuery->orderBy('created_at', 'asc');
+                break;
+            case 'most_credits':
+                $usersQuery->orderBy('time_credits', 'desc');
+                break;
+            case 'most_jobs':
+                $usersQuery->orderBy('jobs_count', 'desc');
+                break;
+            case 'top_rated':
+                // users with higher average rating first
+                $usersQuery->orderBy('reviews_received_rating_avg', 'desc');
+                break;
+            case 'name_desc':
+                $usersQuery->orderBy('first_name', 'desc')->orderBy('last_name', 'desc');
+                break;
+            case 'name_asc':
+            default:
+                $usersQuery->orderBy('first_name')->orderBy('last_name');
+                break;
+        }
+
+        $users = $usersQuery->paginate(15)->withQueryString();
 
         return view('people.index', [
             'users' => $users,
-            'q' => $q
+            'q' => $q,
+            'sort' => $sort
         ]);
     }
 

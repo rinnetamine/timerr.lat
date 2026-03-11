@@ -13,7 +13,8 @@ use App\Http\Controllers\MessagesController;
 use Illuminate\Support\Facades\Route;
 
 // home page route
-Route::view('/', 'home');
+use App\Http\Controllers\HomeController;
+Route::get('/', [HomeController::class, 'index']);
 
 // contact form routes
 Route::get('/contact', [ContactController::class, 'index']);

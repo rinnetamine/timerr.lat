@@ -148,6 +148,48 @@
             color: #0f172a !important;
         }
 
+    /* flash/alert colors for light theme */
+        html.light .bg-green-700\/10,
+        html.light .bg-red-700\/10,
+        html.light .bg-yellow-500\/10 {
+            background-color: rgba(255,255,255,0.92) !important;
+            color: #0f172a !important;
+            border-color: #e6eef5 !important;
+        }
+
+        html.light .text-green-200 {
+            color: #065f46 !important; /* darker green for visibility */
+        }
+
+        html.light .text-red-200 {
+            color: #7f1d1d !important; /* darker red */
+        }
+
+        html.light .text-yellow-200 {
+            color: #92400e !important; /* darker amber */
+        }
+
+        /* additional background variants used across views */
+        html.light .bg-green-900\/30,
+        html.light .bg-green-900\/40,
+        html.light .bg-red-900\/30,
+        html.light .bg-red-900\/40,
+        html.light .bg-green-500\/20,
+        html.light .bg-red-500\/20 {
+            background-color: rgba(255,255,255,0.96) !important;
+            color: #0f172a !important;
+            border-color: #e6eef5 !important;
+        }
+
+        /* additional text shades used for badges */
+        html.light .text-green-300 {
+            color: #065f46 !important;
+        }
+
+        html.light .text-red-300 {
+            color: #7f1d1d !important;
+        }
+
     /* tweak muted text color */
         html.light .text-gray-400 {
             color: #64748b !important;
@@ -195,7 +237,7 @@
     </style>
 </head>
 
-<body class="min-h-screen text-gray-100">
+<body class="min-h-screen text-gray-900">
     <script>
         // mobile menu toggle
         function toggleMobileMenu() {

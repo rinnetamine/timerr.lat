@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 
 // controller for managing job listings and credits
 class JobController extends Controller
@@ -38,7 +39,16 @@ class JobController extends Controller
 
         // handle category filter
         if ($category = request('category')) {
-            $jobsQuery->where('category', $category);
+            $categories = config('job_categories', []);
+            // if top-level category selected, match subcategories too
+            if (array_key_exists($category, $categories)) {
+                $jobsQuery->where(function ($q) use ($category) {
+                    $q->where('category', $category)
+                      ->orWhere('category', 'like', $category . '.%');
+                });
+            } else {
+                $jobsQuery->where('category', $category);
+            }
         }
 
         // handle status filter
@@ -48,9 +58,18 @@ class JobController extends Controller
             });
         }
 
+        // handle numeric credit filters
+        if (($min = request('min_credits')) !== null) {
+            $jobsQuery->where('time_credits', '>=', intval($min));
+        }
+
+        if (($max = request('max_credits')) !== null) {
+            $jobsQuery->where('time_credits', '<=', intval($max));
+        }
+
         // handle sorting
         $sort = request('sort', 'latest');
-        
+
         switch ($sort) {
             case 'latest':
                 $jobsQuery->orderBy('created_at', 'desc');
@@ -64,6 +83,18 @@ class JobController extends Controller
             case 'title_desc':
                 $jobsQuery->orderBy('title', 'desc');
                 break;
+            case 'cheapest':
+                $jobsQuery->orderBy('time_credits', 'asc');
+                break;
+            case 'expensive':
+                $jobsQuery->orderBy('time_credits', 'desc');
+                break;
+            case 'seller_most_credits':
+                // join users table to order by seller's credits
+                $jobsQuery->leftJoin('users', 'job_listings.user_id', '=', 'users.id')
+                          ->select('job_listings.*')
+                          ->orderBy('users.time_credits', 'desc');
+                break;
             default:
                 $jobsQuery->orderBy('created_at', 'desc');
                 break;
@@ -75,7 +106,8 @@ class JobController extends Controller
         return view('jobs.index', [
             'jobs' => $jobs,
             'search' => request('search'),
-            'sort' => $sort
+            'sort' => $sort,
+            'categories' => config('job_categories')
         ]);
     }
 
@@ -85,7 +117,7 @@ class JobController extends Controller
         if (!auth()->check()) {
             return redirect('/login');
         }
-        return view('jobs.create');
+        return view('jobs.create', ['categories' => config('job_categories')]);
     }
 
     // display job details
@@ -98,11 +130,21 @@ class JobController extends Controller
     public function store()
     {
         // validate job creation input
+        // build allowed category list from config
+        $categories = config('job_categories', []);
+        $allowed = [];
+        foreach ($categories as $key => $group) {
+            $allowed[] = $key;
+            if (!empty($group['children']) && is_array($group['children'])) {
+                $allowed = array_merge($allowed, array_keys($group['children']));
+            }
+        }
+
         $attributes = request()->validate([
             'title' => ['required', 'min:3'],
             'description' => ['required', 'min:10'],
             'time_credits' => ['required', 'integer', 'min:1'],
-            'category' => ['required', 'in:creative,education,professional,technology,other']
+            'category' => ['required', Rule::in($allowed)]
         ]);
 
         $user = auth()->user();
@@ -152,7 +194,7 @@ class JobController extends Controller
     // show job edit form
     public function edit(Job $job)
     {
-        return view('jobs.edit', ['job' => $job]);
+        return view('jobs.edit', ['job' => $job, 'categories' => config('job_categories')]);
     }
 
     // update an existing job listing
@@ -162,11 +204,21 @@ class JobController extends Controller
         Gate::authorize('edit-job', $job);
 
         // validate update input
+        // build allowed category list from config 
+        $categories = config('job_categories', []);
+        $allowed = [];
+        foreach ($categories as $key => $group) {
+            $allowed[] = $key;
+            if (!empty($group['children']) && is_array($group['children'])) {
+                $allowed = array_merge($allowed, array_keys($group['children']));
+            }
+        }
+
         $attributes = request()->validate([
             'title' => ['required', 'min:3'],
             'description' => ['required', 'min:10'],
             'time_credits' => ['required', 'integer', 'min:1'],
-            'category' => ['required', 'in:creative,education,professional,technology,other']
+            'category' => ['required', Rule::in($allowed)]
         ]);
 
         $user = auth()->user();

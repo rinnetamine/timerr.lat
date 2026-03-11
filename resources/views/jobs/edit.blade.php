@@ -56,11 +56,18 @@
                                     <select name="category" id="category" required
                                             class="mt-1 block w-full rounded-md bg-gray-900/60 border border-gray-700 text-gray-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-neon-accent/50 focus:border-neon-accent">
                                         <option value="" disabled {{ $job->category ? '' : 'selected' }}>Select a category</option>
-                                        <option value="creative" {{ $job->category == 'creative' ? 'selected' : '' }}>Creative Services</option>
-                                        <option value="education" {{ $job->category == 'education' ? 'selected' : '' }}>Education</option>
-                                        <option value="professional" {{ $job->category == 'professional' ? 'selected' : '' }}>Professional Services</option>
-                                        <option value="technology" {{ $job->category == 'technology' ? 'selected' : '' }}>Technology</option>
-                                        <option value="other" {{ $job->category == 'other' ? 'selected' : '' }}>Other</option>
+                                        @foreach(($categories ?? []) as $topKey => $group)
+                                            @if(!empty($group['children']) && is_array($group['children']))
+                                                <optgroup label="{{ $group['label'] }}">
+                                                    @foreach($group['children'] as $slug => $label)
+                                                        <option value="{{ $slug }}" {{ $job->category == $slug ? 'selected' : '' }}>{{ $label }}</option>
+                                                    @endforeach
+                                                </optgroup>
+                                                <option value="{{ $topKey }}" {{ $job->category == $topKey ? 'selected' : '' }}>All {{ $group['label'] }}</option>
+                                            @else
+                                                <option value="{{ $topKey }}" {{ $job->category == $topKey ? 'selected' : '' }}>{{ $group['label'] }}</option>
+                                            @endif
+                                        @endforeach
                                     </select>
                                     <x-form-error name="category" />
                                 </div>

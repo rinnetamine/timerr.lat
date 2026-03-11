@@ -15,12 +15,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create users
-        $users = User::factory(10)->create();
-
-        // Create job listings with relationships
-        $jobs = Job::factory(20)
-            ->for($users->random())
-            ->create();
+        // seed users and jobs; user seeder will create a demo/admin user too
+        $this->call([
+            \Database\Seeders\UserSeeder::class,
+            \Database\Seeders\JobSeeder::class,
+        ]);
     }
 }
