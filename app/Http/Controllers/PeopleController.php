@@ -27,7 +27,19 @@ class PeopleController extends Controller
             ;
 
         // add helpful aggregates
-        $usersQuery->withCount('jobs')->withAvg('reviewsReceived', 'rating');
+        $usersQuery->withCount('jobs')
+                   ->withCount('completedJobs') 
+                   ->withCount('reviewsReceived')
+                   ->withAvg('reviewsReceived', 'rating');
+        
+        // add a subquery to ensure average rating is calculated correctly
+        $usersQuery->addSelect([
+            'reviews_received_rating_avg' => function ($query) {
+                $query->selectRaw('COALESCE(AVG(rating), 0)')
+                      ->from('reviews')
+                      ->whereColumn('reviews.reviewee_id', 'users.id');
+            }
+        ]);
 
         // sorting options for people listing
         switch ($sort) {
@@ -39,6 +51,9 @@ class PeopleController extends Controller
                 break;
             case 'most_credits':
                 $usersQuery->orderBy('time_credits', 'desc');
+                break;
+            case 'most_completed':
+                $usersQuery->orderBy('completed_jobs_count', 'desc');
                 break;
             case 'most_jobs':
                 $usersQuery->orderBy('jobs_count', 'desc');
@@ -69,7 +84,7 @@ class PeopleController extends Controller
      */
     public function show(User $user)
     {
-        $user->loadCount(['jobs', 'transactions']);
+        $user->loadCount(['jobs', 'completedJobs', 'reviewsReceived', 'transactions']);
 
         return view('people.show', [
             'user' => $user

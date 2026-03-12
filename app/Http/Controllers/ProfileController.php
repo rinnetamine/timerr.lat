@@ -15,6 +15,13 @@ class ProfileController extends Controller
     {
         $user = auth()->user();
         
+        // load stats for display
+        $user->loadCount(['jobs', 'completedJobs', 'reviewsReceived']);
+        $user->load(['reviewsReceived.reviewer']);
+        
+        // add average rating calculation
+        $user->reviews_received_rating_avg = \App\Models\Review::where('reviewee_id', $user->id)->avg('rating') ?? 0;
+        
         // fetch user's job listings
         $services = $user->jobs()->latest()->get();
         

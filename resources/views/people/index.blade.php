@@ -13,6 +13,7 @@
                     <option value="oldest" {{ (isset($sort) && $sort === 'oldest') ? 'selected' : '' }}>Oldest</option>
                     <option value="most_credits" {{ (isset($sort) && $sort === 'most_credits') ? 'selected' : '' }}>Most credits</option>
                     <option value="most_jobs" {{ (isset($sort) && $sort === 'most_jobs') ? 'selected' : '' }}>Most help requests</option>
+                    <option value="most_completed" {{ (isset($sort) && $sort === 'most_completed') ? 'selected' : '' }}>Most completed jobs</option>
                     <option value="top_rated" {{ (isset($sort) && $sort === 'top_rated') ? 'selected' : '' }}>Top rated</option>
                 </select>
 
@@ -27,11 +28,30 @@
                     <a href="/profile" class="block hover-card bg-gray-900/60 p-4 rounded-lg border border-neon-accent">
                         <div class="flex justify-between items-center">
                             <div>
-                                <h4 class="text-lg font-semibold text-white/90">{{ $u->first_name }} {{ $u->last_name }} <span class="ml-2 inline-block text-xs bg-neon-accent text-black px-2 py-0.5 rounded">You</span></h4>
+                                <div class="flex items-center gap-2">
+                                    <h4 class="text-lg font-semibold text-white/90">{{ $u->first_name }} {{ $u->last_name }} <span class="ml-2 inline-block text-xs bg-neon-accent text-black px-2 py-0.5 rounded">You</span></h4>
+                                    @if($u->reviews_received_rating_avg && $u->reviews_received_rating_avg > 0)
+                                        <div class="flex items-center gap-1">
+                                            @for($i = 1; $i <= 5; $i++)
+                                                @if($i <= floor($u->reviews_received_rating_avg))
+                                                    <span class="text-yellow-400">★</span>
+                                                @elseif($i - 0.5 <= $u->reviews_received_rating_avg)
+                                                    <span class="text-yellow-400">☆</span>
+                                                @else
+                                                    <span class="text-gray-600">★</span>
+                                                @endif
+                                            @endfor
+                                            <span class="text-xs text-gray-400 ml-1">({{ number_format($u->reviews_received_rating_avg, 1) }})</span>
+                                        </div>
+                                    @else
+                                        <span class="text-xs text-gray-500">No rating</span>
+                                    @endif
+                                </div>
                                 <p class="text-gray-400 text-sm">{{ $u->email }}</p>
                             </div>
                             <div class="text-sm text-gray-300">
                                 <div>{{ $u->jobs_count ?? $u->jobs()->count() }} help requests</div>
+                                <div>{{ $u->completed_jobs_count ?? $u->completedJobsCount() }} completed jobs</div>
                                 <div>{{ $u->time_credits }} credits</div>
                             </div>
                         </div>
@@ -40,11 +60,30 @@
                     <a href="{{ route('people.show', $u->id) }}" class="block hover-card bg-gray-800/40 p-4 rounded-lg border border-gray-700">
                         <div class="flex justify-between items-center">
                             <div>
-                                <h4 class="text-lg font-semibold text-white/90">{{ $u->first_name }} {{ $u->last_name }}</h4>
+                                <div class="flex items-center gap-2">
+                                    <h4 class="text-lg font-semibold text-white/90">{{ $u->first_name }} {{ $u->last_name }}</h4>
+                                    @if($u->reviews_received_rating_avg && $u->reviews_received_rating_avg > 0)
+                                        <div class="flex items-center gap-1">
+                                            @for($i = 1; $i <= 5; $i++)
+                                                @if($i <= floor($u->reviews_received_rating_avg))
+                                                    <span class="text-yellow-400">★</span>
+                                                @elseif($i - 0.5 <= $u->reviews_received_rating_avg)
+                                                    <span class="text-yellow-400">☆</span>
+                                                @else
+                                                    <span class="text-gray-600">★</span>
+                                                @endif
+                                            @endfor
+                                            <span class="text-xs text-gray-400 ml-1">({{ number_format($u->reviews_received_rating_avg, 1) }})</span>
+                                        </div>
+                                    @else
+                                        <span class="text-xs text-gray-500">No rating</span>
+                                    @endif
+                                </div>
                                 <p class="text-gray-400 text-sm">{{ $u->email }}</p>
                             </div>
                             <div class="text-sm text-gray-300">
                                 <div>{{ $u->jobs_count ?? $u->jobs()->count() }} help requests</div>
+                                <div>{{ $u->completed_jobs_count ?? $u->completedJobsCount() }} completed jobs</div>
                                 <div>{{ $u->time_credits }} credits</div>
                             </div>
                         </div>

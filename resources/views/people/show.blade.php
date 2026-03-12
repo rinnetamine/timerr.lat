@@ -10,7 +10,25 @@
                     </div>
                 </div>
                 <div class="flex-1">
-                    <h2 class="text-2xl font-semibold text-white/90">{{ $user->first_name }} {{ $user->last_name }}</h2>
+                    <div class="flex items-center gap-2">
+                        <h2 class="text-2xl font-semibold text-white/90">{{ $user->first_name }} {{ $user->last_name }}</h2>
+                        @if($user->reviews_received_rating_avg && $user->reviews_received_rating_avg > 0)
+                            <div class="flex items-center gap-1">
+                                @for($i = 1; $i <= 5; $i++)
+                                    @if($i <= floor($user->reviews_received_rating_avg))
+                                        <span class="text-yellow-400 text-lg">★</span>
+                                    @elseif($i - 0.5 <= $user->reviews_received_rating_avg)
+                                        <span class="text-yellow-400 text-lg">☆</span>
+                                    @else
+                                        <span class="text-gray-600 text-lg">★</span>
+                                    @endif
+                                @endfor
+                                <span class="text-xs text-gray-400 ml-1">({{ number_format($user->reviews_received_rating_avg, 1) }})</span>
+                            </div>
+                        @else
+                            <span class="text-sm text-gray-500">No rating</span>
+                        @endif
+                    </div>
                     <p class="text-gray-400">{{ $user->email }}</p>
                     <div class="mt-4 inline-flex items-center px-4 py-2 rounded-full bg-gray-900/60 border border-gray-700">
                         <span class="text-neon-accent font-medium">{{ $user->time_credits }}</span>
@@ -19,6 +37,7 @@
                 </div>
                 <div class="text-right">
                     <div class="text-sm text-gray-400">{{ $user->jobs_count ?? $user->jobs()->count() }} help requests</div>
+                    <div class="text-sm text-gray-400">{{ $user->completed_jobs_count ?? $user->completedJobsCount() }} completed jobs</div>
                 </div>
             </div>
 

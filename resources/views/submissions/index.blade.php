@@ -22,12 +22,16 @@
                                     <p class="text-neon-accent text-sm mt-1">{{ $submission->user->first_name }} {{ $submission->user->last_name }} wants to help</p>
                                 </div>
                                 <div>
-                                    @if($submission->status === 'pending')
+                                    @if($submission->status === 'claimed')
+                                        <span class="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-xs font-semibold">Claimed</span>
+                                    @elseif($submission->status === 'pending')
                                         <span class="bg-yellow-500/20 text-yellow-300 px-3 py-1 rounded-full text-xs font-semibold">Pending</span>
                                     @elseif($submission->status === 'approved')
                                         <span class="bg-green-500/20 text-green-300 px-3 py-1 rounded-full text-xs font-semibold">Approved</span>
                                     @elseif($submission->status === 'declined')
                                         <span class="bg-red-500/20 text-red-300 px-3 py-1 rounded-full text-xs font-semibold">Declined</span>
+                                    @elseif($submission->status === 'admin_review')
+                                        <span class="bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full text-xs font-semibold">Admin Review</span>
                                     @endif
                                 </div>
                             </div>
@@ -83,12 +87,16 @@
                                     <p class="text-gray-400 text-sm mt-1">Posted by {{ $submission->jobListing->user->first_name }} {{ $submission->jobListing->user->last_name }}</p>
                                 </div>
                                 <div>
-                                    @if($submission->status === 'pending')
+                                    @if($submission->status === 'claimed')
+                                        <span class="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-xs font-semibold">Claimed</span>
+                                    @elseif($submission->status === 'pending')
                                         <span class="bg-yellow-500/20 text-yellow-300 px-3 py-1 rounded-full text-xs font-semibold">Pending</span>
                                     @elseif($submission->status === 'approved')
                                         <span class="bg-green-500/20 text-green-300 px-3 py-1 rounded-full text-xs font-semibold">Approved</span>
                                     @elseif($submission->status === 'declined')
                                         <span class="bg-red-500/20 text-red-300 px-3 py-1 rounded-full text-xs font-semibold">Declined</span>
+                                    @elseif($submission->status === 'admin_review')
+                                        <span class="bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full text-xs font-semibold">Admin Review</span>
                                     @endif
                                 </div>
                             </div>

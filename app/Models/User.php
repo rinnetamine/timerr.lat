@@ -8,6 +8,7 @@ use Illuminate\Notifications\Notifiable;
 use App\Models\Job;
 use App\Models\Transaction;
 use App\Models\Review;
+use App\Models\JobSubmission;
 
 
 class User extends Authenticatable
@@ -82,5 +83,23 @@ class User extends Authenticatable
     public function unreadMessagesCount()
     {
         return \App\Models\Message::where('recipient_id', $this->id)->whereNull('read_at')->count();
+    }
+
+    // relationship to job submissions (jobs the user has completed)
+    public function jobSubmissions()
+    {
+        return $this->hasMany(JobSubmission::class);
+    }
+
+    // relationship to successfully completed jobs (approved submissions)
+    public function completedJobs()
+    {
+        return $this->hasMany(JobSubmission::class)->where('status', JobSubmission::STATUS_APPROVED);
+    }
+
+    // count of successfully completed jobs
+    public function completedJobsCount()
+    {
+        return $this->completedJobs()->count();
     }
 }

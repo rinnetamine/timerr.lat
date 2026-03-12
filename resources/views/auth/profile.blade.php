@@ -14,13 +14,35 @@
                         {{ strtoupper(substr($user->first_name, 0, 1) . substr($user->last_name, 0, 1)) }}
                     </div>
                 </div>
-                <div>
-                    <h2 class="text-2xl font-semibold text-white/90">{{ $user->first_name }} {{ $user->last_name }}</h2>
+                <div class="flex-1">
+                    <div class="flex items-center gap-2">
+                        <h2 class="text-2xl font-semibold text-white/90">{{ $user->first_name }} {{ $user->last_name }}</h2>
+                        @if($user->reviews_received_rating_avg && $user->reviews_received_rating_avg > 0)
+                            <div class="flex items-center gap-1">
+                                @for($i = 1; $i <= 5; $i++)
+                                    @if($i <= floor($user->reviews_received_rating_avg))
+                                        <span class="text-yellow-400 text-lg">★</span>
+                                    @elseif($i - 0.5 <= $user->reviews_received_rating_avg)
+                                        <span class="text-yellow-400 text-lg">☆</span>
+                                    @else
+                                        <span class="text-gray-600 text-lg">★</span>
+                                    @endif
+                                @endfor
+                                <span class="text-xs text-gray-400 ml-1">({{ number_format($user->reviews_received_rating_avg, 1) }})</span>
+                            </div>
+                        @else
+                            <span class="text-sm text-gray-500">No rating</span>
+                        @endif
+                    </div>
                     <p class="text-gray-400">{{ $user->email }}</p>
                     <div class="mt-4 inline-flex items-center px-4 py-2 rounded-full bg-gray-900/60 border border-gray-700">
                         <span class="text-neon-accent font-medium">{{ $user->time_credits }}</span>
                         <span class="ml-2 text-gray-400">Time Credits</span>
                     </div>
+                </div>
+                <div class="flex-shrink-0 text-right">
+                    <div class="text-sm text-gray-400">{{ $user->jobs_count ?? $user->jobs()->count() }} help requests</div>
+                    <div class="text-sm text-gray-400">{{ $user->completed_jobs_count ?? $user->completedJobsCount() }} completed jobs</div>
                 </div>
             </div>
         </div>
@@ -243,7 +265,40 @@
             @endif
         </div>
         
-        <!-- Admin panel moved to a dedicated admin dashboard at /admin -->
+        {{-- Reviews received --}}
+        <div class="space-y-6">
+            <h3 class="text-xl font-semibold text-white/90">Reviews Received</h3>
+            @if($user->reviewsReceived()->count() === 0)
+                <div class="bg-gray-800/40 backdrop-blur-sm p-6 rounded-lg border border-gray-700 text-gray-400">
+                    No reviews yet. Complete help requests to receive reviews from others!
+                </div>
+            @else
+                <div class="space-y-4">
+                    @foreach($user->reviewsReceived as $review)
+                        <div class="bg-gray-800/40 backdrop-blur-sm p-6 rounded-lg border border-gray-700">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <div class="text-sm text-gray-300">{{ $review->reviewer->first_name }} {{ $review->reviewer->last_name }} — <span class="text-neon-accent">{{ $review->rating }}/5</span></div>
+                                    @if($review->comment)
+                                        <div class="mt-2 text-gray-300 whitespace-pre-line">{{ $review->comment }}</div>
+                                    @endif
+                                    <div class="text-xs text-gray-500 mt-2">{{ $review->created_at->format('M j, Y') }}</div>
+                                </div>
+                                <div class="flex items-center gap-1">
+                                    @for($i = 1; $i <= 5; $i++)
+                                        @if($i <= $review->rating)
+                                            <span class="text-yellow-400 text-sm">★</span>
+                                        @else
+                                            <span class="text-gray-600 text-sm">★</span>
+                                        @endif
+                                    @endfor
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+        </div>
         
         <!-- transaction history -->
         <div class="space-y-6">

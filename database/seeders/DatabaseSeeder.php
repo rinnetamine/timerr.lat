@@ -3,10 +3,6 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\User;
-use App\Models\Job;
-use App\Models\JobSubmission;
-use App\Models\SubmissionFile;
 
 class DatabaseSeeder extends Seeder
 {
@@ -19,6 +15,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             \Database\Seeders\UserSeeder::class,
             \Database\Seeders\JobSeeder::class,
+            \Database\Seeders\JobSubmissionSeeder::class,
+            \Database\Seeders\ReviewSeeder::class,
         ]);
     }
 }
