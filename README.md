@@ -28,7 +28,7 @@ Timerr is a modern web application built with Laravel that enables users to:
 - PHP >= 8.1
 - Composer
 - Laravel >= 10.0
-- MySQL >= 8.0
+- SQLite
 - Node.js and npm
 - Git
 
@@ -45,18 +45,16 @@ cd timerr.lat
 composer install
 ```
 
-### 3. Configure Database
-1. Create a new MySQL database (i am using xampp for this)
-2. Rename .env.example to .env
-3. Update the database configuration in `.env`:
+### 3. Configure Environment
+```bash
+# Copy the environment file
+cp .env.example .env
+
+# Generate application key
+php artisan key:generate
 ```
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=TimerrDB
-DB_USERNAME=your_username (standart: "root")
-DB_PASSWORD=your_password (standart: "empty")
-```
+
+The application uses SQLite by default. The database file will be created automatically at `database/database.sqlite`.
 
 ### 4. Run Database Migrations
 ```bash
@@ -69,4 +67,17 @@ php artisan serve
 ```
 
 The application will be available at `http://localhost:8000`
+
+## Docker Setup
+
+The project includes Docker support with SQLite configuration:
+
+```bash
+# Build and start the container
+docker-compose up --build
+
+# The app will be available at http://localhost:8000
+```
+
+The Docker configuration uses SQLite by default, eliminating the need for a separate database service.
 
