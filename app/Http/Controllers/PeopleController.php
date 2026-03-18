@@ -85,6 +85,7 @@ class PeopleController extends Controller
     public function show(User $user)
     {
         $user->loadCount(['jobs', 'completedJobs', 'reviewsReceived', 'transactions']);
+        $user->load(['reviewsReceived.reviewer']);
 
         return view('people.show', [
             'user' => $user
