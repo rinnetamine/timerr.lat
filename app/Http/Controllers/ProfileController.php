@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Transaction;
 use App\Models\JobSubmission;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 
 // controller for user profile and dashboard
 class ProfileController extends Controller
@@ -56,5 +58,37 @@ class ProfileController extends Controller
             'transactions' => $transactions,
             'adminReviewSubmissions' => $adminReviewSubmissions
         ]);
+    }
+
+    // change user password
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => ['required', 'string'],
+            'password' => [
+                'required', 
+                'string', 
+                'confirmed', 
+                'min:6',
+                'regex:/[0-9]/', // at least one number
+                'regex:/[!@#$%^&*()_+=\-\[\]{};:\'"<>,\.?\/]/' // at least one special character
+            ]
+        ]);
+
+        $user = auth()->user();
+
+        // verify current password
+        if (!Hash::check($request->current_password, $user->password)) {
+            return back()->withErrors([
+                'current_password' => 'The current password is incorrect.'
+            ]);
+        }
+
+        // update password
+        $user->update([
+            'password' => Hash::make($request->password)
+        ]);
+
+        return back()->with('success', 'Password changed successfully!');
     }
 }

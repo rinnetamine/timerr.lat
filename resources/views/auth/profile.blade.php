@@ -39,11 +39,103 @@
                         <span class="text-neon-accent font-medium">{{ $user->time_credits }}</span>
                         <span class="ml-2 text-gray-400">Time Credits</span>
                     </div>
+                    
+                    <button 
+                        onclick="openPasswordModal()"
+                        class="mt-3 px-3 py-2 bg-orange-600 text-white font-medium rounded-md hover:bg-orange-700 transition-colors text-sm">
+                        Change Password
+                    </button>
                 </div>
                 <div class="flex-shrink-0 text-right">
                     <div class="text-sm text-gray-400">{{ $user->jobs_count ?? $user->jobs()->count() }} help requests</div>
                     <div class="text-sm text-gray-400">{{ $user->completed_jobs_count ?? $user->completedJobsCount() }} completed jobs</div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Services Section -->
+        <div id="passwordModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div class="relative top-20 mx-auto p-4 border w-96 shadow-lg rounded-md bg-gray-800 border-gray-700">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-white/90">Change Password</h3>
+                    <button 
+                        onclick="closePasswordModal()"
+                        class="text-gray-400 hover:text-gray-300 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <form action="{{ route('profile.change-password') }}" method="POST" class="space-y-4">
+                    @csrf
+                    @if ($errors->any())
+                        <div class="bg-red-500/10 border border-red-500 rounded-md p-3 mb-4">
+                            @foreach ($errors->all() as $error)
+                                <div class="text-red-300 text-sm">{{ $error }}</div>
+                            @endforeach
+                        </div>
+                    @endif
+
+                    @if (session('success'))
+                        <div class="bg-green-500/10 border border-green-500 rounded-md p-3 mb-4">
+                            <div class="text-green-300 text-sm">{{ session('success') }}</div>
+                        </div>
+                    @endif
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Current Password</label>
+                        <input 
+                            type="password" 
+                            name="current_password" 
+                            class="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-neon-accent focus:border-transparent"
+                            placeholder="Enter current password"
+                            required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">New Password</label>
+                        <input 
+                            type="password" 
+                            name="password" 
+                            class="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-neon-accent focus:border-transparent"
+                            placeholder="Enter new password"
+                            minlength="6"
+                            required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Confirm New Password</label>
+                        <input 
+                            type="password" 
+                            name="password_confirmation" 
+                            class="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-neon-accent focus:border-transparent"
+                            placeholder="Confirm new password"
+                            minlength="6"
+                            required>
+                    </div>
+                    
+                    <div class="bg-blue-500/10 border border-blue-500 rounded-md p-3">
+                        <div class="text-blue-200 font-medium mb-2">Password Requirements:</div>
+                        <ul class="list-disc list-inside text-sm text-blue-300 space-y-1">
+                            <li>At least 6 characters</li>
+                            <li>At least 1 number (0-9)</li>
+                            <li>At least 1 special character (!@#$%^&*()_+=-[]{}:;"'<>,.?/)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="flex gap-2 pt-4">
+                        <button 
+                            type="button"
+                            onclick="closePasswordModal()"
+                            class="flex-1 px-4 py-2 bg-gray-600 text-white font-medium rounded-md hover:bg-gray-700 transition-colors">
+                            Cancel
+                        </button>
+                        <button type="submit" class="flex-1 px-4 py-2 bg-neon-accent text-black font-medium rounded-md hover:bg-neon-accent/80 transition-colors">
+                            Change Password
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
 
@@ -351,3 +443,29 @@
         </div>
     </div>
 </x-layout>
+
+<script>
+function openPasswordModal() {
+    document.getElementById('passwordModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closePasswordModal() {
+    document.getElementById('passwordModal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+
+// Close modal when clicking outside
+document.getElementById('passwordModal').addEventListener('click', function(event) {
+    if (event.target === this) {
+        closePasswordModal();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closePasswordModal();
+    }
+});
+</script>

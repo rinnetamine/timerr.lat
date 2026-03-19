@@ -46,6 +46,7 @@ Route::post('/logout', [SessionController::class, 'destroy']);
 
 // profile route
 Route::get('/profile', [ProfileController::class, 'show'])->middleware('auth')->name('profile');
+Route::post('/profile/change-password', [ProfileController::class, 'changePassword'])->middleware('auth')->name('profile.change-password');
 
 // job submission routes (protected by auth middleware)
 Route::middleware('auth')->group(function () {

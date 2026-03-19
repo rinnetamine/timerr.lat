@@ -42,7 +42,7 @@
         </div>
 
         <!-- Admin Actions -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Credit Management -->
             <div class="bg-gray-800/40 backdrop-blur-sm p-6 rounded-lg border border-gray-700">
                 <h3 class="text-lg font-semibold text-white mb-4">Credit Management</h3>

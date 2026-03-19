@@ -46,6 +46,15 @@
                                     <x-form-input name="password" id="password" type="password" required />
                                     <x-form-error name="password" />
                                 </div>
+                                
+                                <div class="mt-2 text-sm text-gray-400">
+                                    Password must contain at least:
+                                    <ul class="list-disc list-inside mt-1 space-y-1">
+                                        <li>6 characters minimum</li>
+                                        <li>1 number (0-9)</li>
+                                        <li>1 special character (!@#$%^&*()_+=-[]{}:;"'<>,.?/)</li>
+                                    </ul>
+                                </div>
                             </x-form-field>
 
                             <x-form-field>

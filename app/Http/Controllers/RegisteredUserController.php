@@ -24,7 +24,13 @@ class RegisteredUserController extends Controller
             'first_name' => ['required'],
             'last_name'  => ['required'],
             'email'      => ['required', 'email', 'unique:users'],
-            'password'   => ['required', Password::min(6), 'confirmed']
+            'password'   => [
+                'required', 
+                'min:6', 
+                'confirmed',
+                'regex:/[0-9]/', // at least one number
+                'regex:/[!@#$%^&*()_+=\-\[\]{};:\'"<>,\.?\/]/' // at least one special character
+            ]
         ]);
 
         // create new user
