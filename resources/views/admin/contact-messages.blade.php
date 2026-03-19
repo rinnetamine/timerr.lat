@@ -27,7 +27,9 @@
                                     From: {{ $message->name }} <br>
                                     Email: {{ $message->email }} <br>
                                     @if($message->user)
-                                        User: {{ $message->user->name }}
+                                        User: <a href="{{ route('people.show', $message->user->id) }}" class="text-neon-accent hover:text-neon-accent/80 transition-colors duration-200">
+                                            {{ $message->user->first_name }} {{ $message->user->last_name }}
+                                        </a>
                                     @endif
                                 </p>
                                 <p class="mt-2 text-gray-300">{{ $message->message }}</p>

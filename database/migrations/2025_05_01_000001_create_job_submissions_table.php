@@ -19,6 +19,19 @@ return new class extends Migration
             $table->string('status')->default('claimed'); // claimed, pending, approved, declined, admin_review
             $table->text('admin_notes')->nullable();
             $table->boolean('admin_approved')->default(false);
+            
+            // dispute related fields
+            $table->string('dispute_status')->default('none'); // none, requested, under_review, resolved
+            $table->text('dispute_reason')->nullable();
+            $table->foreignId('dispute_initiated_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->text('dispute_resolution')->nullable();
+            $table->timestamp('dispute_resolved_at')->nullable();
+            $table->foreignId('dispute_resolved_by')->nullable()->constrained('users')->onDelete('set null');
+            
+            // freeze functionality
+            $table->boolean('is_frozen')->default(false);
+            $table->text('freeze_reason')->nullable();
+            
             $table->timestamps();
         });
     }

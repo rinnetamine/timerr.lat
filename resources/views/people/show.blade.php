@@ -46,6 +46,10 @@
                     @if(auth()->id() !== $user->id)
                         <a href="{{ route('messages.conversation', $user->id) }}" class="bg-neon-accent text-black px-3 py-2 rounded text-sm font-medium">Message</a>
                     @endif
+                    
+                    @if(auth()->user()->isAdmin())
+                        <a href="{{ route('admin.users.manage', $user) }}" class="ml-2 bg-purple-600 text-white px-3 py-2 rounded text-sm font-medium hover:bg-purple-700">Manage User</a>
+                    @endif
                 @endauth
             </div>
 
@@ -79,7 +83,11 @@
                             <div class="bg-gray-900/60 p-3 rounded border border-gray-700">
                                 <div class="flex items-start justify-between">
                                     <div>
-                                        <div class="text-sm text-gray-300">{{ $review->reviewer->first_name }} {{ $review->reviewer->last_name }} — <span class="text-neon-accent">{{ $review->rating }}/5</span></div>
+                                        <div class="text-sm text-gray-300">
+                                        <a href="{{ route('people.show', $review->reviewer->id) }}" class="hover:text-neon-accent transition-colors duration-200">
+                                            {{ $review->reviewer->first_name }} {{ $review->reviewer->last_name }}
+                                        </a> — <span class="text-neon-accent">{{ $review->rating }}/5</span>
+                                    </div>
                                         @if($review->comment)
                                             <div class="mt-2 text-gray-300 whitespace-pre-line">{{ $review->comment }}</div>
                                         @endif

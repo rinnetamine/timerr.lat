@@ -9,7 +9,10 @@
             <div class="mb-6">
                 <h2 class="text-xl font-semibold text-white/90">{{ $submission->jobListing->title }}</h2>
                 <p class="text-gray-400 text-sm mt-1">
-                    Help request by {{ $submission->jobListing->user->first_name }} {{ $submission->jobListing->user->last_name }}
+                    Help request by 
+                    <a href="{{ route('people.show', $submission->jobListing->user->id) }}" class="hover:text-neon-accent transition-colors duration-200">
+                        {{ $submission->jobListing->user->first_name }} {{ $submission->jobListing->user->last_name }}
+                    </a>
                 </p>
                 <div class="mt-2 flex items-center">
                     <span class="bg-neon-accent/20 text-neon-accent px-3 py-1 rounded-full text-xs font-semibold">
@@ -37,12 +40,65 @@
                         <span class="ml-2 bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full text-xs font-semibold">Admin Review</span>
                     @endif
                 </div>
+
+                <!-- Timeout Warning -->
+                @php
+                    $timeoutWarning = $submission->getTimeoutWarning();
+                @endphp
+                @if($timeoutWarning)
+                    <div class="mt-3 p-3 rounded-md border
+                        @if($timeoutWarning['severity'] === 'high')
+                            bg-red-500/10 border-red-500
+                        @elseif($timeoutWarning['severity'] === 'medium')
+                            bg-yellow-500/10 border-yellow-500
+                        @else
+                            bg-blue-500/10 border-blue-500
+                        @endif
+                    ">
+                        <div class="flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 mt-0.5 flex-shrink-0
+                                @if($timeoutWarning['severity'] === 'high')
+                                    text-red-400
+                                @elseif($timeoutWarning['severity'] === 'medium')
+                                    text-yellow-400
+                                @else
+                                    text-blue-400
+                                @endif
+                            " fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 2.502-3.004V7.004C20.82 5.667 19.368 4 17.856 4H6.144C4.632 4 3.18 5.667 3.18 7.004v9.992C3.18 18.333 4.632 20 6.144 20h11.712c19.368 0 20.82-1.667 20.82-3.004V7.004C20.82 5.667 19.368 4 17.856 4H6.144z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium
+                                    @if($timeoutWarning['severity'] === 'high')
+                                        text-red-200
+                                    @elseif($timeoutWarning['severity'] === 'medium')
+                                        text-yellow-200
+                                    @else
+                                        text-blue-200
+                                    @endif
+                                ">
+                                    {{ $timeoutWarning['message'] }}
+                                </p>
+                                @if($timeoutWarning['hours_remaining'] > 0)
+                                    <p class="text-xs mt-1 opacity-75">
+                                        Time until dispute available: {{ $timeoutWarning['hours_remaining'] }} hours
+                                    </p>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @endif
             </div>
 
             <!-- Applicant Info -->
             <div class="border-t border-gray-700 pt-4 mb-6">
                 <h3 class="font-semibold text-white/90 mb-2">Applicant</h3>
-                <p class="text-gray-300">{{ $submission->user->first_name }} {{ $submission->user->last_name }}</p>
+                <p class="text-gray-300">
+                    <a href="{{ route('people.show', $submission->user->id) }}" class="hover:text-neon-accent transition-colors duration-200">
+                        {{ $submission->user->first_name }} {{ $submission->user->last_name }}
+                    </a>
+                </p>
                 <p class="text-gray-400 text-sm">{{ $submission->user->email }}</p>
             </div>
 
@@ -230,6 +286,75 @@
                             </div>
                         </form>
                     @endif
+                </div>
+            @endif
+
+            <!-- Dispute button for both parties -->
+            @if(auth()->check() && 
+               (auth()->id() === $submission->jobListing->user_id || auth()->id() === $submission->user_id))
+                <div class="border-t border-gray-700 pt-6 mt-6">
+                    @if($submission->canBeDisputed())
+                        <div class="bg-yellow-500/10 border border-yellow-500 rounded-md p-4 mb-4">
+                            <p class="text-yellow-200 text-sm">
+                                <strong>Having issues with this submission?</strong> You can file a dispute to freeze the submission and get admin assistance.
+                            </p>
+                        </div>
+                        <div class="flex justify-end">
+                            <a href="{{ route('disputes.create', $submission) }}" 
+                               class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-sm font-medium transition-colors duration-200">
+                                File Dispute
+                            </a>
+                        </div>
+                    @else
+                        @php
+                            $timeoutWarning = $submission->getTimeoutWarning();
+                        @endphp
+                        @if($timeoutWarning && $timeoutWarning['hours_remaining'] > 0)
+                            <div class="bg-blue-500/10 border border-blue-500 rounded-md p-4 mb-4">
+                                <p class="text-blue-200 text-sm">
+                                    <strong>Dispute Not Yet Available:</strong> {{ $timeoutWarning['message'] }}
+                                </p>
+                                <p class="text-blue-300 text-xs mt-2">
+                                    Dispute will be available in {{ $timeoutWarning['hours_remaining'] }} hours
+                                </p>
+                            </div>
+                        @else
+                            <div class="bg-gray-700/50 border border-gray-600 rounded-md p-4 mb-4">
+                                <p class="text-gray-300 text-sm">
+                                    <strong>No disputes available</strong> This submission cannot be disputed at this time.
+                                </p>
+                                @if($submission->is_frozen)
+                                    <p class="text-gray-400 text-xs mt-2">
+                                        Reason: {{ $submission->freeze_reason }}
+                                    </p>
+                                @endif
+                            </div>
+                        @endif
+                    @endif
+                </div>
+            @endif
+
+            <!-- Frozen status indicator -->
+            @if($submission->is_frozen)
+                <div class="border-t border-gray-700 pt-6 mt-6">
+                    <div class="bg-red-500/10 border border-red-500 rounded-md p-4">
+                        <div class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                            <div>
+                                <p class="text-red-200 font-semibold">Submission is Frozen</p>
+                                @if($submission->freeze_reason)
+                                    <p class="text-red-300 text-sm mt-1">{{ $submission->freeze_reason }}</p>
+                                @endif
+                                @if($submission->dispute_status !== \App\Models\JobSubmission::DISPUTE_NONE)
+                                    <p class="text-red-300 text-sm mt-1">
+                                        Status: {{ ucfirst(str_replace('_', ' ', $submission->dispute_status)) }}
+                                    </p>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
                 </div>
             @endif
         </div>

@@ -30,6 +30,16 @@ class SessionController extends Controller
             ]);
         }
 
+        // check if user is banned after successful authentication
+        if (Auth::user()->isBanned()) {
+            // logout the banned user immediately
+            Auth::logout();
+            
+            throw ValidationException::withMessages([
+                'email' => 'Your account has been banned. Contact administrator for more information.'
+            ]);
+        }
+
         // regenerate session for security
         request()->session()->regenerate();
 

@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
     {
         // seed users and jobs; user seeder will create a demo/admin user too
         $this->call([
+            \Database\Seeders\AdminSeeder::class,
             \Database\Seeders\UserSeeder::class,
             \Database\Seeders\JobSeeder::class,
             \Database\Seeders\JobSubmissionSeeder::class,

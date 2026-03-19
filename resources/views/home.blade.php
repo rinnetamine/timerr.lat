@@ -91,7 +91,11 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 @foreach(($featuredJobs ?? []) as $job)
                     <a href="/jobs/{{ $job->id }}" class="block p-4 bg-gray-800/40 rounded-lg border border-gray-700 hover:border-neon-accent hover-card">
-                        <div class="text-sm text-neon-accent font-semibold">{{ $job->user->first_name }} {{ $job->user->last_name }}</div>
+                        <div class="text-sm text-neon-accent font-semibold">
+                            <a href="{{ route('people.show', $job->user->id) }}" class="hover:text-neon-accent/80 transition-colors duration-200">
+                                {{ $job->user->first_name }} {{ $job->user->last_name }}
+                            </a>
+                        </div>
                         <div class="mt-2 font-semibold text-white/90">{{ Str::limit($job->title, 60) }}</div>
                         <div class="mt-2 text-gray-400 text-sm">{{ Str::limit($job->description, 80) }}</div>
                         <div class="mt-3 flex items-center justify-between">

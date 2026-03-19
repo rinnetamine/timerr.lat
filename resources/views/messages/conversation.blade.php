@@ -1,5 +1,9 @@
 <x-layout>
-    <x-slot:heading>Conversation with {{ $other->first_name }} {{ $other->last_name }}</x-slot:heading>
+    <x-slot:heading>Conversation with 
+        <a href="{{ route('people.show', $other->id) }}" class="hover:text-neon-accent transition-colors duration-200">
+            {{ $other->first_name }} {{ $other->last_name }}
+        </a>
+    </x-slot:heading>
 
     <div class="mx-auto max-w-7xl grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- conversations sidebar -->
@@ -11,7 +15,11 @@
                         <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-white text-sm font-medium">{{ strtoupper(substr($c['other']->first_name,0,1) ?: 'U') }}</div>
                         <div class="flex-1 min-w-0">
                             <div class="flex justify-between items-center">
-                                <div class="truncate font-medium text-white/90">{{ $c['other']->first_name }} {{ $c['other']->last_name }}</div>
+                                <div class="truncate font-medium text-white/90">
+                                <a href="{{ route('people.show', $c['other']->id) }}" class="hover:text-neon-accent transition-colors duration-200">
+                                    {{ $c['other']->first_name }} {{ $c['other']->last_name }}
+                                </a>
+                            </div>
                                 <div class="text-xs text-gray-400">{{ $c['latest']->created_at->diffForHumans() }}</div>
                             </div>
                             <div class="text-sm text-gray-400 truncate">{{ $c['latest']->body }}</div>
@@ -32,7 +40,11 @@
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center text-white text-lg font-semibold">{{ strtoupper(substr($other->first_name,0,1) ?: 'U') }}</div>
                     <div>
-                        <div class="font-semibold text-white/90">{{ $other->first_name }} {{ $other->last_name }}</div>
+                        <div class="font-semibold text-white/90">
+                            <a href="{{ route('people.show', $other->id) }}" class="hover:text-neon-accent transition-colors duration-200">
+                                {{ $other->first_name }} {{ $other->last_name }}
+                            </a>
+                        </div>
                         <div class="text-sm text-gray-400">@if($other->email) {{ $other->email }} @endif</div>
                     </div>
                 </div>

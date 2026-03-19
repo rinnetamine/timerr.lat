@@ -63,37 +63,43 @@
     <!-- jobs list -->
     <div class="space-y-4">
             @foreach ($jobs as $job)
-                <a href="/jobs/{{ $job['id'] }}" class="block px-4 py-6 border border-gray-700 rounded-lg bg-gray-800/40 backdrop-blur-sm hover:bg-gray-700/40 transition-colors duration-200 hover-card">
-                    <div class="font-bold text-neon-accent text-sm">{{ $job->user->first_name }} {{ $job->user->last_name }} needs help</div>
+                <div class="px-4 py-6 border border-gray-700 rounded-lg bg-gray-800/40 backdrop-blur-sm hover:bg-gray-700/40 transition-colors duration-200 hover-card">
+                    <div class="font-bold text-neon-accent text-sm">
+                        <a href="{{ route('people.show', $job->user->id) }}" class="hover:text-neon-accent/80 transition-colors duration-200">
+                            {{ $job->user->first_name }} {{ $job->user->last_name }}
+                        </a> needs help
+                    </div>
 
                     <div class="mt-2 text-white/90 font-semibold">
-                        {{ $job['title'] }}
+                        <a href="/jobs/{{ $job->id }}" class="hover:text-neon-accent transition-colors duration-200">
+                            {{ $job['title'] }}
+                        </a>
                     </div>
                     
-                            @php
-                                $catLabel = $job->category;
-                                foreach (($categories ?? []) as $topKey => $group) {
-                                    if ($topKey === $job->category) {
-                                        $catLabel = $group['label'];
-                                        break;
-                                    }
-                                    if (!empty($group['children']) && is_array($group['children'])) {
-                                        foreach ($group['children'] as $slug => $label) {
-                                            if ($slug === $job->category) {
-                                                $catLabel = $label;
-                                                break 2;
-                                            }
-                                        }
+                    @php
+                        $catLabel = $job->category;
+                        foreach (($categories ?? []) as $topKey => $group) {
+                            if ($topKey === $job->category) {
+                                $catLabel = $group['label'];
+                                break;
+                            }
+                            if (!empty($group['children']) && is_array($group['children'])) {
+                                foreach ($group['children'] as $slug => $label) {
+                                    if ($slug === $job->category) {
+                                        $catLabel = $label;
+                                        break 2;
                                     }
                                 }
-                            @endphp
-                            <div class="mt-1 text-gray-300 text-sm flex items-center justify-between">
-                                <span>Category: <span class="capitalize">{{ $catLabel }}</span></span>
+                            }
+                        }
+                    @endphp
+                    <div class="mt-1 text-gray-300 text-sm flex items-center justify-between">
+                        <span>Category: <span class="capitalize">{{ $catLabel }}</span></span>
                         <span class="bg-neon-accent/20 text-neon-accent px-3 py-1 rounded-full text-xs font-semibold">
                             {{ $job['time_credits'] }} time credits
                         </span>
                     </div>
-                </a>
+                </div>
             @endforeach
 
             <div>

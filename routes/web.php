@@ -10,6 +10,7 @@ use App\Http\Controllers\ContactController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\PeopleController;
 use App\Http\Controllers\MessagesController;
+use App\Http\Controllers\DisputeController;
 use Illuminate\Support\Facades\Route;
 
 // home page route
@@ -62,7 +63,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/submissions', [JobSubmissionController::class, 'index']);
     
     // single submission view route
-    Route::get('/submissions/{submission}', [JobSubmissionController::class, 'show'])->middleware('auth');
+    Route::get('/submissions/{submission}', [JobSubmissionController::class, 'show'])->middleware('auth')->name('submissions.show');
     // export submission as html
     Route::get('/submissions/{submission}/export', [JobSubmissionController::class, 'exportHtml'])->middleware('auth')->name('submissions.export');
     
@@ -90,11 +91,26 @@ Route::middleware('auth')->group(function () {
     Route::post('/submissions/{submission}/decline', [JobSubmissionController::class, 'decline']);
     // reviews
     Route::post('/submissions/{submission}/reviews', [\App\Http\Controllers\ReviewController::class, 'store']);
+
+    // dispute routes
+    Route::get('/disputes', [DisputeController::class, 'index'])->name('disputes.index');
+    Route::get('/submissions/{submission}/dispute', [DisputeController::class, 'create'])->name('disputes.create');
+    Route::post('/submissions/{submission}/dispute', [DisputeController::class, 'store'])->name('disputes.store');
+    Route::get('/disputes/{submission}', [DisputeController::class, 'show'])->name('disputes.show');
+    Route::post('/disputes/{submission}/resolve', [DisputeController::class, 'resolve'])->name('disputes.resolve');
 });
 
 // people listing and profile 
 Route::get('/people', [PeopleController::class, 'index'])->name('people.index');
 Route::get('/people/{user}', [PeopleController::class, 'show'])->name('people.show');
+
+// admin user management routes
+Route::middleware(['auth'])->group(function () {
+    Route::get('/admin/users/{user}/manage', [PeopleController::class, 'manage'])->name('admin.users.manage');
+    Route::post('/admin/users/{user}/adjust-credits', [PeopleController::class, 'adjustCredits'])->name('admin.users.adjust-credits');
+    Route::post('/admin/users/{user}/ban', [PeopleController::class, 'ban'])->name('admin.users.ban');
+    Route::post('/admin/users/{user}/unban', [PeopleController::class, 'unban'])->name('admin.users.unban');
+});
 
 // messaging
 Route::middleware('auth')->group(function () {

@@ -19,7 +19,11 @@
                             <div class="flex justify-between items-start">
                                 <div>
                                     <h3 class="font-semibold text-white/90">{{ $submission->jobListing->title }}</h3>
-                                    <p class="text-neon-accent text-sm mt-1">{{ $submission->user->first_name }} {{ $submission->user->last_name }} wants to help</p>
+                                    <p class="text-neon-accent text-sm mt-1">
+                                    <a href="{{ route('people.show', $submission->user->id) }}" class="hover:text-neon-accent/80 transition-colors duration-200">
+                                        {{ $submission->user->first_name }} {{ $submission->user->last_name }}
+                                    </a> wants to help
+                                </p>
                                 </div>
                                 <div>
                                     @if($submission->status === 'claimed')
@@ -84,7 +88,11 @@
                             <div class="flex justify-between items-start">
                                 <div>
                                     <h3 class="font-semibold text-white/90">{{ $submission->jobListing->title }}</h3>
-                                    <p class="text-gray-400 text-sm mt-1">Posted by {{ $submission->jobListing->user->first_name }} {{ $submission->jobListing->user->last_name }}</p>
+                                    <p class="text-gray-400 text-sm mt-1">Posted by 
+                                    <a href="{{ route('people.show', $submission->jobListing->user->id) }}" class="hover:text-neon-accent transition-colors duration-200">
+                                        {{ $submission->jobListing->user->first_name }} {{ $submission->jobListing->user->last_name }}
+                                    </a>
+                                </p>
                                 </div>
                                 <div>
                                     @if($submission->status === 'claimed')

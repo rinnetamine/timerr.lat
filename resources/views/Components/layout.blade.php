@@ -347,6 +347,9 @@
                                     <x-nav-link href="/admin" :active="request()->is('admin*')" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">
                                         Admin
                                     </x-nav-link>
+                                    <x-nav-link href="/disputes" :active="request()->is('disputes*')" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">
+                                        Disputes
+                                    </x-nav-link>
                                 @endif
                                 <x-nav-link href="/profile" :active="request()->is('profile')" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">
                                     Profile
@@ -411,6 +414,7 @@
                         <a href="/submissions" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Submissions</a>
                         @if(auth()->user()->isAdmin())
                             <a href="/admin" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Admin</a>
+                            <a href="/disputes" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Disputes</a>
                         @endif
                         <a href="/profile" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Profile</a>
                         <form method="POST" action="/logout">
@@ -460,6 +464,196 @@
                 {{ $slot }}
             </div>
         </main>
+
+        <!-- Footer -->
+        <footer class="mt-auto border-t border-gray-800 bg-gray-900/80 backdrop-blur-md">
+            <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                    <!-- Platform Info -->
+                    <div class="col-span-1 md:col-span-2">
+                        <div class="flex items-center space-x-3 mb-4">
+                            <img class="h-8 w-8 dark-logo" src="{{ asset('clock.svg') }}" alt="Timerr logo">
+                            <img class="h-8 w-8 light-logo hidden" src="{{ asset('clock-light.svg') }}" alt="Timerr logo light">
+                            <h3 class="text-xl font-bold text-white">Timerr</h3>
+                        </div>
+                        <p class="text-gray-300 mb-4 max-w-md">
+                            A time-banking platform where community members exchange services using time credits. 
+                            Share your skills, help others, and build a stronger community together.
+                        </p>
+                        <div class="flex space-x-4">
+                            <a href="https://github.com/rinnetamine/timerr.lat" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-neon-accent transition-colors duration-200" aria-label="GitHub Repository">
+                                <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Quick Links -->
+                    <div>
+                        <h4 class="text-white font-semibold mb-4">Quick Links</h4>
+                        <ul class="space-y-2">
+                            <li><a href="/jobs" class="text-gray-300 hover:text-neon-accent transition-colors duration-200">Browse Jobs</a></li>
+                            <li><a href="/people" class="text-gray-300 hover:text-neon-accent transition-colors duration-200">Find People</a></li>
+                            <li><a href="/contact" class="text-gray-300 hover:text-neon-accent transition-colors duration-200">Contact Us</a></li>
+                            @guest
+                                <li><a href="/register" class="text-gray-300 hover:text-neon-accent transition-colors duration-200">Sign Up</a></li>
+                            @endguest
+                        </ul>
+                    </div>
+
+                    <!-- Resources -->
+                    <div>
+                        <h4 class="text-white font-semibold mb-4">Resources</h4>
+                        <ul class="space-y-2">
+                            <li><button onclick="openModal('howItWorks')" class="text-gray-300 hover:text-neon-accent transition-colors duration-200 text-left w-full">How It Works</button></li>
+                            <li><button onclick="openModal('faq')" class="text-gray-300 hover:text-neon-accent transition-colors duration-200 text-left w-full">FAQ</button></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Bottom Bar -->
+                <div class="mt-8 pt-8 border-t border-gray-800">
+                    <div class="flex flex-col md:flex-row justify-between items-center">
+                        <p class="text-gray-400 text-sm mb-4 md:mb-0">
+                            © {{ date('Y') }} Timerr. Building communities through time banking.
+                        </p>
+                        <div class="flex items-center space-x-6 text-sm text-gray-400">
+                            <span>Platform Stats:</span>
+                            <span class="text-neon-accent">{{ App\Models\User::count() }} Users</span>
+                            <span class="text-neon-accent">{{ App\Models\Job::count() }} Jobs</span>
+                            <span class="text-neon-accent">{{ App\Models\JobSubmission::where('status', 'approved')->count() }} Completed</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
     </div>
+
+    <!-- Modals -->
+    <div id="howItWorks" class="fixed inset-0 z-50 hidden">
+        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" onclick="closeModal('howItWorks')"></div>
+        <div class="fixed inset-0 flex items-center justify-center p-4">
+            <div class="bg-gray-900 border border-gray-700 rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+                <div class="sticky top-0 bg-gray-900 border-b border-gray-700 p-6 flex justify-between items-center">
+                    <h3 class="text-xl font-bold text-white">How Timerr Works</h3>
+                    <button onclick="closeModal('howItWorks')" class="text-gray-400 hover:text-white">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div class="flex items-start space-x-4">
+                        <div class="flex-shrink-0 w-8 h-8 bg-neon-accent text-black rounded-full flex items-center justify-center font-bold">1</div>
+                        <div>
+                            <h4 class="text-white font-semibold mb-2">Sign Up & Get Credits</h4>
+                            <p class="text-gray-300">Create your account and receive 10 free time credits to start. Everyone begins with the same amount to ensure fair exchange.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-4">
+                        <div class="flex-shrink-0 w-8 h-8 bg-neon-accent text-black rounded-full flex items-center justify-center font-bold">2</div>
+                        <div>
+                            <h4 class="text-white font-semibold mb-2">Browse or Create Jobs</h4>
+                            <p class="text-gray-300">Look for jobs that match your skills or post your own needs. Each job has a time credit value based on the work required.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-4">
+                        <div class="flex-shrink-0 w-8 h-8 bg-neon-accent text-black rounded-full flex items-center justify-center font-bold">3</div>
+                        <div>
+                            <h4 class="text-white font-semibold mb-2">Complete the Work</h4>
+                            <p class="text-gray-300">Claim a job, complete the work, and submit proof. The job poster will review your submission and approve it if satisfied.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-4">
+                        <div class="flex-shrink-0 w-8 h-8 bg-neon-accent text-black rounded-full flex items-center justify-center font-bold">4</div>
+                        <div>
+                            <h4 class="text-white font-semibold mb-2">Exchange Credits</h4>
+                            <p class="text-gray-300">Once approved, you receive the time credits. Use them to get help from others or save them for future needs.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-4">
+                        <div class="flex-shrink-0 w-8 h-8 bg-neon-accent text-black rounded-full flex items-center justify-center font-bold">5</div>
+                        <div>
+                            <h4 class="text-white font-semibold mb-2">Build Reputation</h4>
+                            <p class="text-gray-300">Leave reviews for completed jobs. Build trust in the community through positive ratings and successful exchanges.</p>
+                        </div>
+                    </div>
+                    <div class="mt-6 p-4 bg-neon-accent/10 border border-neon-accent/30 rounded-lg">
+                        <p class="text-neon-accent text-sm"><strong>Remember:</strong> 1 time credit = 1 hour of service. Everyone's time is valued equally!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="faq" class="fixed inset-0 z-50 hidden">
+        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" onclick="closeModal('faq')"></div>
+        <div class="fixed inset-0 flex items-center justify-center p-4">
+            <div class="bg-gray-900 border border-gray-700 rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+                <div class="sticky top-0 bg-gray-900 border-b border-gray-700 p-6 flex justify-between items-center">
+                    <h3 class="text-xl font-bold text-white">Frequently Asked Questions</h3>
+                    <button onclick="closeModal('faq')" class="text-gray-400 hover:text-white">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div class="border-b border-gray-700 pb-4">
+                        <h4 class="text-white font-semibold mb-2">What is time banking?</h4>
+                        <p class="text-gray-300">Time banking is a system where people exchange services using time as currency. 1 hour of your time equals 1 time credit, regardless of the service provided.</p>
+                    </div>
+                    <div class="border-b border-gray-700 pb-4">
+                        <h4 class="text-white font-semibold mb-2">How do I earn time credits?</h4>
+                        <p class="text-gray-300">You earn credits by completing jobs for other users. When someone posts a job and you complete it successfully, you receive the time credits offered for that job.</p>
+                    </div>
+                    <div class="border-b border-gray-700 pb-4">
+                        <h4 class="text-white font-semibold mb-2">What if someone doesn't complete the job?</h4>
+                        <p class="text-gray-300">If a job isn't completed satisfactorily, the job poster can decline the submission. The credits remain with the poster and they can re-list the job.</p>
+                    </div>
+                    <div class="border-b border-gray-700 pb-4">
+                        <h4 class="text-white font-semibold mb-2">Can I set my own rates?</h4>
+                        <p class="text-gray-300">Rates are based on time, not money. 1 time credit always equals 1 hour of work. However, you can set how many credits a job is worth based on estimated completion time.</p>
+                    </div>
+                    <div class="border-b border-gray-700 pb-4">
+                        <h4 class="text-white font-semibold mb-2">Is my personal information safe?</h4>
+                        <p class="text-gray-300">Yes. We use encryption for messages and only share necessary information. Your contact details are only shared with users you're directly working with.</p>
+                    </div>
+                    <div class="border-b border-gray-700 pb-4">
+                        <h4 class="text-white font-semibold mb-2">What happens if I run out of credits?</h4>
+                        <p class="text-gray-300">You can earn more credits by completing jobs for others. Everyone starts with 10 credits, so there are always opportunities to earn more.</p>
+                    </div>
+                    <div class="pb-4">
+                        <h4 class="text-white font-semibold mb-2">How do disputes work?</h4>
+                        <p class="text-gray-300">If there's a disagreement about job completion, either party can contact an admin for mediation. Admins review the evidence and make fair decisions.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                ['howItWorks', 'faq'].forEach(id => {
+                    if (!document.getElementById(id).classList.contains('hidden')) {
+                        closeModal(id);
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>

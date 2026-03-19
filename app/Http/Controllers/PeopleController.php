@@ -91,4 +91,84 @@ class PeopleController extends Controller
             'user' => $user
         ]);
     }
+
+    /**
+     * show admin user management page
+     */
+    public function manage(User $user)
+    {
+        if (!auth()->user()->isAdmin()) {
+            abort(403);
+        }
+
+        $user->loadCount(['jobs', 'completedJobs', 'reviewsReceived', 'transactions']);
+        $user->load(['transactions' => function($query) {
+            $query->latest()->limit(10);
+        }]);
+
+        return view('people.manage', [
+            'user' => $user
+        ]);
+    }
+
+    /**
+     * adjust user credits (admin only)
+     */
+    public function adjustCredits(Request $request, User $user)
+    {
+        if (!auth()->user()->isAdmin()) {
+            abort(403);
+        }
+
+        $request->validate([
+            'amount' => 'required|integer|min:-1000|max:1000',
+            'description' => 'required|string|max:255'
+        ]);
+
+        $user->adjustCredits($request->amount, $request->description);
+
+        return back()->with('success', "Credits adjusted successfully. New balance: {$user->time_credits}");
+    }
+
+    /**
+     * ban user (admin only)
+     */
+    public function ban(Request $request, User $user)
+    {
+        if (!auth()->user()->isAdmin()) {
+            abort(403);
+        }
+
+        if ($user->isAdmin()) {
+            return back()->with('error', 'Cannot ban an admin user.');
+        }
+
+        $request->validate([
+            'reason' => 'required|string|max:255'
+        ]);
+
+        // Ban the user
+        $user->ban($request->reason);
+
+        // Invalidate all sessions for the banned user
+        \Illuminate\Support\Facades\DB::table('sessions')
+            ->where('user_id', $user->id)
+            ->delete();
+
+        return back()->with('success', 'User has been banned and logged out immediately.');
+    }
+
+    /**
+     * unban user (admin only)
+     */
+    public function unban(User $user)
+    {
+        if (!auth()->user()->isAdmin()) {
+            abort(403);
+        }
+
+        $user->unban();
+
+        return back()->with('success', 'User has been unbanned.');
+    }
 }

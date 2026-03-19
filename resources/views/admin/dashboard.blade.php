@@ -42,78 +42,135 @@
             </div>
         </div>
 
-        <div class="flex justify-between items-center">
-            <h3 class="text-xl font-semibold text-white/90">Submissions Requiring Admin Review</h3>
-            <a href="/admin/contact" class="text-sm text-gray-400 hover:text-neon-accent">Contact Messages</a>
+        <!-- Site Activity & Performance -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-gray-800/40 backdrop-blur-sm p-6 rounded-lg border border-gray-700">
+                <h3 class="text-lg font-semibold text-white mb-4">Recent Activity</h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-400">New users (7 days)</span>
+                        <span class="text-white font-medium">{{ $newUsersWeek }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-400">Active disputes</span>
+                        <span class="text-yellow-200 font-medium">{{ \App\Models\JobSubmission::where('dispute_status', '!=', \App\Models\JobSubmission::DISPUTE_NONE)->count() }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-400">Pending reviews</span>
+                        <span class="text-blue-200 font-medium">{{ \App\Models\JobSubmission::where('status', \App\Models\JobSubmission::STATUS_ADMIN_REVIEW)->count() }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-400">Unread messages</span>
+                        <span class="text-green-200 font-medium">{{ \App\Models\Message::whereNull('read_at')->count() }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gray-800/40 backdrop-blur-sm p-6 rounded-lg border border-gray-700">
+                <h3 class="text-lg font-semibold text-white mb-4">Platform Health</h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-neon-accent">{{ number_format($totalJobs / max($totalUsers, 1), 1) }}</div>
+                        <div class="text-sm text-gray-400">Jobs per User</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-neon-accent">{{ number_format($totalSubmissions / max($totalJobs, 1), 1) }}</div>
+                        <div class="text-sm text-gray-400">Submissions per Job</div>
+                    </div>
+                </div>
+                <div class="mt-4 pt-4 border-t border-gray-600">
+                    <div class="text-sm text-gray-400">
+                        <div class="mb-2"><strong>Quick Stats:</strong></div>
+                        <div>• Total credits in system: {{ \App\Models\User::sum('time_credits') }}</div>
+                        @php
+    $earliestJobDate = \App\Models\Job::min('created_at');
+    $daysSinceFirstJob = $earliestJobDate ? now()->diffInDays(\Carbon\Carbon::parse($earliestJobDate)) + 1 : 1;
+    $avgSubmissionsPerDay = $totalSubmissions / max(1, $daysSinceFirstJob);
+    $completionRate = $totalSubmissions > 0 ? (\App\Models\JobSubmission::where('status', 'approved')->count() / $totalSubmissions) * 100 : 0;
+@endphp
+                        <div>• Average submissions per day: {{ number_format($avgSubmissionsPerDay, 1) }}</div>
+                        <div>• Completion rate: {{ number_format($completionRate, 1) }}%</div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        @if($adminReviewSubmissions->count() > 0)
+        @if($adminAttentionItems->count() > 0)
             <div class="space-y-4">
-                @foreach($adminReviewSubmissions as $submission)
+                @foreach($adminAttentionItems as $item)
                     <div class="bg-gray-800/40 backdrop-blur-sm p-6 rounded-lg border border-gray-700">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h4 class="text-lg font-medium text-white/90">{{ $submission->jobListing->title }}</h4>
-                                <div class="flex space-x-2 mt-1">
-                                    <p class="text-gray-400 text-sm">Posted by: <span class="text-gray-300">{{ $submission->jobListing->user->first_name }} {{ $submission->jobListing->user->last_name }}</span></p>
-                                    <p class="text-gray-400 text-sm">Applicant: <span class="text-gray-300">{{ $submission->user->first_name }} {{ $submission->user->last_name }}</span></p>
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="flex-1">
+                                <h4 class="text-lg font-medium text-white/90 mb-2">
+                                    {{ $item->jobListing->title }}
+                                </h4>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                                    <div>
+                                        <span class="text-gray-400">Job Poster:</span>
+                                        <a href="{{ route('people.show', $item->jobListing->user->id) }}" class="text-white ml-2 hover:text-neon-accent transition-colors duration-200">
+                                            {{ $item->jobListing->user->first_name }} {{ $item->jobListing->user->last_name }}
+                                        </a>
+                                    </div>
+                                    <div>
+                                        <span class="text-gray-400">Worker:</span>
+                                        <a href="{{ route('people.show', $item->user->id) }}" class="text-white ml-2 hover:text-neon-accent transition-colors duration-200">
+                                            {{ $item->user->first_name }} {{ $item->user->last_name }}
+                                        </a>
+                                    </div>
+                                    <div>
+                                        <span class="text-gray-400">Type:</span>
+                                        @if($item->status === \App\Models\JobSubmission::STATUS_ADMIN_REVIEW)
+                                            <span class="text-white ml-2">Admin Review (Decline)</span>
+                                        @elseif($item->dispute_status === \App\Models\JobSubmission::DISPUTE_REQUESTED)
+                                            <span class="text-white ml-2">Manual Dispute</span>
+                                        @elseif($item->dispute_status === \App\Models\JobSubmission::DISPUTE_UNDER_REVIEW)
+                                            <span class="text-white ml-2">Under Review</span>
+                                        @elseif($item->dispute_status === \App\Models\JobSubmission::DISPUTE_RESOLVED)
+                                            <span class="text-white ml-2">Resolved Dispute</span>
+                                        @endif
+                                    </div>
                                 </div>
-                                <p class="text-gray-400 text-sm mt-1">Credits: <span class="text-neon-accent">{{ $submission->jobListing->credits }}</span></p>
                             </div>
-                            <span class="bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full text-xs font-semibold">Admin Review</span>
+                            <div class="ml-4">
+                                <span class="inline-flex px-3 py-1 text-xs font-medium rounded-full
+                                    @if($item->status === \App\Models\JobSubmission::STATUS_ADMIN_REVIEW)
+                                        bg-purple-500/20 text-purple-200 border border-purple-500
+                                    @elseif($item->dispute_status === \App\Models\JobSubmission::DISPUTE_REQUESTED)
+                                        bg-yellow-500/20 text-yellow-200 border border-yellow-500
+                                    @elseif($item->dispute_status === \App\Models\JobSubmission::DISPUTE_UNDER_REVIEW)
+                                        bg-blue-500/20 text-blue-200 border border-blue-500
+                                    @elseif($item->dispute_status === \App\Models\JobSubmission::DISPUTE_RESOLVED)
+                                        bg-green-500/20 text-green-200 border border-green-500
+                                    @endif
+                                ">
+                                    @if($item->status === \App\Models\JobSubmission::STATUS_ADMIN_REVIEW)
+                                        Admin Review
+                                    @else
+                                        {{ ucfirst(str_replace('_', ' ', $item->dispute_status)) }}
+                                    @endif
+                                </span>
+                            </div>
                         </div>
 
-                        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <h5 class="text-sm font-semibold text-white/90 mb-2">Application Message:</h5>
-                                <div class="bg-gray-900/60 p-3 rounded text-gray-300 text-sm">
-                                    {{ $submission->message }}
-                                </div>
-                            </div>
-                            <div>
-                                <h5 class="text-sm font-semibold text-white/90 mb-2">Decline Reason:</h5>
-                                <div class="bg-gray-900/60 p-3 rounded text-gray-300 text-sm">
-                                    {{ $submission->admin_notes }}
-                                </div>
-                            </div>
+                        <div class="mb-4">
+                            @if($item->status === \App\Models\JobSubmission::STATUS_ADMIN_REVIEW)
+                                <p class="text-gray-300 text-sm mb-2"><strong>Admin Review Details:</strong></p>
+                                <p class="text-purple-200 bg-purple-900/20 p-3 rounded border border-purple-600">
+                                    {{ $item->admin_notes }}
+                                </p>
+                            @else
+                                <p class="text-gray-300 text-sm mb-2"><strong>Dispute Reason:</strong></p>
+                                <p class="text-gray-200 bg-gray-800/40 p-3 rounded border border-gray-600">
+                                    {{ $item->dispute_reason }}
+                                </p>
+                            @endif
                         </div>
 
-                        @if($submission->files->count() > 0)
-                            <div class="mt-4">
-                                <h5 class="text-sm font-semibold text-white/90 mb-2">Attached Files:</h5>
-                                <div class="space-y-2">
-                                    @foreach($submission->files as $file)
-                                        <div class="flex items-center justify-between bg-gray-900/60 p-3 rounded">
-                                            <div class="flex items-center">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                                </svg>
-                                                <span class="text-gray-300 text-sm">{{ $file->file_name }}</span>
-                                            </div>
-                                            <a href="{{ route('file.download', $file->id) }}" class="text-neon-accent hover:text-neon-accent/80 text-sm font-medium">
-                                                Download
-                                            </a>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                        @endif
-
-                        <div class="mt-6 flex space-x-3">
-                            <!-- admin action buttons for submission approval/rejection -->
-                            <form method="POST" action="/admin/submissions/{{ $submission->id }}/approve">
-                                @csrf
-                                <button type="submit" class="bg-green-700 hover:bg-green-600 text-white px-4 py-2 rounded text-sm font-medium transition-colors duration-200">
-                                    Approve & Transfer Credits to Applicant
-                                </button>
-                            </form>
-
-                            <form method="POST" action="/admin/submissions/{{ $submission->id }}/reject">
-                                @csrf
-                                <button type="submit" class="bg-red-700 hover:bg-red-600 text-white px-4 py-2 rounded text-sm font-medium transition-colors duration-200">
-                                    Reject & Return Credits to Poster
-                                </button>
-                            </form>
+                        <div class="flex justify-end space-x-3">
+                            <a href="{{ route('disputes.show', $item) }}" 
+                               class="px-4 py-2 bg-neon-accent text-black font-medium rounded hover:bg-neon-accent/80 transition-colors duration-200">
+                                Review & Resolve
+                            </a>
                         </div>
                     </div>
                 @endforeach

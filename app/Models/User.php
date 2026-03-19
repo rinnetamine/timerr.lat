@@ -22,13 +22,17 @@ class User extends Authenticatable
         'email',
         'password',
         'time_credits',
-        'role'
+        'role',
+        'is_banned',
+        'ban_reason',
+        'banned_at'
     ];
 
     // default values for new users
     protected $attributes = [
         'time_credits' => 10,
-        'role' => 'user'
+        'role' => 'user',
+        'is_banned' => false
     ];
 
     // guarded attributes (empty array means all attributes are fillable)
@@ -46,6 +50,8 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_banned' => 'boolean',
+            'banned_at' => 'datetime',
         ];
     }
 
@@ -101,5 +107,47 @@ class User extends Authenticatable
     public function completedJobsCount()
     {
         return $this->completedJobs()->count();
+    }
+
+    // check if user is banned
+    public function isBanned()
+    {
+        return $this->is_banned;
+    }
+
+    // ban the user
+    public function ban($reason = null)
+    {
+        $this->update([
+            'is_banned' => true,
+            'ban_reason' => $reason,
+            'banned_at' => now()
+        ]);
+    }
+
+    // unban the user
+    public function unban()
+    {
+        $this->update([
+            'is_banned' => false,
+            'ban_reason' => null,
+            'banned_at' => null
+        ]);
+    }
+
+    // adjust user credits
+    public function adjustCredits($amount, $description = null)
+    {
+        $oldCredits = $this->time_credits;
+        $this->increment('time_credits', $amount);
+        
+        // Create transaction record
+        \App\Models\Transaction::create([
+            'user_id' => $this->id,
+            'amount' => $amount,
+            'description' => $description ?? "Credit adjustment by admin",
+        ]);
+        
+        return $this->fresh();
     }
 }

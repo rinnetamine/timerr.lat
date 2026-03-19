@@ -139,25 +139,25 @@ class AdminController extends Controller
         // core admin stats
         $totalUsers = User::count();
         $newUsersWeek = User::where('created_at', '>=', now()->subDays(7))->count();
-
         $totalJobs = Job::count();
         $recentJobs = Job::latest()->take(5)->with('user')->get();
-
         $totalSubmissions = JobSubmission::count();
         $pendingAdmin = JobSubmission::where('status', JobSubmission::STATUS_ADMIN_REVIEW)->count();
-
         $recentSignups = User::latest()->take(5)->get();
         $recentTransactions = Transaction::latest()->take(5)->get();
-
         $contactMessagesCount = ContactMessage::count();
 
-        $adminReviewSubmissions = JobSubmission::where('status', JobSubmission::STATUS_ADMIN_REVIEW)
-            ->with(['jobListing', 'user', 'jobListing.user', 'files'])
-            ->latest()
+        // get all items needing admin attention (disputes + admin reviews)
+        $adminAttentionItems = JobSubmission::with(['user', 'jobListing', 'jobListing.user', 'disputeInitiator'])
+            ->where(function($query) {
+                $query->where('dispute_status', '!=', JobSubmission::DISPUTE_NONE)
+                      ->orWhere('status', JobSubmission::STATUS_ADMIN_REVIEW);
+            })
+            ->orderBy('created_at', 'desc')
             ->get();
 
         return view('admin.dashboard', compact(
-            'adminReviewSubmissions',
+            'adminAttentionItems',
             'totalUsers',
             'newUsersWeek',
             'totalJobs',

@@ -18,6 +18,9 @@ return new class extends Migration
             $table->string('password');
             $table->string('role')->default('user');
             $table->integer('time_credits')->default(0);
+            $table->boolean('is_banned')->default(false);
+            $table->text('ban_reason')->nullable();
+            $table->timestamp('banned_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

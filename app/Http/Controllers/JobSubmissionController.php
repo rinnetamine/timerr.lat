@@ -314,13 +314,18 @@ class JobSubmissionController extends Controller
         }
 
         try {
-            // send to admin review instead of direct decline
+            // send to admin review instead of direct decline - create automatic dispute
             $submission->update([
                 'status' => JobSubmission::STATUS_ADMIN_REVIEW,
-                'admin_notes' => request('admin_notes') ?? 'Declined by job owner, pending admin review.'
+                'admin_notes' => request('admin_notes') ?? 'Declined by job owner, pending admin review.',
+                'dispute_status' => JobSubmission::DISPUTE_REQUESTED,
+                'dispute_reason' => request('admin_notes') ?? 'Job owner declined this submission. Reason: ' . (request('admin_notes') ?? 'No reason provided'),
+                'dispute_initiated_by' => auth()->id(),
+                'is_frozen' => true,
+                'freeze_reason' => 'Automatically frozen due to job owner decline'
             ]);
             
-            return redirect('/submissions')->with('success', 'Application has been declined and sent for admin review. An administrator will decide if the credits should be returned to you or awarded to the applicant.');
+            return redirect('/submissions')->with('success', 'Application has been declined and a dispute has been automatically created. An administrator will review this case.');
         } catch (\Exception $e) {
             Log::error('Job submission decline failed: ' . $e->getMessage());
             

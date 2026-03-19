@@ -7,7 +7,11 @@
         <div class="bg-gray-800/40 backdrop-blur-sm p-8 rounded-lg border border-gray-700">
             <div class="flex items-center justify-between mb-4">
                 <div>
-                    <div class="text-neon-accent text-sm font-medium">{{ $job->user->first_name }} {{ $job->user->last_name }} needs help</div>
+                    <div class="text-neon-accent text-sm font-medium">
+                    <a href="{{ route('people.show', $job->user->id) }}" class="hover:text-neon-accent/80 transition-colors duration-200">
+                        {{ $job->user->first_name }} {{ $job->user->last_name }}
+                    </a> needs help
+                </div>
                     <h2 class="font-bold text-xl text-white/90 mt-1">{{ $job->title }}</h2>
                 </div>
                 <div class="bg-neon-accent/20 text-neon-accent px-4 py-2 rounded-full text-sm font-semibold">
