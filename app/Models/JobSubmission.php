@@ -91,51 +91,18 @@ class JobSubmission extends Model
     // check if submission can be disputed
     public function canBeDisputed()
     {
-        // Always allow if already frozen with dispute
+        // always decline if already frozen with dispute
         if ($this->is_frozen && $this->dispute_status !== self::DISPUTE_NONE) {
             return false;
         }
 
-        // Check if submission is in appropriate status
-        if (!in_array($this->status, [self::STATUS_PENDING, self::STATUS_APPROVED, self::STATUS_DECLINED])) {
-            return false;
-        }
-
-        // If already has dispute, cannot dispute again
+        // if already has dispute, cannot dispute again
         if ($this->dispute_status !== self::DISPUTE_NONE) {
             return false;
         }
 
-        // Timeout rules for automatic dispute eligibility
-        $now = now();
-        $hoursSinceUpdate = $this->updated_at->diffInHours($now);
-
-        // Rule 1: If claimed for more than 48 hours without action, allow dispute
-        if ($this->status === self::STATUS_CLAIMED && $hoursSinceUpdate > 48) {
-            return true;
-        }
-
-        // Rule 2: If pending for more than 72 hours without approval, allow dispute
-        if ($this->status === self::STATUS_PENDING && $hoursSinceUpdate > 72) {
-            return true;
-        }
-
-        // Rule 3: If approved for more than 24 hours without review, allow dispute
-        if ($this->status === self::STATUS_APPROVED && $hoursSinceUpdate > 24 && !$this->review) {
-            return true;
-        }
-
-        // Rule 4: If declined, allow dispute immediately (for transparency)
-        if ($this->status === self::STATUS_DECLINED) {
-            return true;
-        }
-
-        // Rule 5: If not frozen yet, allow dispute by involved parties
-        if (!$this->is_frozen) {
-            return true;
-        }
-
-        return false;
+        // always allow disputes for involved parties (no timeout restrictions)
+        return true;
     }
 
     // check if submission is frozen
@@ -174,7 +141,7 @@ class JobSubmission extends Model
             $remainingHours = max(0, 48 - $hoursSinceUpdate);
             return [
                 'type' => 'claim_timeout',
-                'message' => "Worker has been inactive for {$hoursSinceUpdate} hours. Dispute will be available in {$remainingHours} hours if no action is taken.",
+                'message' => "Worker has been inactive for " . round($hoursSinceUpdate) . " hours.",
                 'hours_remaining' => $remainingHours,
                 'severity' => $remainingHours <= 12 ? 'high' : ($remainingHours <= 24 ? 'medium' : 'low')
             ];
