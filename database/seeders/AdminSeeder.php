@@ -24,5 +24,19 @@ class AdminSeeder extends Seeder
                 'email_verified_at' => now(),
             ]
         );
+
+        // create or update static user account
+        User::updateOrCreate(
+            ['email' => 'user@timerr.lat'],
+            [
+                'first_name' => 'Test',
+                'last_name' => 'User',
+                'email' => 'user@timerr.lat',
+                'password' => Hash::make('user'),
+                'role' => 'user',
+                'time_credits' => 100,
+                'email_verified_at' => now(),
+            ]
+        );
     }
 }
