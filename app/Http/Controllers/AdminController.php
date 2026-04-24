@@ -18,7 +18,7 @@ class AdminController extends Controller
     private function checkAdmin()
     {
         if (!auth()->check() || !auth()->user()->isAdmin()) {
-            abort(403, 'Unauthorized action.');
+            abort(403, 'Nepietiekamas piekļuves tiesības.');
         }
     }
     
@@ -30,7 +30,7 @@ class AdminController extends Controller
         // validate submission status
         if ($submission->status !== JobSubmission::STATUS_ADMIN_REVIEW) {
             return back()->withErrors([
-                'error' => 'This submission is not in admin review status.'
+                'error' => 'Šis iesniegums pašlaik nav administratora pārskatīšanā.'
             ]);
         }
         
@@ -51,7 +51,7 @@ class AdminController extends Controller
             Transaction::create([
                 'user_id' => $applicant->id,
                 'amount' => $job->time_credits,
-                'description' => "Admin approved: Credits for help with '{$job->title}'",
+                'description' => "Administrators apstiprināja palīdzību darbā: {$job->title}",
                 'type' => 'credit'
             ]);
             
@@ -66,14 +66,14 @@ class AdminController extends Controller
             // commit transaction
             DB::commit();
             
-            return redirect('/profile')->with('success', 'Submission approved and credits transferred to applicant.');
+            return redirect('/profile')->with('success', 'Pieteikums apstiprinu0101ts un kredu012bti pu0101rnesti pieteiku0113jam.');
             
         } catch (\Exception $e) {
             // rollback transaction on error
             DB::rollBack();
             Log::error('Admin approval failed: ' . $e->getMessage());
             return back()->withErrors([
-                'error' => 'Failed to approve submission: ' . $e->getMessage()
+                'error' => 'Neizdevās apstiprināt iesniegumu: ' . $e->getMessage()
             ]);
         }
     }
@@ -87,7 +87,7 @@ class AdminController extends Controller
         // validate submission status
         if ($submission->status !== JobSubmission::STATUS_ADMIN_REVIEW) {
             return back()->withErrors([
-                'error' => 'This submission is not in admin review status.'
+                'error' => 'Šis iesniegums pašlaik nav administratora pārskatīšanā.'
             ]);
         }
         
@@ -97,12 +97,12 @@ class AdminController extends Controller
             $submission->admin_approved = false;
             $submission->save();
             
-            return redirect('/profile')->with('success', 'submission rejected. the job remains available for others to claim.');
+            return redirect('/profile')->with('success', 'Iesniegums noraidīts. Darbs paliek pieejams citiem pieteicējiem.');
             
         } catch (\Exception $e) {
             Log::error('admin rejection failed: ' . $e->getMessage());
             return back()->withErrors([
-                'error' => 'failed to reject submission: ' . $e->getMessage()
+                'error' => 'Neizdevās noraidīt iesniegumu: ' . $e->getMessage()
             ]);
         }
     }
@@ -124,10 +124,10 @@ class AdminController extends Controller
 
         try {
             $message->delete();
-            return back()->with('success', 'Message deleted.');
+            return back()->with('success', 'Ziu0146ojums dzu0113sts.');
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Failed to delete contact message: ' . $e->getMessage());
-            return back()->withErrors(['error' => 'Failed to delete message.']);
+            return back()->withErrors(['error' => 'Neizdevās dzēst ziņojumu.']);
         }
     }
 

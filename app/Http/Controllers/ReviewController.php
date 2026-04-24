@@ -20,12 +20,12 @@ class ReviewController extends Controller
 
         // only allow reviews for completed/approved submissions
         if ($submission->status !== JobSubmission::STATUS_APPROVED) {
-            return back()->withErrors(['submission' => 'Cannot review until the job is marked completed/approved.']);
+            return back()->withErrors(['submission' => 'Atsauksmi var atstāt tikai pēc tam, kad darbs ir apstiprināts.']);
         }
 
         // prevent duplicate reviews
         if ($submission->review) {
-            return back()->withErrors(['review' => 'A review has already been left for this submission.']);
+            return back()->withErrors(['review' => 'Šim iesniegumam atsauksme jau ir atstāta.']);
         }
 
         $data = $request->validate([
@@ -41,6 +41,6 @@ class ReviewController extends Controller
             'comment' => $data['comment'] ?? null,
         ]);
 
-        return redirect()->back()->with('success', 'Review submitted successfully.');
+        return redirect()->back()->with('success', 'Atsauksme iesniegta veiksmīgi.');
     }
 }

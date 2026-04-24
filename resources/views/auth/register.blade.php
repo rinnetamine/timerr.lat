@@ -1,6 +1,6 @@
 <x-layout>
     <x-slot:heading>
-        Register
+        Reģistrēties
     </x-slot:heading>
 
     <div class="max-w-2xl mx-auto">
@@ -10,10 +10,10 @@
 
                 <div class="space-y-12">
                     <div class="border-b border-gray-700 pb-12">
-                        <h2 class="text-xl font-semibold leading-7 text-white/90">Create Your Account</h2>
+                        <h2 class="text-xl font-semibold leading-7 text-white/90">Izveido savu kontu</h2>
                         <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
                             <x-form-field>
-                                <x-form-label for="first_name">First Name</x-form-label>
+                                <x-form-label for="first_name">Vārds</x-form-label>
 
                                 <div class="mt-2">
                                     <x-form-input name="first_name" id="first_name" required />
@@ -22,7 +22,7 @@
                             </x-form-field>
 
                             <x-form-field>
-                                <x-form-label for="last_name">Last Name</x-form-label>
+                                <x-form-label for="last_name">Uzvārds</x-form-label>
 
                                 <div class="mt-2">
                                     <x-form-input name="last_name" id="last_name" required />
@@ -31,7 +31,7 @@
                             </x-form-field>
 
                             <x-form-field>
-                                <x-form-label for="email">Email</x-form-label>
+                                <x-form-label for="email">E-pasts</x-form-label>
 
                                 <div class="mt-2">
                                     <x-form-input name="email" id="email" type="email" required />
@@ -40,7 +40,7 @@
                             </x-form-field>
 
                             <x-form-field>
-                                <x-form-label for="password">Password</x-form-label>
+                                <x-form-label for="password">Parole</x-form-label>
 
                                 <div class="mt-2">
                                     <x-form-input name="password" id="password" type="password" required />
@@ -48,17 +48,17 @@
                                 </div>
                                 
                                 <div class="mt-2 text-sm text-gray-400">
-                                    Password must contain at least:
+                                    Parolei jāsatur vismaz:
                                     <ul class="list-disc list-inside mt-1 space-y-1">
-                                        <li>6 characters minimum</li>
-                                        <li>1 number (0-9)</li>
-                                        <li>1 special character (!@#$%^&*()_+=-[]{}:;"'<>,.?/)</li>
+                                        <li>6 rakstzīmes minimums</li>
+                                        <li>1 cipars (0-9)</li>
+                                        <li>1 speciālā rakstzīme (!@#$%^&*()_+=-[]{}:;"'<>,.?/)</li>
                                     </ul>
                                 </div>
                             </x-form-field>
 
                             <x-form-field>
-                                <x-form-label for="password_confirmation">Confirm Password</x-form-label>
+                                <x-form-label for="password_confirmation">Apstiprināt paroli</x-form-label>
 
                                 <div class="mt-2">
                                     <x-form-input name="password_confirmation" id="password_confirmation" type="password" required />
@@ -70,8 +70,8 @@
                 </div>
 
                 <div class="mt-6 flex items-center justify-end gap-x-6">
-                    <a href="/" class="text-gray-300 hover:text-neon-accent transition-colors duration-200">Cancel</a>
-                    <x-form-button>Register</x-form-button>
+                    <a href="/" class="text-gray-300 hover:text-neon-accent transition-colors duration-200">Atcelt</a>
+                    <x-form-button>Reģistrēties</x-form-button>
                 </div>
             </form>
         </div>

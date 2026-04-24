@@ -38,6 +38,6 @@ class ContactController extends Controller
         $contactMessage->save();
 
         // redirect back with success message
-        return redirect()->back()->with('success', 'Your message has been sent successfully!');
+        return redirect()->back()->with('success', 'Jūsu ziņojums ir nosūtīts veiksmīgi!');
     }
 }

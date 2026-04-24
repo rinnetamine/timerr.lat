@@ -16,7 +16,7 @@ class JobSubmissionFactory extends Factory
         return [
             'job_listing_id' => Job::factory(),
             'user_id' => User::factory(),
-            'message' => fake()->paragraph(3),
+            'message' => fake('lv_LV')->paragraph(3),
             'status' => fake()->randomElement([
                 JobSubmission::STATUS_CLAIMED,
                 JobSubmission::STATUS_PENDING,
@@ -24,7 +24,7 @@ class JobSubmissionFactory extends Factory
                 JobSubmission::STATUS_DECLINED,
                 JobSubmission::STATUS_ADMIN_REVIEW
             ]),
-            'admin_notes' => fake()->optional(0.3)->paragraph(2),
+            'admin_notes' => fake('lv_LV')->optional(0.3)->paragraph(2),
             'admin_approved' => fake()->boolean(70), // 70% chance of being approved
         ];
     }

@@ -26,7 +26,7 @@ class SessionController extends Controller
         // attempt to authenticate user
         if (! Auth::attempt($attributes)) {
             throw ValidationException::withMessages([
-                'email' => 'Sorry, those credentials do not match.'
+                'email' => 'Norādītie pieslēgšanās dati nav pareizi.'
             ]);
         }
 
@@ -36,7 +36,7 @@ class SessionController extends Controller
             Auth::logout();
             
             throw ValidationException::withMessages([
-                'email' => 'Your account has been banned. Contact administrator for more information.'
+                'email' => 'Jūsu konts ir bloķēts. Sazinieties ar administratoru, lai saņemtu vairāk informācijas.'
             ]);
         }
 

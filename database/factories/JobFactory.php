@@ -28,41 +28,41 @@ class JobFactory extends Factory
         // choose a group (top-level) for generating category-specific titles/descriptions
         $groupKey = explode('.', $category)[0];
 
-        // category-aware title pools
+        // category-aware title pools in Latvian
         $pools = [
             'creative' => [
-                'Design a modern logo for my startup',
-                'Create social media graphics for product launch',
-                'Edit a short promotional video',
-                'Write landing page copy and headlines',
+                'Izveidot modernu logotipu manam uzņēmumam',
+                'Izveidot sociālo mediju grafiku produktu palaišanai',
+                'Rediģēt īsu reklāmas video',
+                'Uzrakstīt satura tekstu un virsrakstus mājaslapai',
             ],
             'technology' => [
-                'Build a small Laravel API endpoint',
-                'Fix a bug in a React component',
-                'Setup CI/CD pipeline for repository',
-                'Integrate third-party OAuth provider',
+                'Izveidot mazu Laravel API galapunktu',
+                'Salabot kļūdu React komponentā',
+                'Iestatīt CI/CD konveijeru repozitorijam',
+                'Integrēt trešās puses OAuth nodrošinātāju',
             ],
             'education' => [
-                'Math tutoring: calculus session',
-                'English conversation practice',
-                'Career coaching: resume review',
-                'Design mentoring: portfolio feedback',
+                'Matemātikas privātstundas: kalkulu sesija',
+                'Angļu valodas konversāciju prakse',
+                'Karjeras konsultācijas: CV pārskatīšana',
+                'Dizaina mentorēšana: portfolio atsauksmes',
             ],
             'professional' => [
-                'Prepare bookkeeping for last quarter',
-                'Review a basic contract',
-                'Business strategy session (1 hour)',
-                'Recruiting: shortlist candidates',
+                'Sagatavot grāmatvedību par pēdējo ceturksni',
+                'Pārskatīt pamata līgumu',
+                'Biznesa stratēģijas sesija (1 stunda)',
+                'Darbinieku atlase: kandidātu saraksta izveide',
             ],
             'marketing' => [
-                'SEO audit of a small website',
-                'Run Facebook ad campaign setup',
-                'Create weekly social media calendar',
-                'Email sequence for onboarding',
+                'SEO audits mazai mājaslapai',
+                'Facebook reklāmas kampaņas iestatīšana',
+                'Izveidot iknedēļu sociālo mediju kalendāru',
+                'E-pasta sērija jauniem lietotājiem',
             ],
             'other' => [
-                'Quick research and data entry task',
-                'General virtual assistant: 1 hour',
+                'Ātra pētniecība un datu ievades uzdevums',
+                'Vispārīgais virtuālais asistents: 1 stunda',
             ],
         ];
 
@@ -70,8 +70,8 @@ class JobFactory extends Factory
     $titlePool = $pools[$groupKey] ?? [fake()->sentence(6)];
         $title = fake()->randomElement($titlePool);
 
-        // build a slightly longer description using faker and a category hint
-        $descIntro = "Category: " . ($categories[$groupKey]['label'] ?? ucfirst($groupKey)) . ".\n";
+        // build a slightly longer description using faker and a category hint in Latvian
+        $descIntro = "Kategorija: " . ($categories[$groupKey]['label'] ?? ucfirst($groupKey)) . ".\n";
         $descBody = fake()->paragraphs(2, true);
         $description = $descIntro . "\n" . $descBody;
 
@@ -110,45 +110,45 @@ class JobFactory extends Factory
 
             $pools = [
                 'creative' => [
-                    'Design a modern logo for my startup',
-                    'Create social media graphics for product launch',
-                    'Edit a short promotional video',
-                    'Write landing page copy and headlines',
+                    'Izveidot modernu logotipu manam uzņēmumam',
+                    'Izveidot sociālo mediju grafiku produktu palaišanai',
+                    'Rediģēt īsu reklāmas video',
+                    'Uzrakstīt satura tekstu un virsrakstus mājaslapai',
                 ],
                 'technology' => [
-                    'Build a small Laravel API endpoint',
-                    'Fix a bug in a React component',
-                    'Setup CI/CD pipeline for repository',
-                    'Integrate third-party OAuth provider',
+                    'Izveidot mazu Laravel API galapunktu',
+                    'Salabot kļūdu React komponentā',
+                    'Iestatīt CI/CD konveijeru repozitorijam',
+                    'Integrēt trešās puses OAuth nodrošinātāju',
                 ],
                 'education' => [
-                    'Math tutoring: calculus session',
-                    'English conversation practice',
-                    'Career coaching: resume review',
-                    'Design mentoring: portfolio feedback',
+                    'Matemātikas privātstundas: kalkulu sesija',
+                    'Angļu valodas konversāciju prakse',
+                    'Karjeras konsultācijas: CV pārskatīšana',
+                    'Dizaina mentorēšana: portfolio atsauksmes',
                 ],
                 'professional' => [
-                    'Prepare bookkeeping for last quarter',
-                    'Review a basic contract',
-                    'Business strategy session (1 hour)',
-                    'Recruiting: shortlist candidates',
+                    'Sagatavot grāmatvedību par pēdējo ceturksni',
+                    'Pārskatīt pamata līgumu',
+                    'Biznesa stratēģijas sesija (1 stunda)',
+                    'Darbinieku atlase: kandidātu saraksta izveide',
                 ],
                 'marketing' => [
-                    'SEO audit of a small website',
-                    'Run Facebook ad campaign setup',
-                    'Create weekly social media calendar',
-                    'Email sequence for onboarding',
+                    'SEO audits mazai mājaslapai',
+                    'Facebook reklāmas kampaņas iestatīšana',
+                    'Izveidot iknedēļu sociālo mediju kalendāru',
+                    'E-pasta sērija jauniem lietotājiem',
                 ],
                 'other' => [
-                    'Quick research and data entry task',
-                    'General virtual assistant: 1 hour',
+                    'Ātra pētniecība un datu ievades uzdevums',
+                    'Vispārīgais virtuālais asistents: 1 stunda',
                 ],
             ];
 
             $titlePool = $pools[$groupKey] ?? [fake()->sentence(6)];
             $title = fake()->randomElement($titlePool);
 
-            $descIntro = "Category: " . ($categories[$groupKey]['label'] ?? ucfirst($groupKey)) . ".\n";
+            $descIntro = "Kategorija: " . ($categories[$groupKey]['label'] ?? ucfirst($groupKey)) . ".\n";
             $descBody = fake()->paragraphs(2, true);
             $description = $descIntro . "\n" . $descBody;
 

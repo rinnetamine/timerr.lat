@@ -1,6 +1,6 @@
 <x-layout>
     <x-slot:heading>
-        Application Details
+        Pieteikuma detaļas
     </x-slot:heading>
 
     <div class="max-w-3xl mx-auto">
@@ -9,17 +9,17 @@
             <div class="mb-6">
                 <h2 class="text-xl font-semibold text-white/90">{{ $submission->jobListing->title }}</h2>
                 <p class="text-gray-400 text-sm mt-1">
-                    Help request by 
-                    <a href="{{ route('people.show', $submission->jobListing->user->id) }}" class="hover:text-neon-accent transition-colors duration-200">
+                    Palīdzības pieprasījumu no 
+                    <a href="{{ route('messages.conversation', $submission->jobListing->user->id) }}" class="hover:text-neon-accent transition-colors duration-200">
                         {{ $submission->jobListing->user->first_name }} {{ $submission->jobListing->user->last_name }}
                     </a>
                 </p>
                 <div class="mt-2 flex items-center">
                     <span class="bg-neon-accent/20 text-neon-accent px-3 py-1 rounded-full text-xs font-semibold">
-                        {{ $submission->jobListing->time_credits }} time credits
+                        {{ $submission->jobListing->time_credits }} laika kredīti
                     </span>
                     <span class="ml-3 text-gray-400 text-sm capitalize">
-                        Category: {{ $submission->jobListing->category }}
+                        Kategorija: {{ $submission->jobListing->category }}
                     </span>
                 </div>
             </div>
@@ -27,75 +27,26 @@
             <!-- application Status -->
             <div class="border-t border-gray-700 pt-4 mb-6">
                 <div class="flex items-center">
-                    <span class="text-gray-400 text-sm">Status: </span>
+                    <span class="text-gray-400 text-sm">Statuss: </span>
                     @if($submission->status === 'claimed')
-                        <span class="ml-2 bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-xs font-semibold">Claimed</span>
+                        <span class="ml-2 bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-xs font-semibold">Saņēmts</span>
                     @elseif($submission->status === 'pending')
-                        <span class="ml-2 bg-yellow-500/20 text-yellow-300 px-3 py-1 rounded-full text-xs font-semibold">Pending</span>
+                        <span class="ml-2 bg-yellow-500/20 text-yellow-300 px-3 py-1 rounded-full text-xs font-semibold">Gaida</span>
                     @elseif($submission->status === 'approved')
-                        <span class="ml-2 bg-green-500/20 text-green-300 px-3 py-1 rounded-full text-xs font-semibold">Approved</span>
+                        <span class="ml-2 bg-green-500/20 text-green-300 px-3 py-1 rounded-full text-xs font-semibold">Apstiprināts</span>
                     @elseif($submission->status === 'declined')
-                        <span class="ml-2 bg-red-500/20 text-red-300 px-3 py-1 rounded-full text-xs font-semibold">Declined</span>
+                        <span class="ml-2 bg-red-500/20 text-red-300 px-3 py-1 rounded-full text-xs font-semibold">Noraidīts</span>
                     @elseif($submission->status === 'admin_review')
-                        <span class="ml-2 bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full text-xs font-semibold">Admin Review</span>
+                        <span class="ml-2 bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full text-xs font-semibold">Admin pārskatīšana</span>
                     @endif
                 </div>
-
-                <!-- Timeout Warning -->
-                @php
-                    $timeoutWarning = $submission->getTimeoutWarning();
-                @endphp
-                @if($timeoutWarning)
-                    <div class="mt-3 p-3 rounded-md border
-                        @if($timeoutWarning['severity'] === 'high')
-                            bg-red-500/10 border-red-500
-                        @elseif($timeoutWarning['severity'] === 'medium')
-                            bg-yellow-500/10 border-yellow-500
-                        @else
-                            bg-blue-500/10 border-blue-500
-                        @endif
-                    ">
-                        <div class="flex items-start">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 mt-0.5 flex-shrink-0
-                                @if($timeoutWarning['severity'] === 'high')
-                                    text-red-400
-                                @elseif($timeoutWarning['severity'] === 'medium')
-                                    text-yellow-400
-                                @else
-                                    text-blue-400
-                                @endif
-                            " fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 2.502-3.004V7.004C20.82 5.667 19.368 4 17.856 4H6.144C4.632 4 3.18 5.667 3.18 7.004v9.992C3.18 18.333 4.632 20 6.144 20h11.712c19.368 0 20.82-1.667 20.82-3.004V7.004C20.82 5.667 19.368 4 17.856 4H6.144z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                            </svg>
-                            <div class="flex-1">
-                                <p class="text-sm font-medium
-                                    @if($timeoutWarning['severity'] === 'high')
-                                        text-red-200
-                                    @elseif($timeoutWarning['severity'] === 'medium')
-                                        text-yellow-200
-                                    @else
-                                        text-blue-200
-                                    @endif
-                                ">
-                                    {{ $timeoutWarning['message'] }}
-                                </p>
-                                @if($timeoutWarning['hours_remaining'] > 0)
-                                    <p class="text-xs mt-1 opacity-75">
-                                        Time until dispute available: {{ $timeoutWarning['hours_remaining'] }} hours
-                                    </p>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                @endif
             </div>
 
             <!-- Applicant Info -->
             <div class="border-t border-gray-700 pt-4 mb-6">
-                <h3 class="font-semibold text-white/90 mb-2">Applicant</h3>
+                <h3 class="font-semibold text-white/90 mb-2">Pieteicējs</h3>
                 <p class="text-gray-300">
-                    <a href="{{ route('people.show', $submission->user->id) }}" class="hover:text-neon-accent transition-colors duration-200">
+                    <a href="{{ route('messages.conversation', $submission->user->id) }}" class="hover:text-neon-accent transition-colors duration-200">
                         {{ $submission->user->first_name }} {{ $submission->user->last_name }}
                     </a>
                 </p>
@@ -103,13 +54,13 @@
             </div>
 
             <div class="border-t border-gray-700 pt-4 mb-6">
-                <h3 class="font-semibold text-white/90 mb-2">Message</h3>
+                <h3 class="font-semibold text-white/90 mb-2">Ziņojums</h3>
                 <div class="text-gray-300 whitespace-pre-line">{{ $submission->message }}</div>
             </div>
 
             @if(auth()->check() && auth()->id() === $submission->user_id && $submission->status === 'claimed')
                 <div class="border-t border-gray-700 pt-4 mb-6">
-                    <h3 class="font-semibold text-white/90 mb-2">Complete Your Application</h3>
+                    <h3 class="font-semibold text-white/90 mb-2">Pabeidziet savu pieteikumu</h3>
 
                     @if($errors->any())
                         <div class="bg-red-900/40 border border-red-700 p-3 rounded mb-4">
@@ -126,19 +77,19 @@
                         <input type="hidden" name="submission_id" value="{{ $submission->id }}">
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-1">Message to the job owner</label>
-                            <textarea name="message" rows="6" required placeholder="Describe what you will do, timeframe, or attach any proof files..." class="w-full rounded-md bg-gray-900/60 border border-gray-700 text-gray-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-neon-accent/50 focus:border-neon-accent">{{ old('message') }}</textarea>
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Ziņojums darba īpašniekam</label>
+                            <textarea name="message" rows="6" required placeholder="Aprakstiet, ko jūs darīsiet, laika posmu, vai pievienojiet jebkurus pierādījumu failus..." class="w-full rounded-md bg-gray-900/60 border border-gray-700 text-gray-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-neon-accent/50 focus:border-neon-accent">{{ old('message') }}</textarea>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-1">Attach files (optional)</label>
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Pielikumi (neobligāti)</label>
                             <input type="file" name="files[]" multiple class="text-sm text-gray-300">
-                            <p class="text-xs text-gray-500 mt-1">You can attach files to support your application. Max 50MB per file.</p>
+                            <p class="text-xs text-gray-500 mt-1">Jūs varat pievienot failus, lai atbalstītu savu pieteikumu. Maks. 50MB failā.</p>
                         </div>
 
                         <div class="flex justify-end">
-                            <a href="/submissions" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm font-medium mr-3">Cancel</a>
-                            <button type="submit" class="bg-neon-accent text-black px-4 py-2 rounded text-sm font-medium">Submit Application</button>
+                            <a href="/submissions" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm font-medium mr-3">Atcelt</a>
+                            <button type="submit" class="bg-neon-accent text-black px-4 py-2 rounded text-sm font-medium">Iesniegt pieteikumu</button>
                         </div>
                     </form>
                 </div>
@@ -147,18 +98,18 @@
             <!-- admin notes -->
             @if($submission->status === 'admin_review' && $submission->admin_notes)
                 <div class="border-t border-gray-700 pt-4 mb-6">
-                    <h3 class="font-semibold text-white/90 mb-2">Admin Notes</h3>
+                    <h3 class="font-semibold text-white/90 mb-2">Admin piezīmes</h3>
                     <div class="bg-purple-500/10 border border-purple-500/30 p-4 rounded-md text-gray-300 whitespace-pre-line">
                         {{ $submission->admin_notes }}
                     </div>
-                    <p class="mt-2 text-sm text-gray-400">An administrator will review this application and decide if the credits should be returned to the job owner or awarded to applicant.</p>
+                    <p class="mt-2 text-sm text-gray-400">Administrators pārskatīs šo pieteikumu un izlems, vai kredīti jāatgriež darba īpašniekam vai jāpiešķir pieteicējam.</p>
                 </div>
             @endif
 
             <!-- attached files -->
             @if($submission->files->count() > 0)
                 <div class="border-t border-gray-700 pt-4 mb-6">
-                    <h3 class="font-semibold text-white/90 mb-2">Attached Files</h3>
+                    <h3 class="font-semibold text-white/90 mb-2">Pievienotie faili</h3>
                     <div class="space-y-2">
                         @foreach($submission->files as $file)
                             <div class="flex items-center justify-between bg-gray-900/60 p-3 rounded">
@@ -168,8 +119,8 @@
                                     </svg>
                                     <span class="text-gray-300 text-sm">{{ $file->file_name }}</span>
                                 </div>
-                                <a href="{{ route('file.download', $file->id) }}" class="text-neon-accent hover:text-neon-accent/80 text-sm font-medium">
-                                    Download
+                                <a href="{{ route('files.download', $file->id) }}" class="text-neon-accent hover:text-neon-accent/80 text-sm font-medium">
+                                    Lejupielādēt
                                 </a>
                             </div>
                         @endforeach
@@ -182,42 +133,42 @@
                 <div class="border-t border-gray-700 pt-6 mt-6">
                     <div class="flex justify-between">
                         <a href="/submissions" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm font-medium transition-colors duration-200">
-                            Back to Applications
+                            Atpakaļ uz pieteikumiem
                         </a>
-                        <a href="{{ route('submissions.export', $submission->id) }}" class="ml-3 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm font-medium transition-colors duration-200">Download HTML</a>
+                        <a href="{{ route('submissions.export', $submission->id) }}" class="ml-3 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm font-medium transition-colors duration-200">Lejupielādēt HTML</a>
                         <div class="flex space-x-3">
                             <form method="POST" action="/submissions/{{ $submission->id }}/decline" id="declineForm" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
                                 @csrf
                                 <div class="bg-gray-800 p-6 rounded-lg max-w-md w-full">
-                                    <h3 class="text-lg font-semibold text-white mb-4">Decline Application</h3>
+                                    <h3 class="text-lg font-semibold text-white mb-4">Noraidīt pieteikumu</h3>
                                     
                                     <p class="text-gray-300 mb-4">
-                                        This application will be sent for admin review. Please provide a reason for declining:
+                                        Šis pieteikums tiks nosūtīts administratora pārskatīšanai. Lūdzu, norādiet iemeslu noraidīšanai:
                                     </p>
                                     
                                     <textarea name="admin_notes" rows="4" required
                                         class="w-full rounded-md bg-gray-900/60 border border-gray-700 text-gray-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-neon-accent/50 focus:border-neon-accent placeholder-gray-500"
-                                        placeholder="Explain why you're declining this application..."></textarea>
+                                        placeholder="Paskaidrojiet, kāpēc noraidāt šo pieteikumu..."></textarea>
                                     
                                     <div class="mt-4 flex justify-end space-x-3">
                                         <button type="button" onclick="document.getElementById('declineForm').classList.add('hidden')" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm font-medium transition-colors duration-200">
-                                            Cancel
+                                            Atcelt
                                         </button>
                                         <button type="submit" class="bg-red-700 hover:bg-red-600 text-white px-4 py-2 rounded text-sm font-medium transition-colors duration-200">
-                                            Submit & Decline
+                                            Iesniegt un noraidīt
                                         </button>
                                     </div>
                                 </div>
                             </form>
                             
                             <button type="button" onclick="document.getElementById('declineForm').classList.remove('hidden')" class="bg-red-700 hover:bg-red-600 text-white px-4 py-2 rounded text-sm font-medium transition-colors duration-200">
-                                Decline
+                                Noraidīt
                             </button>
                             
                             <form method="POST" action="/submissions/{{ $submission->id }}/approve">
                                 @csrf
                                 <button type="submit" class="bg-green-700 hover:bg-green-600 text-white px-4 py-2 rounded text-sm font-medium transition-colors duration-200">
-                                    Approve and Transfer Credits
+                                    Apstiprināt un pārsūtīt kredītus
                                 </button>
                             </form>
                         </div>
@@ -227,9 +178,9 @@
                 <div class="border-t border-gray-700 pt-6 mt-6">
                     <div class="flex items-center space-x-3">
                         <a href="/submissions" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm font-medium transition-colors duration-200">
-                            Back to Applications
+                            Atpakaļ uz pieteikumiem
                         </a>
-                        <a href="{{ route('submissions.export', $submission->id) }}" class="ml-2 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm font-medium transition-colors duration-200">Download HTML</a>
+                        <a href="{{ route('submissions.export', $submission->id) }}" class="ml-2 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm font-medium transition-colors duration-200">Lejupielādēt HTML</a>
                     </div>
                 </div>
             @endif
@@ -237,7 +188,7 @@
             {{-- Review form: allow job owner to leave a review after approval/completion --}}
             @if(auth()->check() && auth()->id() === $submission->jobListing->user_id && $submission->status === 'approved')
                 <div class="border-t border-gray-700 pt-6 mt-6">
-                    <h3 class="font-semibold text-white/90 mb-3">Leave a review for {{ $submission->user->first_name }}</h3>
+                    <h3 class="font-semibold text-white/90 mb-3">Atstājiet atsauksmi {{ $submission->user->first_name }}</h3>
 
                     @if(session('success'))
                         <div class="bg-green-900/30 border border-green-700 p-3 rounded mb-4 text-green-200">{{ session('success') }}</div>
@@ -247,9 +198,9 @@
                         <div class="bg-gray-900/60 p-4 rounded border border-gray-700">
                             <div class="flex items-start justify-between">
                                 <div>
-                                    <div class="text-sm text-gray-300">Rating: <strong class="text-neon-accent">{{ $submission->review->rating }}/5</strong></div>
+                                    <div class="text-sm text-gray-300">Vērtējums: <strong class="text-neon-accent">{{ $submission->review->rating }}/5</strong></div>
                                     <div class="mt-2 text-gray-300 whitespace-pre-line">{{ $submission->review->comment }}</div>
-                                    <div class="text-xs text-gray-500 mt-2">Left on {{ $submission->review->created_at->format('M j, Y') }}</div>
+                                    <div class="text-xs text-gray-500 mt-2">Atstāts {{ $submission->review->created_at->translatedFormat('j. M Y') }}</div>
                                 </div>
                             </div>
                         </div>
@@ -267,22 +218,22 @@
                         <form method="POST" action="/submissions/{{ $submission->id }}/reviews" class="space-y-4">
                             @csrf
                             <div>
-                                <label class="block text-sm font-medium text-gray-300 mb-1">Rating</label>
+                                <label class="block text-sm font-medium text-gray-300 mb-1">Vērtējums</label>
                                 <select name="rating" required class="w-32 rounded-md bg-gray-900/60 border border-gray-700 text-gray-100 px-3 py-2">
-                                    <option value="">Select</option>
+                                    <option value="">Izvēlieties</option>
                                     @for($i=5; $i>=1; $i--)
-                                        <option value="{{ $i }}">{{ $i }} star{{ $i>1? 's':'' }}</option>
+                                        <option value="{{ $i }}">{{ $i }} zvaigzne{{ $i>1? 's':'' }}</option>
                                     @endfor
                                 </select>
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-gray-300 mb-1">Comment (optional)</label>
-                                <textarea name="comment" rows="4" placeholder="Share what went well or any notes..." class="w-full rounded-md bg-gray-900/60 border border-gray-700 text-gray-100 px-3 py-2 focus:outline-none">{{ old('comment') }}</textarea>
+                                <label class="block text-sm font-medium text-gray-300 mb-1">Komentārs (neobligāti)</label>
+                                <textarea name="comment" rows="4" placeholder="Dalieties ar to, kas noritās labi, vai jebkādām piezīmēm..." class="w-full rounded-md bg-gray-900/60 border border-gray-700 text-gray-100 px-3 py-2 focus:outline-none">{{ old('comment') }}</textarea>
                             </div>
 
                             <div class="flex justify-end">
-                                <button type="submit" class="bg-neon-accent text-black px-4 py-2 rounded text-sm font-medium">Submit Review</button>
+                                <button type="submit" class="bg-neon-accent text-black px-4 py-2 rounded text-sm font-medium">Iesniegt atsauksmi</button>
                             </div>
                         </form>
                     @endif
@@ -296,40 +247,26 @@
                     @if($submission->canBeDisputed())
                         <div class="bg-yellow-500/10 border border-yellow-500 rounded-md p-4 mb-4">
                             <p class="text-yellow-200 text-sm">
-                                <strong>Having issues with this submission?</strong> You can file a dispute to freeze the submission and get admin assistance.
+                                <strong>Radās problēmas ar šo iesniegumu?</strong> Jūs varat iesniegt strīdu, lai sasaldētu iesniegumu un saņemtu administratora palīdzību.
                             </p>
                         </div>
                         <div class="flex justify-end">
                             <a href="{{ route('disputes.create', $submission) }}" 
                                class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-sm font-medium transition-colors duration-200">
-                                File Dispute
+                                Iesniegt strīdu
                             </a>
                         </div>
                     @else
-                        @php
-                            $timeoutWarning = $submission->getTimeoutWarning();
-                        @endphp
-                        @if($timeoutWarning && $timeoutWarning['hours_remaining'] > 0)
-                            <div class="bg-blue-500/10 border border-blue-500 rounded-md p-4 mb-4">
-                                <p class="text-blue-200 text-sm">
-                                    <strong>Dispute Not Yet Available:</strong> {{ $timeoutWarning['message'] }}
+                        <div class="bg-gray-700/50 border border-gray-600 rounded-md p-4 mb-4">
+                            <p class="text-gray-300 text-sm">
+                                <strong>Strīds jau ir iesniegts</strong> Šim iesniegumam jau ir aktīvs strīds.
+                            </p>
+                            @if($submission->is_frozen)
+                                <p class="text-gray-400 text-xs mt-2">
+                                    Iemesls: {{ $submission->freeze_reason }}
                                 </p>
-                                <p class="text-blue-300 text-xs mt-2">
-                                    Dispute will be available in {{ $timeoutWarning['hours_remaining'] }} hours
-                                </p>
-                            </div>
-                        @else
-                            <div class="bg-gray-700/50 border border-gray-600 rounded-md p-4 mb-4">
-                                <p class="text-gray-300 text-sm">
-                                    <strong>No disputes available</strong> This submission cannot be disputed at this time.
-                                </p>
-                                @if($submission->is_frozen)
-                                    <p class="text-gray-400 text-xs mt-2">
-                                        Reason: {{ $submission->freeze_reason }}
-                                    </p>
-                                @endif
-                            </div>
-                        @endif
+                            @endif
+                        </div>
                     @endif
                 </div>
             @endif
@@ -343,13 +280,13 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                             </svg>
                             <div>
-                                <p class="text-red-200 font-semibold">Submission is Frozen</p>
+                                <p class="text-red-200 font-semibold">Iesniegums ir sasaldēts</p>
                                 @if($submission->freeze_reason)
                                     <p class="text-red-300 text-sm mt-1">{{ $submission->freeze_reason }}</p>
                                 @endif
                                 @if($submission->dispute_status !== \App\Models\JobSubmission::DISPUTE_NONE)
                                     <p class="text-red-300 text-sm mt-1">
-                                        Status: {{ ucfirst(str_replace('_', ' ', $submission->dispute_status)) }}
+                                        Statuss: {{ ucfirst(str_replace('_', ' ', $submission->dispute_status)) }}
                                     </p>
                                 @endif
                             </div>

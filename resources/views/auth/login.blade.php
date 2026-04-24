@@ -1,6 +1,6 @@
 <x-layout>
     <x-slot:heading>
-        Log In
+        Ierakstīties
     </x-slot:heading>
 
     <div class="max-w-2xl mx-auto">
@@ -12,7 +12,7 @@
                     <div class="border-b border-gray-700 pb-12">
                         <div class="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
                             <x-form-field>
-                                <x-form-label for="email" class="text-gray-300">Email</x-form-label>
+                                <x-form-label for="email" class="text-gray-300">E-pasts</x-form-label>
 
                                 <div class="mt-2">
                                     <x-form-input name="email" id="email" type="email" :value="old('email')" required class="text-gray-300" />
@@ -21,7 +21,7 @@
                             </x-form-field>
 
                             <x-form-field>
-                                <x-form-label for="password" class="text-gray-300">Password</x-form-label>
+                                <x-form-label for="password" class="text-gray-300">Parole</x-form-label>
 
                                 <div class="mt-2">
                                     <x-form-input name="password" id="password" type="password" required class="text-gray-300" />
@@ -33,8 +33,8 @@
                 </div>
 
                 <div class="mt-6 flex items-center justify-end gap-x-6">
-                    <a href="/" class="text-gray-300 hover:text-neon-accent transition-colors duration-200">Cancel</a>
-                    <x-form-button class="text-gray-300">Log In</x-form-button>
+                    <a href="/" class="text-gray-300 hover:text-neon-accent transition-colors duration-200">Atcelt</a>
+                    <x-form-button class="text-gray-300">Ierakstīties</x-form-button>
                 </div>
             </form>
         </div>

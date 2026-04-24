@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" class="min-h-screen bg-fixed">
+<html lang="lv" class="min-h-screen bg-fixed">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
@@ -298,10 +298,10 @@
 
         document.addEventListener('DOMContentLoaded', initTheme);
     </script>
-    <div class="min-h-screen px-4 md:px-0">
+    <div class="min-h-screen flex flex-col">
         <nav class="sticky top-0 z-50 backdrop-blur-md bg-gray-900/60 border-b border-gray-800">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div class="flex h-16 items-center justify-between">
+            <div class="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
+                <div class="flex h-12 items-center justify-between">
                     <div class="flex items-center">
                         <div class="flex-shrink-0">
                             <img class="h-8 w-8 dark-logo" src="{{ asset('clock.svg') }}" alt="Timerr logo - clock">
@@ -309,10 +309,10 @@
                         </div>
                         <div class="hidden md:block">
                             <div class="ml-10 flex items-baseline space-x-4">
-                                <x-nav-link href="/" :active="request()->is('/')" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Home</x-nav-link>
-                                <x-nav-link href="/jobs" :active="request()->is('jobs')" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Jobs</x-nav-link>
-                                <x-nav-link href="/people" :active="request()->is('people*')" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">People</x-nav-link>
-                                <x-nav-link href="/contact" :active="request()->is('contact')" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Contact</x-nav-link>
+                                <x-nav-link href="/" :active="request()->is('/')" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Sākums</x-nav-link>
+                                <x-nav-link href="/jobs" :active="request()->is('jobs')" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Darbi</x-nav-link>
+                                <x-nav-link href="/people" :active="request()->is('people*')" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Cilvēki</x-nav-link>
+                                <x-nav-link href="/contact" :active="request()->is('contact')" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Kontakti</x-nav-link>
                             </div>
                         </div>
                     </div>
@@ -323,41 +323,41 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon-moon h-5 w-5" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
                                 </svg>
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon-sun hidden h-5 w-5" aria-hidden="true">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon-sun hidden h-5 w-5 mr-2" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.36 6.36l-1.42-1.42M7.05 6.05 5.64 4.64m12.02 0-1.41 1.41M7.05 17.95l-1.41 1.41" />
                                     <circle cx="12" cy="12" r="3" stroke-width="1.5"></circle>
                                 </svg>
                             </button>
                             @guest
-                                <x-nav-link href="/login" :active="request()->is('login')" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Log In</x-nav-link>
-                                <x-nav-link href="/register" :active="request()->is('register')" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Register</x-nav-link>
+                                <x-nav-link href="/login" :active="request()->is('login')" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Ierakstīties</x-nav-link>
+                                <x-nav-link href="/register" :active="request()->is('register')" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Reģistrēties</x-nav-link>
                             @endguest
 
                             @auth
                                 <x-nav-link href="/messages" :active="request()->is('messages*')" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">
-                                    Messages
+                                    Ziņojumi
                                     @if(auth()->user()->unreadMessagesCount() > 0)
                                         <span class="ml-2 inline-block w-2 h-2 rounded-full bg-neon-accent" aria-hidden="true"></span>
                                     @endif
                                 </x-nav-link>
                                 <x-nav-link href="/submissions" :active="request()->is('submissions')" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">
-                                    Submissions
+                                    Iesniegumi
                                 </x-nav-link>
                                 @if(auth()->user()->isAdmin())
                                     <x-nav-link href="/admin" :active="request()->is('admin*')" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">
-                                        Admin
+                                        Administrācija
                                     </x-nav-link>
                                     <x-nav-link href="/disputes" :active="request()->is('disputes*')" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">
-                                        Disputes
+                                        Strīdi
                                     </x-nav-link>
                                 @endif
                                 <x-nav-link href="/profile" :active="request()->is('profile')" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">
-                                    Profile
-                                    <span class="ml-2 text-sm text-neon-accent">{{ auth()->user()->time_credits }} credits</span>
+                                    Profils
+                                    <span class="ml-2 text-sm text-neon-accent">{{ auth()->user()->time_credits }} kredīti</span>
                                 </x-nav-link>
                                 <form method="POST" action="/logout" class="ml-3">
                                     @csrf
-                                    <x-form-button class="text-gray-300 hover:text-neon-accent hover:bg-gray-800/80 border border-gray-700 transition-all duration-300">Log Out</x-form-button>
+                                    <x-form-button class="text-gray-300 hover:text-neon-accent hover:bg-gray-800/80 border border-gray-700 transition-all duration-300">Izrakstīties</x-form-button>
                                 </form>
                             @endauth
                         </div>
@@ -368,7 +368,7 @@
                                 class="relative inline-flex items-center justify-center rounded-md bg-gray-800 p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
                                 aria-controls="mobile-menu" aria-expanded="false">
                             <span class="absolute -inset-0.5"></span>
-                            <span class="sr-only">Open main menu</span>
+                            <span class="sr-only">Atvērt galveno izvēlni</span>
                             <svg class="block h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                  stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -387,7 +387,7 @@
             <div class="md:hidden hidden" id="mobile-menu">
                 <div class="space-y-1 px-2 pb-3 pt-2 sm:px-3">
                     <a href="/" class="bg-gray-900 text-white block rounded-md px-3 py-2 text-base font-medium"
-                       aria-current="page">Home</a>
+                       aria-current="page">Sākums</a>
                     <!-- mobile theme toggle -->
                     <button type="button" onclick="toggleTheme()" class="theme-toggle w-full text-left inline-flex items-center rounded-md p-2 text-gray-300 hover:text-neon-accent hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium" aria-pressed="false" title="toggle theme">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon-moon h-5 w-5 mr-2" aria-hidden="true">
@@ -397,29 +397,29 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.36 6.36l-1.42-1.42M7.05 6.05 5.64 4.64m12.02 0-1.41 1.41M7.05 17.95l-1.41 1.41" />
                             <circle cx="12" cy="12" r="3" stroke-width="1.5"></circle>
                         </svg>
-                        toggle theme
+                        mainīt tēmu
                     </button>
                     <a href="/jobs"
-                       class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Jobs</a>
+                       class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Darbi</a>
                           <a href="/people"
-                              class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">People</a>
+                              class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Cilvēki</a>
                     <a href="/contact"
-                       class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Contact</a>
+                       class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Kontakti</a>
                     @guest
-                        <a href="/login" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Log In</a>
-                        <a href="/register" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Register</a>
+                        <a href="/login" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Ierakstīties</a>
+                        <a href="/register" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Reģistrēties</a>
                     @endguest
                     @auth
-                        <a href="/messages" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Messages @if(auth()->user()->unreadMessagesCount() > 0)<span class="ml-2 inline-block w-2 h-2 rounded-full bg-neon-accent" aria-hidden="true"></span>@endif</a>
-                        <a href="/submissions" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Submissions</a>
+                        <a href="/messages" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Ziņojumi @if(auth()->user()->unreadMessagesCount() > 0)<span class="ml-2 inline-block w-2 h-2 rounded-full bg-neon-accent" aria-hidden="true"></span>@endif</a>
+                        <a href="/submissions" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Iesniegumi</a>
                         @if(auth()->user()->isAdmin())
-                            <a href="/admin" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Admin</a>
-                            <a href="/disputes" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Disputes</a>
+                            <a href="/admin" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Administrācija</a>
+                            <a href="/disputes" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Strīdi</a>
                         @endif
-                        <a href="/profile" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Profile</a>
+                        <a href="/profile" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Profils</a>
                         <form method="POST" action="/logout">
                             @csrf
-                            <button type="submit" class="w-full text-left text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Log Out</button>
+                            <button type="submit" class="w-full text-left text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Izrakstīties</button>
                         </form>
                     @endauth
                 </div>  
@@ -431,7 +431,7 @@
                 <h1 class="text-3xl font-bold tracking-tight text-white/90">{{ $heading }}</h1>
 
                 @if(request()->is('jobs'))
-                    <x-button href="/jobs/create" class="text-gray-300 hover:text-neon-accent hover:bg-gray-800/80 border border-gray-700 transition-all duration-300">Create Job</x-button>
+                    <x-button href="/jobs/create" class="text-gray-300 hover:text-neon-accent hover:bg-gray-800/80 border border-gray-700 transition-all duration-300">Izveidot darbu</x-button>
                 @endif
             </div>
         </header>
@@ -477,11 +477,11 @@
                             <h3 class="text-xl font-bold text-white">Timerr</h3>
                         </div>
                         <p class="text-gray-300 mb-4 max-w-md">
-                            A time-banking platform where community members exchange services using time credits. 
-                            Share your skills, help others, and build a stronger community together.
+                            Laika bankas platforma, kurā sabiedrības locekļi apmainās pakalpojumiem, izmantojot laika kredītus. 
+                            Dalies ar savām prasmēm, palīdz citiem un kopā veido stiprāku sabiedrību.
                         </p>
                         <div class="flex space-x-4">
-                            <a href="https://github.com/rinnetamine/timerr.lat" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-neon-accent transition-colors duration-200" aria-label="GitHub Repository">
+                            <a href="https://github.com/rinnetamine/timerr.lat" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-neon-accent transition-colors duration-200" aria-label="GitHub repozitorijs">
                                 <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
                                 </svg>
@@ -491,23 +491,23 @@
 
                     <!-- Quick Links -->
                     <div>
-                        <h4 class="text-white font-semibold mb-4">Quick Links</h4>
+                        <h4 class="text-white font-semibold mb-4">Ātrās saites</h4>
                         <ul class="space-y-2">
-                            <li><a href="/jobs" class="text-gray-300 hover:text-neon-accent transition-colors duration-200">Browse Jobs</a></li>
-                            <li><a href="/people" class="text-gray-300 hover:text-neon-accent transition-colors duration-200">Find People</a></li>
-                            <li><a href="/contact" class="text-gray-300 hover:text-neon-accent transition-colors duration-200">Contact Us</a></li>
+                            <li><a href="/jobs" class="text-gray-300 hover:text-neon-accent transition-colors duration-200">Pārlūkot darbus</a></li>
+                            <li><a href="/people" class="text-gray-300 hover:text-neon-accent transition-colors duration-200">Atrast cilvēkus</a></li>
+                            <li><a href="/contact" class="text-gray-300 hover:text-neon-accent transition-colors duration-200">Sazināties ar mums</a></li>
                             @guest
-                                <li><a href="/register" class="text-gray-300 hover:text-neon-accent transition-colors duration-200">Sign Up</a></li>
+                                <li><a href="/register" class="text-gray-300 hover:text-neon-accent transition-colors duration-200">Reģistrēties</a></li>
                             @endguest
                         </ul>
                     </div>
 
                     <!-- Resources -->
                     <div>
-                        <h4 class="text-white font-semibold mb-4">Resources</h4>
+                        <h4 class="text-white font-semibold mb-4">Resursi</h4>
                         <ul class="space-y-2">
-                            <li><button onclick="openModal('howItWorks')" class="text-gray-300 hover:text-neon-accent transition-colors duration-200 text-left w-full">How It Works</button></li>
-                            <li><button onclick="openModal('faq')" class="text-gray-300 hover:text-neon-accent transition-colors duration-200 text-left w-full">FAQ</button></li>
+                            <li><button onclick="openModal('howItWorks')" class="text-gray-300 hover:text-neon-accent transition-colors duration-200 text-left w-full">Kā tas darbojas</button></li>
+                            <li><button onclick="openModal('faq')" class="text-gray-300 hover:text-neon-accent transition-colors duration-200 text-left w-full">BUJ</button></li>
                         </ul>
                     </div>
                 </div>
@@ -516,13 +516,13 @@
                 <div class="mt-8 pt-8 border-t border-gray-800">
                     <div class="flex flex-col md:flex-row justify-between items-center">
                         <p class="text-gray-400 text-sm mb-4 md:mb-0">
-                            © {{ date('Y') }} Timerr. Building communities through time banking.
+                            © {{ date('Y') }} Timerr. Veidojam sabiedrības caur laika banku.
                         </p>
                         <div class="flex items-center space-x-6 text-sm text-gray-400">
-                            <span>Platform Stats:</span>
-                            <span class="text-neon-accent">{{ App\Models\User::count() }} Users</span>
-                            <span class="text-neon-accent">{{ App\Models\Job::count() }} Jobs</span>
-                            <span class="text-neon-accent">{{ App\Models\JobSubmission::where('status', 'approved')->count() }} Completed</span>
+                            <span>Platformas statistika:</span>
+                            <span class="text-neon-accent">{{ App\Models\User::count() }} Lietotāji</span>
+                            <span class="text-neon-accent">{{ App\Models\Job::count() }} Darbi</span>
+                            <span class="text-neon-accent">{{ App\Models\JobSubmission::where('status', 'approved')->count() }} Pabeigti</span>
                         </div>
                     </div>
                 </div>
@@ -536,7 +536,7 @@
         <div class="fixed inset-0 flex items-center justify-center p-4">
             <div class="bg-gray-900 border border-gray-700 rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
                 <div class="sticky top-0 bg-gray-900 border-b border-gray-700 p-6 flex justify-between items-center">
-                    <h3 class="text-xl font-bold text-white">How Timerr Works</h3>
+                    <h3 class="text-xl font-bold text-white">Kā Timerr darbojas</h3>
                     <button onclick="closeModal('howItWorks')" class="text-gray-400 hover:text-white">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -547,40 +547,40 @@
                     <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0 w-8 h-8 bg-neon-accent text-black rounded-full flex items-center justify-center font-bold">1</div>
                         <div>
-                            <h4 class="text-white font-semibold mb-2">Sign Up & Get Credits</h4>
-                            <p class="text-gray-300">Create your account and receive 10 free time credits to start. Everyone begins with the same amount to ensure fair exchange.</p>
+                            <h4 class="text-white font-semibold mb-2">Reģistrējies un saņem kredītus</h4>
+                            <p class="text-gray-300">Izveido savu kontu un saņem 10 bezmaksas laika kredītu sākšanai. Visi sāk ar vienādu daudzumu, lai nodrošinātu godīgu apmaiņu.</p>
                         </div>
                     </div>
                     <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0 w-8 h-8 bg-neon-accent text-black rounded-full flex items-center justify-center font-bold">2</div>
                         <div>
-                            <h4 class="text-white font-semibold mb-2">Browse or Create Jobs</h4>
-                            <p class="text-gray-300">Look for jobs that match your skills or post your own needs. Each job has a time credit value based on the work required.</p>
+                            <h4 class="text-white font-semibold mb-2">Pārlūko vai izveido darbus</h4>
+                            <p class="text-gray-300">Meklē darbus, kas atbilst tavām prasmēm, vai publicē savas vajadzības. Katram darbam ir laika kredītu vērtība, kas balstīta uz nepieciešamā darba apjomu.</p>
                         </div>
                     </div>
                     <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0 w-8 h-8 bg-neon-accent text-black rounded-full flex items-center justify-center font-bold">3</div>
                         <div>
-                            <h4 class="text-white font-semibold mb-2">Complete the Work</h4>
-                            <p class="text-gray-300">Claim a job, complete the work, and submit proof. The job poster will review your submission and approve it if satisfied.</p>
+                            <h4 class="text-white font-semibold mb-2">Pabeidz darbu</h4>
+                            <p class="text-gray-300">Pieteicies darbam, pabeidz to un iesniedz pierādījumus. Darba publicētājs pārskatīs tavu iesniegumu un apstiprinās to, ja būs apmierināts.</p>
                         </div>
                     </div>
                     <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0 w-8 h-8 bg-neon-accent text-black rounded-full flex items-center justify-center font-bold">4</div>
                         <div>
-                            <h4 class="text-white font-semibold mb-2">Exchange Credits</h4>
-                            <p class="text-gray-300">Once approved, you receive the time credits. Use them to get help from others or save them for future needs.</p>
+                            <h4 class="text-white font-semibold mb-2">Maini kredītus</h4>
+                            <p class="text-gray-300">Kad apstiprināts, tu saņem laika kredītus. Izmanto tos, lai saņemtu palīdzību no citiem vai saglabā tos nākotnes vajadzībām.</p>
                         </div>
                     </div>
                     <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0 w-8 h-8 bg-neon-accent text-black rounded-full flex items-center justify-center font-bold">5</div>
                         <div>
-                            <h4 class="text-white font-semibold mb-2">Build Reputation</h4>
-                            <p class="text-gray-300">Leave reviews for completed jobs. Build trust in the community through positive ratings and successful exchanges.</p>
+                            <h4 class="text-white font-semibold mb-2">Veido reputāciju</h4>
+                            <p class="text-gray-300">Atstāj atsauksmes par pabeigtiem darbiem. Veido uzticību sabiedrībā caur pozitīviem vērtējumiem un veiksmīgu apmaiņu.</p>
                         </div>
                     </div>
                     <div class="mt-6 p-4 bg-neon-accent/10 border border-neon-accent/30 rounded-lg">
-                        <p class="text-neon-accent text-sm"><strong>Remember:</strong> 1 time credit = 1 hour of service. Everyone's time is valued equally!</p>
+                        <p class="text-neon-accent text-sm"><strong>Atceries:</strong> 1 laika kredīts = 1 stunda pakalpojuma. Visu laiku vērtē vienlīdzīgi!</p>
                     </div>
                 </div>
             </div>
@@ -592,7 +592,7 @@
         <div class="fixed inset-0 flex items-center justify-center p-4">
             <div class="bg-gray-900 border border-gray-700 rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
                 <div class="sticky top-0 bg-gray-900 border-b border-gray-700 p-6 flex justify-between items-center">
-                    <h3 class="text-xl font-bold text-white">Frequently Asked Questions</h3>
+                    <h3 class="text-xl font-bold text-white">Bieži uzdotie jautājumi</h3>
                     <button onclick="closeModal('faq')" class="text-gray-400 hover:text-white">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -601,32 +601,32 @@
                 </div>
                 <div class="p-6 space-y-4">
                     <div class="border-b border-gray-700 pb-4">
-                        <h4 class="text-white font-semibold mb-2">What is time banking?</h4>
-                        <p class="text-gray-300">Time banking is a system where people exchange services using time as currency. 1 hour of your time equals 1 time credit, regardless of the service provided.</p>
+                        <h4 class="text-white font-semibold mb-2">Kas ir laika banka?</h4>
+                        <p class="text-gray-300">Laika banka ir sistēma, kurā cilvēki apmainās ar pakalpojumiem, izmantojot laiku kā valūtu. 1 stunda no tava laika vienāda ar 1 laika kredītu, neatkarīgi no sniegtā pakalpojuma.</p>
                     </div>
                     <div class="border-b border-gray-700 pb-4">
-                        <h4 class="text-white font-semibold mb-2">How do I earn time credits?</h4>
-                        <p class="text-gray-300">You earn credits by completing jobs for other users. When someone posts a job and you complete it successfully, you receive the time credits offered for that job.</p>
+                        <h4 class="text-white font-semibold mb-2">Kā es varu nopelnīt laika kredītus?</h4>
+                        <p class="text-gray-300">Tu nopelnī kredītus, pabeidzot darbus citiem lietotājiem. Kad kāds publicē darbu un tu to veiksmīgi pabeidz, tu saņem šim darbam piedāvātos laika kredītus.</p>
                     </div>
                     <div class="border-b border-gray-700 pb-4">
-                        <h4 class="text-white font-semibold mb-2">What if someone doesn't complete the job?</h4>
-                        <p class="text-gray-300">If a job isn't completed satisfactorily, the job poster can decline the submission. The credits remain with the poster and they can re-list the job.</p>
+                        <h4 class="text-white font-semibold mb-2">Ko darīt, ja kāds nepabeidz darbu?</h4>
+                        <p class="text-gray-300">Ja darbs nav pabeigts apmierinoši, darba publicētājs var noraidīt iesniegumu. Kredīti paliek pie publicētāja, un viņš var atkārtoti publicēt darbu.</p>
                     </div>
                     <div class="border-b border-gray-700 pb-4">
-                        <h4 class="text-white font-semibold mb-2">Can I set my own rates?</h4>
-                        <p class="text-gray-300">Rates are based on time, not money. 1 time credit always equals 1 hour of work. However, you can set how many credits a job is worth based on estimated completion time.</p>
+                        <h4 class="text-white font-semibold mb-2">Vai es varu noteikt savas cenas?</h4>
+                        <p class="text-gray-300">Cenas balstās uz laiku, ne naudu. 1 laika kredīts vienmēr ir vienāds ar 1 darba stundu. Tomēr tu vari noteikt, cik daudz kredītu darbs ir vērts, pamatojoties uz prognozēto pabeigšanas laiku.</p>
                     </div>
                     <div class="border-b border-gray-700 pb-4">
-                        <h4 class="text-white font-semibold mb-2">Is my personal information safe?</h4>
-                        <p class="text-gray-300">Yes. We use encryption for messages and only share necessary information. Your contact details are only shared with users you're directly working with.</p>
+                        <h4 class="text-white font-semibold mb-2">Vai mana personīgā informācija ir droša?</h4>
+                        <p class="text-gray-300">Jā. Mēs izmantojam šifrēšanu ziņojumiem un dalāmies tikai ar nepieciešamo informāciju. Tavi kontaktu dati tiek dalīti tikai ar lietotājiem, ar kuriem tieši strādā.</p>
                     </div>
                     <div class="border-b border-gray-700 pb-4">
-                        <h4 class="text-white font-semibold mb-2">What happens if I run out of credits?</h4>
-                        <p class="text-gray-300">You can earn more credits by completing jobs for others. Everyone starts with 10 credits, so there are always opportunities to earn more.</p>
+                        <h4 class="text-white font-semibold mb-2">Ko notiks, ja man beigsies kredīti?</h4>
+                        <p class="text-gray-300">Tu vari nopelnīt vairāk kredītu, pabeidzot darbus citiem. Visi sāk ar 10 kredītiem, tāpēc vienmēr ir iespējas nopelnīt vairāk.</p>
                     </div>
                     <div class="pb-4">
-                        <h4 class="text-white font-semibold mb-2">How do disputes work?</h4>
-                        <p class="text-gray-300">If there's a disagreement about job completion, either party can contact an admin for mediation. Admins review the evidence and make fair decisions.</p>
+                        <h4 class="text-white font-semibold mb-2">Kā darbojas strīdi?</h4>
+                        <p class="text-gray-300">Ja rodas nesaskaņas par darba pabeigšanu, jebkura puse var sazināties ar administratoru, lai saņemtu starpniecību. Administratori pārskata pierādījumus un pieņem godīgus lēmumus.</p>
                     </div>
                 </div>
             </div>

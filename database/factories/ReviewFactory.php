@@ -18,7 +18,7 @@ class ReviewFactory extends Factory
             'reviewer_id' => User::factory(),
             'reviewee_id' => User::factory(),
             'rating' => fake()->numberBetween(1, 5),
-            'comment' => fake()->optional(0.8)->paragraph(3), // 80% chance of having a comment
+            'comment' => fake('lv_LV')->optional(0.8)->paragraph(3), // 80% chance of having a comment
         ];
     }
 }

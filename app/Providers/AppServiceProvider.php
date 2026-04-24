@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\Job;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Gate;
@@ -18,6 +19,9 @@ class AppServiceProvider extends ServiceProvider
     // bootstrap application services
     public function boot(): void
     {
+        app()->setLocale(config('app.locale'));
+        Carbon::setLocale(config('app.locale'));
+
         // prevent lazy loading of models
         Model::preventLazyLoading();
 

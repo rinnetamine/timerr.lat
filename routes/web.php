@@ -69,13 +69,19 @@ Route::middleware('auth')->group(function () {
     Route::get('/submissions/{submission}/export', [JobSubmissionController::class, 'exportHtml'])->middleware('auth')->name('submissions.export');
     
     // file download route
-    Route::get('/files/{file}/download', [JobSubmissionController::class, 'downloadFile'])->middleware('auth')->name('file.download');
+    Route::get('/files/{file}/download', [JobSubmissionController::class, 'downloadFile'])->middleware('auth')->name('files.download');
 
     // export transactions PDF/HTML
     Route::get('/transactions/export', [TransactionController::class, 'exportPdf'])->name('transactions.export');
 
     // export transactions PDF/HTML download route
     Route::get('/transactions/download', [TransactionController::class, 'download'])->name('transactions.download');
+
+    // export transactions CSV download route
+    Route::get('/transactions/csv', [TransactionController::class, 'exportCsv'])->name('transactions.csv');
+
+    // export transactions Excel download route
+    Route::get('/transactions/excel', [TransactionController::class, 'exportExcel'])->name('transactions.excel');
 
     // admin routes
     Route::get('/admin', [AdminController::class, 'index'])->middleware('auth')->name('admin.dashboard');

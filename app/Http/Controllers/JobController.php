@@ -123,7 +123,10 @@ class JobController extends Controller
     // display job details
     public function show(Job $job)
     {
-        return view('jobs.show', ['job' => $job]);
+        return view('jobs.show', [
+            'job' => $job,
+            'categories' => config('job_categories')
+        ]);
     }
 
     // create a new job listing
@@ -152,7 +155,7 @@ class JobController extends Controller
         // check if user has enough credits
         if ($user->time_credits < $attributes['time_credits']) {
             return back()->withErrors([
-                'time_credits' => 'You don\'t have enough time credits. Please add more credits or reduce the required amount.'
+                'time_credits' => 'Jums nav pietiekami daudz laika kredītu. Lūdzu, papildiniet kredītus vai samaziniet nepieciešamo daudzumu.'
             ])->withInput();
         }
 
@@ -172,7 +175,7 @@ class JobController extends Controller
                 DB::table('transactions')->insert([
                     'user_id' => $user->id,
                     'amount' => -$attributes['time_credits'],
-                    'description' => "Created job listing: {$attributes['title']}",
+                    'description' => "Izveidots darba sludinājums: {$attributes['title']}",
                     'created_at' => now(),
                     'updated_at' => now()
                 ]);
@@ -180,13 +183,13 @@ class JobController extends Controller
                 return $job;
             });
 
-            return redirect('/jobs')->with('success', 'Service listing created successfully! ' . $attributes['time_credits'] . ' credits have been reserved for this job.');
+            return redirect('/jobs')->with('success', 'Serviss veiksmīgi izveidots! ' . $attributes['time_credits'] . ' kredīti ir rezervēti šim darbam.');
         } catch (\Exception $e) {
             // log error and show user-friendly message
             Log::error('Job creation failed: ' . $e->getMessage());
             
             return back()->withErrors([
-                'error' => 'Failed to create listing: ' . $e->getMessage()
+                'error' => 'Neizdevās izveidot sludinājumu: ' . $e->getMessage()
             ])->withInput();
         }
     }
@@ -233,7 +236,7 @@ class JobController extends Controller
             if ($netChange > 0) {
                 if ($user->time_credits < $netChange) {
                     return back()->withErrors([
-                        'time_credits' => 'You don\'t have enough time credits. Your current balance is ' . $user->time_credits . ' credits.'
+                        'time_credits' => 'Jums nav pietiekami daudz laika kredītu. Jūsu pašreizējais atlikums ir ' . $user->time_credits . ' kredīti.'
                     ])->withInput();
                 }
             }
@@ -250,7 +253,7 @@ class JobController extends Controller
                     DB::table('transactions')->insert([
                         'user_id' => $user->id,
                         'amount' => $originalCredits,
-                        'description' => "Credits returned from updated job: {$job->title}",
+                        'description' => "Atgriezti kredīti no atjaunināta darba: {$job->title}",
                         'created_at' => now(),
                         'updated_at' => now()
                     ]);
@@ -264,7 +267,7 @@ class JobController extends Controller
                     DB::table('transactions')->insert([
                         'user_id' => $user->id,
                         'amount' => -$newCredits,
-                        'description' => "Credits allocated for updated job: {$attributes['title']}",
+                        'description' => "Piešķirti kredīti atjauninātam darbam: {$attributes['title']}",
                         'created_at' => now(),
                         'updated_at' => now()
                     ]);
@@ -273,19 +276,19 @@ class JobController extends Controller
                     $job->update($attributes);
                 });
 
-                return redirect('/jobs/' . $job->id)->with('success', 'Service updated successfully! Credit adjustment has been processed.');
+                return redirect('/jobs/' . $job->id)->with('success', 'Serviss atjaunināts veiksmīgi! Kredītu pielāgojums ir apstrādāts.');
             } catch (\Exception $e) {
                 // log error and show message
                 Log::error('Job update failed: ' . $e->getMessage());
                 
                 return back()->withErrors([
-                    'error' => 'Failed to update listing: ' . $e->getMessage()
+                    'error' => 'Neizdevās atjaunināt sludinājumu: ' . $e->getMessage()
                 ])->withInput();
             }
         } else {
             // if credits haven't changed, just update the job
             $job->update($attributes);
-            return redirect('/jobs/' . $job->id)->with('success', 'Service updated successfully!');
+            return redirect('/jobs/' . $job->id)->with('success', 'Serviss atjaunināts veiksmīgi!');
         }
     }
 
@@ -310,7 +313,7 @@ class JobController extends Controller
                     DB::table('transactions')->insert([
                         'user_id' => $jobOwner->id,
                         'amount' => $job->time_credits,
-                        'description' => "Credits returned from deleted job: {$job->title}",
+                        'description' => "Atgriezti kredīti no dzēsta darba: {$job->title}",
                         'created_at' => now(),
                         'updated_at' => now()
                     ]);
@@ -320,13 +323,13 @@ class JobController extends Controller
                 $job->delete();
             });
             
-            return redirect('/jobs')->with('success', 'Service deleted successfully and credits have been returned!');
+            return redirect('/jobs')->with('success', 'Serviss veiksmīgi dzēsts un kredīti ir atgriezti!');
         } catch (\Exception $e) {
             // log error and show user-friendly message
             Log::error(message: 'Job deletion failed: ' . $e->getMessage());
             
             return back()->withErrors([
-                'error' => 'Failed to delete listing: ' . $e->getMessage()
+                'error' => 'Neizdevās dzēst sludinājumu: ' . $e->getMessage()
             ]);
         }
     }

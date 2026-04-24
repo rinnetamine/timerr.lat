@@ -1,5 +1,5 @@
 <x-layout>
-    <x-slot:heading>Contact Us</x-slot:heading>
+    <x-slot:heading>Sazināties ar mums</x-slot:heading>
 
     <div class="max-w-2xl mx-auto">
 
@@ -8,25 +8,25 @@
                 @csrf
                 
                 <div>
-                    <label for="name" class="block text-sm font-medium text-gray-300">Name</label>
+                    <label for="name" class="block text-sm font-medium text-gray-300">Vārds</label>
                     <input type="text" name="name" id="name" required
                            class="mt-1 block w-full rounded-md bg-gray-900/60 border border-gray-700 text-gray-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-neon-accent/50 focus:border-neon-accent placeholder-gray-500 transition-all duration-200">
                 </div>
 
                 <div>
-                    <label for="email" class="block text-sm font-medium text-gray-300">Email</label>
+                    <label for="email" class="block text-sm font-medium text-gray-300">E-pasts</label>
                     <input type="email" name="email" id="email" required
                            class="mt-1 block w-full rounded-md bg-gray-900/60 border border-gray-700 text-gray-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-neon-accent/50 focus:border-neon-accent placeholder-gray-500 transition-all duration-200">
                 </div>
 
                 <div>
-                    <label for="subject" class="block text-sm font-medium text-gray-300">Subject</label>
+                    <label for="subject" class="block text-sm font-medium text-gray-300">Temats</label>
                     <input type="text" name="subject" id="subject" required
                            class="mt-1 block w-full rounded-md bg-gray-900/60 border border-gray-700 text-gray-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-neon-accent/50 focus:border-neon-accent placeholder-gray-500 transition-all duration-200">
                 </div>
 
                 <div>
-                    <label for="message" class="block text-sm font-medium text-gray-300">Message</label>
+                    <label for="message" class="block text-sm font-medium text-gray-300">Ziņojums</label>
                     <textarea name="message" id="message" rows="4" required
                               class="mt-1 block w-full rounded-md bg-gray-900/60 border border-gray-700 text-gray-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-neon-accent/50 focus:border-neon-accent placeholder-gray-500 transition-all duration-200"></textarea>
                 </div>
@@ -34,7 +34,7 @@
                 <div class="flex justify-end">
                     <button type="submit" 
                             class="text-gray-300 hover:text-neon-accent hover:bg-gray-800/80 border border-gray-700 transition-all duration-300 px-4 py-2 rounded-md">
-                        Send Message
+                        Sūtīt ziņojumu
                     </button>
                 </div>
             </form>

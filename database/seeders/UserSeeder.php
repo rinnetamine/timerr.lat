@@ -12,8 +12,8 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // number of users to create; configurable via env for convenience
-        $count = (int) env('SEED_USERS', 30);
+        // number of users to create; reduced for testing
+        $count = (int) env('SEED_USERS', 5);
 
         // create a mix of users
         User::factory()->count($count)->create();
@@ -23,7 +23,7 @@ class UserSeeder extends Seeder
             ['email' => 'demo@local.test'],
             [
                 'first_name' => 'Demo',
-                'last_name' => 'User',
+                'last_name' => 'Lietotājs',
                 'password' => 'password', // factory will hash if model casts apply
                 'time_credits' => 50,
                 'role' => 'admin'

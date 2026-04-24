@@ -3,10 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Message;
+use App\Models\MessageFile;
 use App\Models\User;
+use App\Models\JobSubmission;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class MessagesController extends Controller
 {
@@ -30,12 +35,15 @@ class MessagesController extends Controller
             ->whereNull('read_at')
             ->update(['read_at' => now()]);
 
+        // check for job relationships between users
+        $jobRelationships = $this->getJobRelationships($me, $user);
+
         // load messages between the two users (after marking read)
         $messages = Message::where(function ($q) use ($me, $user) {
             $q->where('sender_id', $me->id)->where('recipient_id', $user->id);
         })->orWhere(function ($q) use ($me, $user) {
             $q->where('sender_id', $user->id)->where('recipient_id', $me->id);
-        })->orderBy('created_at')->get();
+        })->with('files')->orderBy('created_at')->get();
 
         // build conversations list so the view can render a sidebar
         $all = Message::where('sender_id', $me->id)
@@ -52,6 +60,29 @@ class MessagesController extends Controller
                     'latest' => $m,
                     'unread' => 0
                 ];
+            }
+        }
+
+        // get job-related contacts even if no messages exist
+        $jobContacts = $this->getJobRelatedContacts($me);
+        
+        foreach ($jobContacts as $contact) {
+            $contactId = $contact['user']->id;
+            if (!isset($convos[$contactId])) {
+                // Create a dummy message for sorting purposes
+                $dummyMessage = new Message();
+                $dummyMessage->created_at = $contact['submission']->created_at;
+                $dummyMessage->body = '';
+                
+                $convos[$contactId] = [
+                    'other' => $contact['user'],
+                    'latest' => $dummyMessage,
+                    'unread' => 0,
+                    'job_relationship' => $contact['role']
+                ];
+            } else {
+                // Add job relationship info to existing conversation
+                $convos[$contactId]['job_relationship'] = $contact['role'];
             }
         }
 
@@ -73,7 +104,8 @@ class MessagesController extends Controller
         return view('messages.conversation', [
             'other' => $user,
             'messages' => $messages,
-            'conversations' => $conversations
+            'conversations' => $conversations,
+            'jobRelationships' => $jobRelationships
         ]);
     }
 
@@ -102,6 +134,29 @@ class MessagesController extends Controller
                     'latest' => $m,
                     'unread' => 0
                 ];
+            }
+        }
+
+        // get job-related contacts even if no messages exist
+        $jobContacts = $this->getJobRelatedContacts($me);
+        
+        foreach ($jobContacts as $contact) {
+            $contactId = $contact['user']->id;
+            if (!isset($convos[$contactId])) {
+                // Create a dummy message for sorting purposes
+                $dummyMessage = new Message();
+                $dummyMessage->created_at = $contact['submission']->created_at;
+                $dummyMessage->body = '';
+                
+                $convos[$contactId] = [
+                    'other' => $contact['user'],
+                    'latest' => $dummyMessage,
+                    'unread' => 0,
+                    'job_relationship' => $contact['role']
+                ];
+            } else {
+                // Add job relationship info to existing conversation
+                $convos[$contactId]['job_relationship'] = $contact['role'];
             }
         }
 
@@ -134,22 +189,191 @@ class MessagesController extends Controller
             return redirect('/login');
         }
 
-        $data = $request->validate([
+        $files = $this->normalizeUploadedFiles($request->allFiles()['files'] ?? []);
+
+        $validator = Validator::make($request->all(), [
             'recipient_id' => ['required', 'exists:users,id'],
-            'body' => ['required', 'string', 'max:2000'],
+            'body' => ['nullable', 'string', 'max:2000'],
+            'files' => ['nullable', 'array'],
+            'files.*' => ['nullable', 'file', 'max:20480']
+        ], [
+            'files.*.file' => 'Vienu no pievienotajiem failiem neizdevās augšupielādēt. Lūdzu, mēģiniet vēlreiz.',
+            'files.*.max' => 'Katram pielikumam jābūt ne lielākam par 20 MB.',
         ]);
+
+        $validator->after(function ($validator) use ($request, $files) {
+            $body = trim((string) $request->input('body', ''));
+
+            if ($body === '' && count($files) === 0) {
+                $validator->errors()->add('body', 'Uzrakstiet ziņojumu vai pievienojiet vismaz vienu failu.');
+            }
+
+            foreach ($files as $index => $file) {
+                if (! $file->isValid()) {
+                    $validator->errors()->add("files.$index", $this->uploadErrorMessage($file));
+                }
+            }
+        });
+
+        $data = $validator->validate();
 
         // prevent sending message to yourself
         if ($data['recipient_id'] == Auth::id()) {
-            return redirect('/profile')->with('error', 'You cannot send a message to yourself.');
+            return redirect('/profile')->with('error', 'Jūs nevarat nosūtīt ziņojumu sev.');
         }
 
-        $message = Message::create([
-            'sender_id' => Auth::id(),
-            'recipient_id' => $data['recipient_id'],
-            'body' => $data['body']
-        ]);
+        try {
+            DB::transaction(function () use ($data, $files) {
+                $message = Message::create([
+                    'sender_id' => Auth::id(),
+                    'recipient_id' => $data['recipient_id'],
+                    'body' => $data['body'] ?? ''
+                ]);
 
-        return redirect()->route('messages.conversation', ['user' => $data['recipient_id']])->with('success', 'Message sent.');
+                // handle file uploads if any were provided
+                foreach ($files as $index => $file) {
+                    try {
+                        $path = $file->store('message-files', 'public');
+
+                        if (! $path) {
+                            throw new \Exception('Krātuve neatgrieza faila ceļu.');
+                        }
+
+                        MessageFile::create([
+                            'message_id' => $message->id,
+                            'file_name' => $file->getClientOriginalName(),
+                            'file_path' => $path,
+                            'mime_type' => $file->getMimeType(),
+                            'file_size' => $file->getSize()
+                        ]);
+                    } catch (\Exception $fileError) {
+                        \Log::error("Error uploading file {$index}: " . $fileError->getMessage());
+                        throw new \Exception("Neizdevās augšupielādēt failu {$index}: " . $fileError->getMessage());
+                    }
+                }
+            });
+
+            return redirect()->route('messages.conversation', ['user' => $data['recipient_id']])->with('success', 'Ziņojums nosūtīts.');
+        } catch (\Exception $e) {
+            \Log::error('Message upload error: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'Kļūda sūtot ziņojumu: ' . $e->getMessage()])->withInput();
+        }
+    }
+
+    /**
+     * Normalize uploaded files into a flat array.
+     */
+    private function normalizeUploadedFiles(mixed $files): array
+    {
+        return collect(Arr::wrap($files))
+            ->flatten(1)
+            ->filter(fn ($file) => $file instanceof UploadedFile)
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Convert PHP upload errors into something the UI can show directly.
+     */
+    private function uploadErrorMessage(UploadedFile $file): string
+    {
+        return match ($file->getError()) {
+            UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => 'Šis pielikums ir pārāk liels. Lūdzu, izvēlieties failu, kas ir mazāks par 20 MB.',
+            UPLOAD_ERR_PARTIAL => 'Šis pielikums tika augšupielādēts tikai daļēji. Lūdzu, mēģiniet vēlreiz.',
+            UPLOAD_ERR_NO_FILE => 'Pielikums netika saņemts. Lūdzu, izvēlieties failu un mēģiniet vēlreiz.',
+            UPLOAD_ERR_NO_TMP_DIR, UPLOAD_ERR_CANT_WRITE, UPLOAD_ERR_EXTENSION => 'Serveris nevarēja saglabāt šo pielikumu. Lūdzu, mēģiniet vēlreiz.',
+            default => $file->getErrorMessage(),
+        };
+    }
+
+    /**
+     * Get job relationships between two users
+     */
+    private function getJobRelationships($user1, $user2)
+    {
+        $relationships = [];
+        $seenRoles = [];
+        
+        // Check if they have any job submissions together
+        $submissions = JobSubmission::where(function($q) use ($user1, $user2) {
+            $q->where('user_id', $user1->id)
+              ->whereHas('jobListing', function($subQ) use ($user2) {
+                  $subQ->where('user_id', $user2->id);
+              });
+        })->orWhere(function($q) use ($user1, $user2) {
+            $q->where('user_id', $user2->id)
+              ->whereHas('jobListing', function($subQ) use ($user1) {
+                  $subQ->where('user_id', $user1->id);
+              });
+        })->with('jobListing')->get();
+
+        foreach ($submissions as $submission) {
+            $role = $submission->user_id === $user1->id ? 'worker' : 'client';
+            
+            // Only add each role once
+            if (!in_array($role, $seenRoles)) {
+                $relationships[] = [
+                    'type' => 'job',
+                    'submission' => $submission,
+                    'job' => $submission->jobListing,
+                    'role' => $role
+                ];
+                $seenRoles[] = $role;
+            }
+        }
+        
+        return $relationships;
+    }
+
+    /**
+     * Get all users you have job relationships with
+     */
+    private function getJobRelatedContacts($user)
+    {
+        $contacts = [];
+        
+        // Get users where you are the job owner
+        $jobOwnerSubmissions = JobSubmission::whereHas('jobListing', function($q) use ($user) {
+            $q->where('user_id', $user->id);
+        })->with('user')->get();
+        
+        foreach ($jobOwnerSubmissions as $submission) {
+            if ($submission->user_id !== $user->id) {
+                $contacts[] = [
+                    'user' => $submission->user,
+                    'role' => 'client',
+                    'submission' => $submission
+                ];
+            }
+        }
+        
+        // Get users where you are the worker
+        $workerSubmissions = JobSubmission::where('user_id', $user->id)
+            ->with('jobListing.user')
+            ->get();
+        
+        foreach ($workerSubmissions as $submission) {
+            if ($submission->jobListing->user_id !== $user->id) {
+                $contacts[] = [
+                    'user' => $submission->jobListing->user,
+                    'role' => 'worker',
+                    'submission' => $submission
+                ];
+            }
+        }
+        
+        // Remove duplicates and return unique contacts
+        $uniqueContacts = [];
+        $seenIds = [];
+        
+        foreach ($contacts as $contact) {
+            $userId = $contact['user']->id;
+            if (!in_array($userId, $seenIds)) {
+                $seenIds[] = $userId;
+                $uniqueContacts[] = $contact;
+            }
+        }
+        
+        return $uniqueContacts;
     }
 }

@@ -1,16 +1,16 @@
 <x-layout>
     <x-slot:heading>
-        Your Applications
+        Mani pieteikumi
     </x-slot:heading>
 
     <div class="max-w-4xl mx-auto space-y-10">
         <!-- Received Applications (for help requests you posted) -->
         <div>
-            <h2 class="text-xl font-semibold text-white/90 mb-4">Applications to Your Help Requests</h2>
+            <h2 class="text-xl font-semibold text-white/90 mb-4">Pieteikumi jūsu palīdzības pieprasījumiem</h2>
             
             @if($receivedSubmissions->isEmpty())
                 <div class="bg-gray-800/40 backdrop-blur-sm p-6 rounded-lg border border-gray-700 text-gray-400">
-                    You haven't received any applications yet. When someone applies to help with your requests, they'll appear here.
+                    Jūs vēl neesat saņēmis nevienu pieteikumu. Kad kāds pieteiksies palīdzēt ar jūsu pieprasījumiem, tie parādīsies šeit.
                 </div>
             @else
                 <div class="space-y-4">
@@ -22,20 +22,20 @@
                                     <p class="text-neon-accent text-sm mt-1">
                                     <a href="{{ route('people.show', $submission->user->id) }}" class="hover:text-neon-accent/80 transition-colors duration-200">
                                         {{ $submission->user->first_name }} {{ $submission->user->last_name }}
-                                    </a> wants to help
+                                    </a> vēlas palīdzēt
                                 </p>
                                 </div>
                                 <div>
                                     @if($submission->status === 'claimed')
-                                        <span class="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-xs font-semibold">Claimed</span>
+                                        <span class="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-xs font-semibold">Saņēmts</span>
                                     @elseif($submission->status === 'pending')
-                                        <span class="bg-yellow-500/20 text-yellow-300 px-3 py-1 rounded-full text-xs font-semibold">Pending</span>
+                                        <span class="bg-yellow-500/20 text-yellow-300 px-3 py-1 rounded-full text-xs font-semibold">Gaida</span>
                                     @elseif($submission->status === 'approved')
-                                        <span class="bg-green-500/20 text-green-300 px-3 py-1 rounded-full text-xs font-semibold">Approved</span>
+                                        <span class="bg-green-500/20 text-green-300 px-3 py-1 rounded-full text-xs font-semibold">Apstiprināts</span>
                                     @elseif($submission->status === 'declined')
-                                        <span class="bg-red-500/20 text-red-300 px-3 py-1 rounded-full text-xs font-semibold">Declined</span>
+                                        <span class="bg-red-500/20 text-red-300 px-3 py-1 rounded-full text-xs font-semibold">Noraidīts</span>
                                     @elseif($submission->status === 'admin_review')
-                                        <span class="bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full text-xs font-semibold">Admin Review</span>
+                                        <span class="bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full text-xs font-semibold">Admin pārskatīšana</span>
                                     @endif
                                 </div>
                             </div>
@@ -46,7 +46,7 @@
                             
                             <div class="mt-4 flex justify-between items-center">
                                 <a href="/submissions/{{ $submission->id }}" class="text-neon-accent hover:text-neon-accent/80 transition-colors duration-200 text-sm font-medium">
-                                    View full application
+                                    Skatīt pilnu pieteikumu
                                 </a>
                                 
                                 @if($submission->status === 'pending')
@@ -54,14 +54,14 @@
                                         <form method="POST" action="/submissions/{{ $submission->id }}/approve">
                                             @csrf
                                             <button type="submit" class="bg-green-700 hover:bg-green-600 text-white px-3 py-1 rounded text-xs font-medium transition-colors duration-200">
-                                                Approve
+                                                Apstiprināt
                                             </button>
                                         </form>
                                         
                                         <form method="POST" action="/submissions/{{ $submission->id }}/decline">
                                             @csrf
                                             <button type="submit" class="bg-red-700 hover:bg-red-600 text-white px-3 py-1 rounded text-xs font-medium transition-colors duration-200">
-                                                Decline
+                                                Noraidīt
                                             </button>
                                         </form>
                                     </div>
@@ -75,11 +75,11 @@
         
         <!-- Your Applications (that you sent to others) -->
         <div>
-            <h2 class="text-xl font-semibold text-white/90 mb-4">Your Applications to Help Others</h2>
+            <h2 class="text-xl font-semibold text-white/90 mb-4">Mani pieteikumi, lai palīdzētu citiem</h2>
             
             @if($sentSubmissions->isEmpty())
                 <div class="bg-gray-800/40 backdrop-blur-sm p-6 rounded-lg border border-gray-700 text-gray-400">
-                    You haven't applied to any help requests yet. Browse the help requests and offer your assistance!
+                    Jūs vēl neesat pieteicies nevienu palīdzības pieprasījumu. Pārlūkojiet palīdzības pieprasījumus un piedāvājiet savu palīdzību!
                 </div>
             @else
                 <div class="space-y-4">
@@ -88,7 +88,7 @@
                             <div class="flex justify-between items-start">
                                 <div>
                                     <h3 class="font-semibold text-white/90">{{ $submission->jobListing->title }}</h3>
-                                    <p class="text-gray-400 text-sm mt-1">Posted by 
+                                    <p class="text-gray-400 text-sm mt-1">Publicēja 
                                     <a href="{{ route('people.show', $submission->jobListing->user->id) }}" class="hover:text-neon-accent transition-colors duration-200">
                                         {{ $submission->jobListing->user->first_name }} {{ $submission->jobListing->user->last_name }}
                                     </a>
@@ -96,15 +96,15 @@
                                 </div>
                                 <div>
                                     @if($submission->status === 'claimed')
-                                        <span class="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-xs font-semibold">Claimed</span>
+                                        <span class="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-xs font-semibold">Saņēmts</span>
                                     @elseif($submission->status === 'pending')
-                                        <span class="bg-yellow-500/20 text-yellow-300 px-3 py-1 rounded-full text-xs font-semibold">Pending</span>
+                                        <span class="bg-yellow-500/20 text-yellow-300 px-3 py-1 rounded-full text-xs font-semibold">Gaida</span>
                                     @elseif($submission->status === 'approved')
-                                        <span class="bg-green-500/20 text-green-300 px-3 py-1 rounded-full text-xs font-semibold">Approved</span>
+                                        <span class="bg-green-500/20 text-green-300 px-3 py-1 rounded-full text-xs font-semibold">Apstiprināts</span>
                                     @elseif($submission->status === 'declined')
-                                        <span class="bg-red-500/20 text-red-300 px-3 py-1 rounded-full text-xs font-semibold">Declined</span>
+                                        <span class="bg-red-500/20 text-red-300 px-3 py-1 rounded-full text-xs font-semibold">Noraidīts</span>
                                     @elseif($submission->status === 'admin_review')
-                                        <span class="bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full text-xs font-semibold">Admin Review</span>
+                                        <span class="bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full text-xs font-semibold">Admin pārskatīšana</span>
                                     @endif
                                 </div>
                             </div>
@@ -115,7 +115,7 @@
                             
                             <div class="mt-4">
                                 <a href="/submissions/{{ $submission->id }}" class="text-neon-accent hover:text-neon-accent/80 transition-colors duration-200 text-sm font-medium">
-                                    View details
+                                    Skatīt detaļas
                                 </a>
                             </div>
                         </div>

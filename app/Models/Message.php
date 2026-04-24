@@ -28,6 +28,11 @@ class Message extends Model
         return $this->belongsTo(User::class, 'recipient_id');
     }
 
+    public function files()
+    {
+        return $this->hasMany(MessageFile::class);
+    }
+
     /**
      * encrypt the message body when saving to the database
      */

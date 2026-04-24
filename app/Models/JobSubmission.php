@@ -91,17 +91,12 @@ class JobSubmission extends Model
     // check if submission can be disputed
     public function canBeDisputed()
     {
-        // always decline if already frozen with dispute
-        if ($this->is_frozen && $this->dispute_status !== self::DISPUTE_NONE) {
-            return false;
-        }
-
         // if already has dispute, cannot dispute again
         if ($this->dispute_status !== self::DISPUTE_NONE) {
             return false;
         }
 
-        // always allow disputes for involved parties (no timeout restrictions)
+        // always allow disputes for involved parties
         return true;
     }
 
@@ -125,48 +120,5 @@ class JobSubmission extends Model
         $this->is_frozen = false;
         $this->freeze_reason = null;
         $this->save();
-    }
-
-    // get timeout warning message
-    public function getTimeoutWarning()
-    {
-        if ($this->is_frozen || $this->dispute_status !== self::DISPUTE_NONE) {
-            return null;
-        }
-
-        $now = now();
-        $hoursSinceUpdate = $this->updated_at->diffInHours($now);
-
-        if ($this->status === self::STATUS_CLAIMED && $hoursSinceUpdate > 24) {
-            $remainingHours = max(0, 48 - $hoursSinceUpdate);
-            return [
-                'type' => 'claim_timeout',
-                'message' => "Worker has been inactive for " . round($hoursSinceUpdate) . " hours.",
-                'hours_remaining' => $remainingHours,
-                'severity' => $remainingHours <= 12 ? 'high' : ($remainingHours <= 24 ? 'medium' : 'low')
-            ];
-        }
-
-        if ($this->status === self::STATUS_PENDING && $hoursSinceUpdate > 48) {
-            $remainingHours = max(0, 72 - $hoursSinceUpdate);
-            return [
-                'type' => 'pending_timeout',
-                'message' => "Job has been pending for {$hoursSinceUpdate} hours. Dispute will be available in {$remainingHours} hours if not approved.",
-                'hours_remaining' => $remainingHours,
-                'severity' => $remainingHours <= 12 ? 'high' : ($remainingHours <= 24 ? 'medium' : 'low')
-            ];
-        }
-
-        if ($this->status === self::STATUS_APPROVED && $hoursSinceUpdate > 12 && !$this->review) {
-            $remainingHours = max(0, 24 - $hoursSinceUpdate);
-            return [
-                'type' => 'review_timeout',
-                'message' => "Job was approved {$hoursSinceUpdate} hours ago but no review left. Dispute will be available in {$remainingHours} hours.",
-                'hours_remaining' => $remainingHours,
-                'severity' => $remainingHours <= 6 ? 'high' : ($remainingHours <= 12 ? 'medium' : 'low')
-            ];
-        }
-
-        return null;
     }
 }

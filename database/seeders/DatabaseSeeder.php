@@ -11,13 +11,17 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // seed users and jobs; user seeder will create a demo/admin user too
+        // seed users and jobs only - no submissions or reviews
         $this->call([
             \Database\Seeders\AdminSeeder::class,
             \Database\Seeders\UserSeeder::class,
             \Database\Seeders\JobSeeder::class,
-            \Database\Seeders\JobSubmissionSeeder::class,
-            \Database\Seeders\ReviewSeeder::class,
         ]);
+    }
+
+    // automatically run seeder when called from migration
+    public function runWithDefaults(): void
+    {
+        $this->run();
     }
 }

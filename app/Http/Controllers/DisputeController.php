@@ -13,15 +13,10 @@ class DisputeController extends Controller
      */
     public function create(JobSubmission $submission)
     {
-        // check if user can dispute this submission
-        if (!$submission->canBeDisputed()) {
-            return back()->with('error', 'This submission cannot be disputed.');
-        }
-
         // check if user is involved in this job
         $user = Auth::user();
         if ($submission->user_id !== $user->id && $submission->jobListing->user_id !== $user->id) {
-            return back()->with('error', 'You are not authorized to dispute this submission.');
+            return back()->with('error', 'Jums nav ties\u012bbu str\u012bdu\u0113t par \u0161o iesniegumu.');
         }
 
         return view('disputes.create', [
@@ -39,15 +34,10 @@ class DisputeController extends Controller
             'reason' => 'required|string|min:10|max:1000'
         ]);
 
-        // check if user can dispute this submission
-        if (!$submission->canBeDisputed()) {
-            return back()->with('error', 'This submission cannot be disputed.');
-        }
-
         // check if user is involved in this job
         $user = Auth::user();
         if ($submission->user_id !== $user->id && $submission->jobListing->user_id !== $user->id) {
-            return back()->with('error', 'You are not authorized to dispute this submission.');
+            return back()->with('error', 'Jums nav ties\u012bbu str\u012bdu\u0113t par \u0161o iesniegumu.');
         }
 
         // create dispute and freeze submission
@@ -56,11 +46,11 @@ class DisputeController extends Controller
             'dispute_reason' => $request->reason,
             'dispute_initiated_by' => $user->id,
             'is_frozen' => true,
-            'freeze_reason' => 'Dispute initiated by ' . $user->first_name . ' ' . $user->last_name
+            'freeze_reason' => 'Strīdu uzsāka ' . $user->first_name . ' ' . $user->last_name
         ]);
 
         return redirect()->route('submissions.show', $submission)
-            ->with('success', 'Dispute has been submitted. An admin will review it soon.');
+            ->with('success', 'Str\u012bds iesniegts. Administr\u0101tors to p\u0101rskat\u012bs dr\u012bz.');
     }
 
     /**
@@ -74,7 +64,7 @@ class DisputeController extends Controller
 
         $disputes = JobSubmission::with(['user', 'jobListing.user', 'disputeInitiator', 'disputeResolver'])
             ->where(function($query) {
-                // show both manual disputes and admin reviews
+                // show disputes and admin reviews
                 $query->where('dispute_status', '!=', JobSubmission::DISPUTE_NONE)
                       ->orWhere('status', JobSubmission::STATUS_ADMIN_REVIEW);
             })
@@ -138,13 +128,13 @@ class DisputeController extends Controller
                 \App\Models\Transaction::create([
                     'user_id' => $submission->user_id,
                     'amount' => $submission->jobListing->time_credits,
-                    'description' => "Completed job: {$submission->jobListing->title}"
+                    'description' => "Pabeigts darbs: {$submission->jobListing->title}"
                 ]);
-                
+
                 \App\Models\Transaction::create([
                     'user_id' => $submission->jobListing->user_id,
                     'amount' => -$submission->jobListing->time_credits,
-                    'description' => "Paid for job completion: {$submission->jobListing->title}"
+                    'description' => "Samaksāts par pabeigtu darbu: {$submission->jobListing->title}"
                 ]);
                 break;
 
@@ -166,6 +156,6 @@ class DisputeController extends Controller
         }
 
         return redirect()->route('disputes.index')
-            ->with('success', 'Dispute has been resolved successfully.');
+            ->with('success', 'Strīds veiksmīgi atrisināts.');
     }
 }

@@ -8,62 +8,62 @@ return [
      |
      */
     'creative' => [
-        'label' => 'Creative Services',
+        'label' => 'Radošie pakalpojumi',
         'children' => [
-            'creative.logo' => 'Logo & Branding',
-            'creative.graphic' => 'Graphic Design',
-            'creative.video' => 'Video & Animation',
-            'creative.copy' => 'Copywriting & Content',
-            'creative.uiux' => 'UI / UX Design',
+            'creative.logo' => 'Logotipi un zīmolu dizains',
+            'creative.graphic' => 'Grafiskais dizains',
+            'creative.video' => 'Video un animācija',
+            'creative.copy' => 'Tekstu rakstīšana un saturs',
+            'creative.uiux' => 'UI / UX dizains',
         ],
     ],
 
     'technology' => [
-        'label' => 'Technology',
+        'label' => 'Tehnoloģijas',
         'children' => [
-            'technology.web' => 'Web Development',
-            'technology.mobile' => 'Mobile Apps',
-            'technology.backend' => 'Backend / APIs',
-            'technology.devops' => 'DevOps & Infrastructure',
-            'technology.data' => 'Data, ML & Analytics',
+            'technology.web' => 'Web izstrāde',
+            'technology.mobile' => 'Mobilās aplikācijas',
+            'technology.backend' => 'Backend / API',
+            'technology.devops' => 'DevOps un infrastruktūra',
+            'technology.data' => 'Dati, ML un analītika',
         ],
     ],
 
     'education' => [
-        'label' => 'Education & Coaching',
+        'label' => 'Izglītība un mācība',
         'children' => [
-            'education.tutoring' => 'Tutoring',
-            'education.languages' => 'Languages',
-            'education.career' => 'Career Coaching',
-            'education.design' => 'Design Mentoring',
+            'education.tutoring' => 'Privātstundas',
+            'education.languages' => 'Valodas',
+            'education.career' => 'Karjeras konsultācijas',
+            'education.design' => 'Dizaina mentorēšana',
         ],
     ],
 
     'professional' => [
-        'label' => 'Professional Services',
+        'label' => 'Profesionālie pakalpojumi',
         'children' => [
-            'professional.accounting' => 'Accounting & Bookkeeping',
-            'professional.legal' => 'Legal Advice',
-            'professional.consulting' => 'Business Consulting',
-            'professional.hr' => 'HR & Recruiting',
+            'professional.accounting' => 'Grāmatvedība un uzskaites vedēšana',
+            'professional.legal' => 'Juridiskie padomi',
+            'professional.consulting' => 'Biznesa konsultācijas',
+            'professional.hr' => 'HR un darbinieku atlase',
         ],
     ],
 
     'marketing' => [
-        'label' => 'Marketing & Growth',
+        'label' => 'Mārketings un izaugsme',
         'children' => [
-            'marketing.seo' => 'SEO & Content',
-            'marketing.smm' => 'Social Media',
-            'marketing.ads' => 'Paid Advertising',
-            'marketing.email' => 'Email Marketing',
+            'marketing.seo' => 'SEO un saturs',
+            'marketing.smm' => 'Sociālie mediji',
+            'marketing.ads' => 'Apmaksātā reklāma',
+            'marketing.email' => 'E-pasta mārketings',
         ],
     ],
 
     'other' => [
-        'label' => 'Other / Misc',
+        'label' => 'Citi / dažādi',
         'children' => [
-            'other.general' => 'General Help',
-            'other.research' => 'Research & Data Entry',
+            'other.general' => 'Vispārīgā palīdzība',
+            'other.research' => 'Pētniecība un datu ievade',
         ],
     ],
 ];

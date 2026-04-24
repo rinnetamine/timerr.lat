@@ -38,5 +38,59 @@ class AdminSeeder extends Seeder
                 'email_verified_at' => now(),
             ]
         );
+
+        // create additional static user accounts
+        $staticUsers = [
+            [
+                'email' => 'user1@timerr.lat',
+                'first_name' => 'Jānis',
+                'last_name' => 'Bērziņš',
+                'password' => 'user1',
+                'time_credits' => 75,
+            ],
+            [
+                'email' => 'user2@timerr.lat',
+                'first_name' => 'Māra',
+                'last_name' => 'Kalniņa',
+                'password' => 'user2',
+                'time_credits' => 120,
+            ],
+            [
+                'email' => 'user3@timerr.lat',
+                'first_name' => 'Andris',
+                'last_name' => 'Ozoliņš',
+                'password' => 'user3',
+                'time_credits' => 50,
+            ],
+            [
+                'email' => 'user4@timerr.lat',
+                'first_name' => 'Līga',
+                'last_name' => 'Liepiņa',
+                'password' => 'user4',
+                'time_credits' => 90,
+            ],
+            [
+                'email' => 'user5@timerr.lat',
+                'first_name' => 'Guntis',
+                'last_name' => 'Krūmiņš',
+                'password' => 'user5',
+                'time_credits' => 60,
+            ],
+        ];
+
+        foreach ($staticUsers as $userData) {
+            User::updateOrCreate(
+                ['email' => $userData['email']],
+                [
+                    'first_name' => $userData['first_name'],
+                    'last_name' => $userData['last_name'],
+                    'email' => $userData['email'],
+                    'password' => Hash::make($userData['password']),
+                    'role' => 'user',
+                    'time_credits' => $userData['time_credits'],
+                    'email_verified_at' => now(),
+                ]
+            );
+        }
     }
 }

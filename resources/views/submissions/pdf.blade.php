@@ -1,10 +1,15 @@
 <!doctype html>
-<html lang="en">
+<html lang="lv">
 <head>
     <meta charset="utf-8" />
-    <title>Submission #{{ $submission->id }} - Timerr</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Iesniegums #{{ $submission->id }} - Timerr</title>
     <style>
-        body { font-family: Arial, Helvetica, sans-serif; color: #0f172a; }
+        @charset "UTF-8";
+        body { 
+            font-family: "DejaVu Sans", "Arial Unicode MS", Arial, Helvetica, sans-serif; 
+            color: #0f172a; 
+        }
         .container { max-width: 800px; margin: 24px auto; padding: 20px; }
         h1 { font-size: 20px; margin-bottom: 8px; }
         .muted { color: #55617a; font-size: 13px; }
@@ -18,41 +23,41 @@
 </head>
 <body>
     <div class="container">
-        <h1>Submission #{{ $submission->id }} — {{ $submission->jobListing->title }}</h1>
-        <div class="muted">Generated: {{ now()->toDateTimeString() }}</div>
+        <h1>Iesniegums #{{ $submission->id }} — {{ $submission->jobListing->title }}</h1>
+        <div class="muted">Ģenerēts: {{ now()->toDateTimeString() }}</div>
 
         <div class="box">
-            <div class="label">Status</div>
+            <div class="label">Statuss</div>
             <div class="value">{{ ucfirst($submission->status) }}</div>
         </div>
 
         <div class="box">
-            <div class="label">Applicant</div>
+            <div class="label">Pieteicējs</div>
             <div class="value">{{ $submission->user->first_name }} {{ $submission->user->last_name }} &lt;{{ $submission->user->email }}&gt;</div>
-            <div class="small">User ID: {{ $submission->user->id }}</div>
+            <div class="small">Lietotāja ID: {{ $submission->user->id }}</div>
         </div>
 
         <div class="box">
-            <div class="label">Help request</div>
+            <div class="label">Palīdzības pieprasījums</div>
             <div class="value">{{ $submission->jobListing->title }}</div>
-            <div class="small">Category: {{ $submission->jobListing->category }} — Credits: {{ $submission->jobListing->time_credits }}</div>
+            <div class="small">Kategorija: {{ $submission->jobListing->category }} — Kredīti: {{ $submission->jobListing->time_credits }}</div>
         </div>
 
         <div class="box">
-            <div class="label">Message</div>
+            <div class="label">Ziņojums</div>
             <div class="value">{!! nl2br(e($submission->message)) !!}</div>
         </div>
 
         @if($submission->admin_notes)
             <div class="box">
-                <div class="label">Admin notes</div>
+                <div class="label">Admin piezīmes</div>
                 <div class="value">{!! nl2br(e($submission->admin_notes)) !!}</div>
             </div>
         @endif
 
         @if($submission->files->count())
             <div class="box">
-                <div class="label">Attached files</div>
+                <div class="label">Pievienotie faili</div>
                 <div class="files">
                     @foreach($submission->files as $file)
                         <div class="file">• {{ $file->file_name }} ({{ round($file->file_size/1024, 1) }} KB)</div>
@@ -61,7 +66,7 @@
             </div>
         @endif
 
-        <div class="small">This document was exported from Timerr. For more details visit the site.</div>
+        <div class="small">Šis dokuments tika eksportēts no Timerr. Lai iegūtu vairāk informācijas, apmeklējiet vietni.</div>
     </div>
 </body>
 </html>

@@ -19,7 +19,7 @@ class JobSubmissionSeeder extends Seeder
 
         // create submissions for jobs
         foreach ($jobs as $job) {
-            $submissionCount = rand(0, 3);
+            $submissionCount = rand(0, 1);
             
             for ($i = 0; $i < $submissionCount; $i++) {
                 // pick a random user who doesn't own the job
@@ -101,10 +101,10 @@ class JobSubmissionSeeder extends Seeder
 
         // ensure we have some approved submissions for testing
         $approvedCount = JobSubmission::where('status', JobSubmission::STATUS_APPROVED)->count();
-        if ($approvedCount < 5) {
+        if ($approvedCount < 2) {
             // create some approved submissions if we don't have enough
-            $jobs = Job::take(5)->get();
-            $users = User::where('id', '!=', $jobs->first()->user_id)->take(5)->get();
+            $jobs = Job::take(2)->get();
+            $users = User::where('id', '!=', $jobs->first()->user_id)->take(2)->get();
             
             foreach ($jobs as $index => $job) {
                 if ($index < $users->count()) {
@@ -147,44 +147,6 @@ class JobSubmissionSeeder extends Seeder
                 'dispute_initiated_by' => $job->user_id,
                 'is_frozen' => true,
                 'freeze_reason' => 'Automatically frozen due to worker inactivity timeout'
-            ]);
-        }
-
-        // scenario 2: Job owner approval delay dispute (72+ hours)
-        if ($jobs->count() >= 2 && $users->count() >= 3) {
-            $job = $jobs->skip(1)->first();
-            $worker = $users->where('id', '!=', $job->user_id)->skip(1)->first();
-            
-            JobSubmission::factory()->create([
-                'job_listing_id' => $job->id,
-                'user_id' => $worker->id,
-                'status' => JobSubmission::STATUS_PENDING,
-                'created_at' => now()->subDays(4), // 4 days old
-                'updated_at' => now()->subDays(4),
-                'dispute_status' => JobSubmission::DISPUTE_REQUESTED,
-                'dispute_reason' => 'Job owner has not reviewed submission for over 72 hours',
-                'dispute_initiated_by' => $worker->id,
-                'is_frozen' => true,
-                'freeze_reason' => 'Automatically frozen due to approval timeout'
-            ]);
-        }
-
-        // Scenario 3: resolved dispute
-        if ($jobs->count() >= 3 && $users->count() >= 4 && $adminUser) {
-            $job = $jobs->skip(2)->first();
-            $worker = $users->where('id', '!=', $job->user_id)->skip(2)->first();
-            
-            JobSubmission::factory()->create([
-                'job_listing_id' => $job->id,
-                'user_id' => $worker->id,
-                'status' => JobSubmission::STATUS_PENDING,
-                'dispute_status' => JobSubmission::DISPUTE_RESOLVED,
-                'dispute_reason' => 'Quality dispute - resolved in favor of worker',
-                'dispute_initiated_by' => $job->user_id,
-                'dispute_resolved_by' => $adminUser->id,
-                'dispute_resolved_at' => now()->subDay(),
-                'is_frozen' => false,
-                'freeze_reason' => 'Dispute resolved - submission unfrozen'
             ]);
         }
     }
