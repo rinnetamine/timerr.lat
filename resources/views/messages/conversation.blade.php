@@ -175,10 +175,10 @@
                                     @foreach($m->files as $file)
                                         @if($file->isImage())
                                             <div class="relative group">
-                                                <img src="{{ asset('storage/' . $file->file_path) }}" 
+                                                <img src="{{ $file->url }}" 
                                                      alt="{{ $file->file_name }}" 
                                                      class="max-w-xs rounded cursor-pointer hover:opacity-90 transition"
-                                                     onclick="window.open('{{ asset('storage/' . $file->file_path) }}', '_blank')">
+                                                     onclick="window.open('{{ $file->url }}', '_blank')">
                                                 <div class="absolute bottom-1 right-1 bg-black/70 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
                                                     {{ $file->formatted_size }}
                                                 </div>
@@ -194,7 +194,7 @@
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
                                                     </svg>
                                                 @endif
-                                                <a href="{{ asset('storage/' . $file->file_path) }}" 
+                                                <a href="{{ $file->url }}" 
                                                    target="_blank" 
                                                    class="text-neon-accent hover:underline flex-1 truncate">
                                                     {{ $file->file_name }}

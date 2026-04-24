@@ -122,6 +122,7 @@ Route::middleware(['auth'])->group(function () {
 // messaging
 Route::middleware('auth')->group(function () {
     Route::get('/messages', [MessagesController::class, 'index'])->name('messages.index');
+    Route::get('/messages/files/{file}', [MessagesController::class, 'downloadFile'])->name('messages.files.download');
     Route::get('/messages/{user}', [MessagesController::class, 'conversation'])->name('messages.conversation');
     Route::post('/messages', [MessagesController::class, 'store'])->name('messages.store');
 });

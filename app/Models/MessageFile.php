@@ -24,7 +24,7 @@ class MessageFile extends Model
 
     public function getUrlAttribute()
     {
-        return asset('storage/' . $this->file_path);
+        return route('messages.files.download', $this);
     }
 
     public function getFormattedSizeAttribute()

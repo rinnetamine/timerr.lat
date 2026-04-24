@@ -11,10 +11,43 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class MessagesController extends Controller
 {
+    public function downloadFile(MessageFile $file)
+    {
+        if (! Auth::check()) {
+            return redirect('/login');
+        }
+
+        $message = $file->message;
+        $userId = Auth::id();
+
+        if ($userId !== $message->sender_id && $userId !== $message->recipient_id) {
+            abort(403, 'Jums nav atļauts piekļūt šim failam.');
+        }
+
+        if (! Storage::disk('public')->exists($file->file_path)) {
+            abort(404, 'Fails nav atrasts.');
+        }
+
+        $path = Storage::disk('public')->path($file->file_path);
+
+        if ($file->isImage()) {
+            return Response::file($path, [
+                'Content-Type' => $file->mime_type,
+                'Content-Disposition' => 'inline; filename="' . addslashes($file->file_name) . '"',
+            ]);
+        }
+
+        return Response::download($path, $file->file_name, [
+            'Content-Type' => $file->mime_type,
+        ]);
+    }
+
     // show conversation between authenticated user and given user
     public function conversation(User $user)
     {
