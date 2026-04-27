@@ -7,9 +7,7 @@
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-6">
                     <div class="flex-shrink-0">
-                        <div class="w-24 h-24 rounded-full bg-gray-700 flex items-center justify-center text-3xl text-white/90">
-                            {{ strtoupper(substr($user->first_name, 0, 1) . substr($user->last_name, 0, 1)) }}
-                        </div>
+                        <x-avatar :user="$user" size="lg" />
                     </div>
                     <div class="flex-1">
                         <div class="flex items-center gap-2">

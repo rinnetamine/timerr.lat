@@ -7,10 +7,12 @@
         <div class="bg-gray-800/40 backdrop-blur-sm p-8 rounded-lg border border-gray-700">
             <!-- help request info-->
             <div class="mb-6">
+                <x-job-image :job="$submission->jobListing" class="mb-5" />
                 <h2 class="text-xl font-semibold text-white/90">{{ $submission->jobListing->title }}</h2>
                 <p class="text-gray-400 text-sm mt-1">
                     Palīdzības pieprasījumu no 
-                    <a href="{{ route('messages.conversation', $submission->jobListing->user->id) }}" class="hover:text-neon-accent transition-colors duration-200">
+                    <a href="{{ route('messages.conversation', $submission->jobListing->user->id) }}" class="inline-flex items-center gap-2 hover:text-neon-accent transition-colors duration-200">
+                        <x-avatar :user="$submission->jobListing->user" size="sm" />
                         {{ $submission->jobListing->user->first_name }} {{ $submission->jobListing->user->last_name }}
                     </a>
                 </p>
@@ -46,7 +48,8 @@
             <div class="border-t border-gray-700 pt-4 mb-6">
                 <h3 class="font-semibold text-white/90 mb-2">Pieteicējs</h3>
                 <p class="text-gray-300">
-                    <a href="{{ route('messages.conversation', $submission->user->id) }}" class="hover:text-neon-accent transition-colors duration-200">
+                    <a href="{{ route('messages.conversation', $submission->user->id) }}" class="inline-flex items-center gap-2 hover:text-neon-accent transition-colors duration-200">
+                        <x-avatar :user="$submission->user" size="sm" />
                         {{ $submission->user->first_name }} {{ $submission->user->last_name }}
                     </a>
                 </p>
@@ -135,7 +138,7 @@
                         <a href="/submissions" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm font-medium transition-colors duration-200">
                             Atpakaļ uz pieteikumiem
                         </a>
-                        <a href="{{ route('submissions.export', $submission->id) }}" class="ml-3 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm font-medium transition-colors duration-200">Lejupielādēt HTML</a>
+                        <a href="{{ route('submissions.export', $submission->id) }}" class="ml-3 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm font-medium transition-colors duration-200">Lejupielādēt PDF</a>
                         <div class="flex space-x-3">
                             <form method="POST" action="/submissions/{{ $submission->id }}/decline" id="declineForm" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
                                 @csrf
@@ -180,7 +183,7 @@
                         <a href="/submissions" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm font-medium transition-colors duration-200">
                             Atpakaļ uz pieteikumiem
                         </a>
-                        <a href="{{ route('submissions.export', $submission->id) }}" class="ml-2 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm font-medium transition-colors duration-200">Lejupielādēt HTML</a>
+                        <a href="{{ route('submissions.export', $submission->id) }}" class="ml-2 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm font-medium transition-colors duration-200">Lejupielādēt PDF</a>
                     </div>
                 </div>
             @endif

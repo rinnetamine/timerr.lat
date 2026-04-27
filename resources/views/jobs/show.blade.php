@@ -4,13 +4,18 @@
     </x-slot:heading>
 
     <div class="max-w-3xl mx-auto">
-        <div class="bg-gray-800/40 backdrop-blur-sm p-8 rounded-lg border border-gray-700">
+        <div class="overflow-hidden bg-gray-800/40 backdrop-blur-sm rounded-lg border border-gray-700">
+            <x-job-image :job="$job" class="rounded-none border-0 border-b border-gray-700" />
+            <div class="p-8">
             <div class="flex items-center justify-between mb-4">
                 <div>
-                    <div class="font-bold text-neon-accent text-sm">
+                    <div class="font-bold text-neon-accent text-sm flex items-center gap-2">
+                        <x-avatar :user="$job->user" size="sm" />
+                        <span>
                         <a href="{{ route('messages.conversation', $job->user->id) }}" class="hover:text-neon-accent/80 transition-colors duration-200">
                             {{ $job->user->first_name }} {{ $job->user->last_name }}
                         </a> vajag palīdzību
+                        </span>
                     </div>
                     <h2 class="font-bold text-xl text-white/90 mt-1">{{ $job->title }}</h2>
                 </div>
@@ -182,6 +187,7 @@ Iesniegt pieteikumu
                     </form>
                 </div>
             @endcan
+            </div>
         </div>
     </div>
 </x-layout>

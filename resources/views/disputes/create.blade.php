@@ -2,20 +2,21 @@
     <x-slot name="heading">Iesniegt strīdu</x-slot>
 
     <div class="max-w-2xl mx-auto">
-        <div class="bg-gray-900/60 border border-gray-700 rounded-lg p-6 mb-6">
-            <h2 class="text-xl font-bold text-white mb-4">Darba informācija</h2>
-            <div class="space-y-3">
+	        <div class="bg-gray-900/60 border border-gray-700 rounded-lg p-6 mb-6">
+	            <h2 class="text-xl font-bold text-white mb-4">Darba informācija</h2>
+                <x-job-image :job="$submission->jobListing" class="mb-4" />
+	            <div class="space-y-3">
                 <div>
                     <span class="text-gray-400">Darba nosaukums:</span>
                     <span class="text-white ml-2">{{ $submission->jobListing->title }}</span>
                 </div>
                 <div>
                     <span class="text-gray-400">Publicēja:</span>
-                    <span class="text-white ml-2">{{ $submission->jobListing->user->first_name }} {{ $submission->jobListing->user->last_name }}</span>
+	                    <span class="inline-flex items-center gap-2 text-white ml-2"><x-avatar :user="$submission->jobListing->user" size="sm" />{{ $submission->jobListing->user->first_name }} {{ $submission->jobListing->user->last_name }}</span>
                 </div>
                 <div>
                     <span class="text-gray-400">Iesniedza:</span>
-                    <span class="text-white ml-2">{{ $submission->user->first_name }} {{ $submission->user->last_name }}</span>
+	                    <span class="inline-flex items-center gap-2 text-white ml-2"><x-avatar :user="$submission->user" size="sm" />{{ $submission->user->first_name }} {{ $submission->user->last_name }}</span>
                 </div>
                 <div>
                     <span class="text-gray-400">Laika kredīti:</span>

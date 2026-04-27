@@ -5,7 +5,7 @@
 
     <div class="max-w-2xl mx-auto">
         <div class="bg-gray-800/40 backdrop-blur-sm p-8 rounded-lg border border-gray-700">
-            <form method="POST" action="/jobs/{{ $job->id }}">
+            <form method="POST" action="/jobs/{{ $job->id }}" enctype="multipart/form-data">
                 @csrf
                 @method('PATCH')
 
@@ -70,6 +70,17 @@
                                         @endforeach
                                     </select>
                                     <x-form-error name="category" />
+                                </div>
+                            </x-form-field>
+
+                            <x-form-field>
+                                <x-form-label for="image">Attēls</x-form-label>
+                                <div class="mt-2 space-y-3">
+                                    <x-job-image :job="$job" />
+                                    <input type="file" name="image" id="image" accept="image/jpeg,image/png,image/webp"
+                                        class="block w-full rounded-md border border-gray-700 bg-gray-900/60 px-3 py-2 text-sm text-gray-300 file:mr-4 file:rounded-md file:border-0 file:bg-neon-accent file:px-3 file:py-2 file:text-sm file:font-medium file:text-black hover:file:bg-neon-accent/80">
+                                    <p class="text-sm text-gray-400">Neobligāti. Augšupielādējot jaunu attēlu, tas aizstās pašreizējo.</p>
+                                    <x-form-error name="image" />
                                 </div>
                             </x-form-field>
                         </div>

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#172033"/>
+      <stop offset="1" stop-color="#241537"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#00ff9d"/>
+      <stop offset="1" stop-color="#f59e0b"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="540" fill="url(#bg)"/>
+  <circle cx="760" cy="90" r="170" fill="#00ff9d" opacity=".08"/>
+  <circle cx="170" cy="440" r="210" fill="#f59e0b" opacity=".09"/>
+  <path d="M230 330c88-130 180-208 275-234 67-18 124-2 171 48 25 27 39 59 41 96-64-26-126-27-185-4-76 30-139 91-190 184-35-11-72-41-112-90z" fill="url(#accent)" opacity=".86"/>
+  <path d="M235 332c39 48 77 78 114 89-45 23-98 39-160 48 11-50 26-95 46-137z" fill="#00ff9d" opacity=".8"/>
+  <path d="M706 238c10 80-28 137-114 172-62 25-136 29-220 10 49-90 108-149 178-177 50-20 102-22 156-5z" fill="#ffffff" opacity=".12"/>
+  <g fill="none" stroke="#ffffff" stroke-opacity=".14" stroke-width="8">
+    <path d="M170 120h180"/>
+    <path d="M170 155h110"/>
+    <path d="M650 410h150"/>
+    <path d="M650 445h95"/>
+  </g>
+</svg>

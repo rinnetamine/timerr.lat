@@ -215,6 +215,95 @@ class MessagesController extends Controller
         ]);
     }
 
+    public function create(Request $request)
+    {
+        if (!Auth::check()) {
+            return redirect('/login');
+        }
+
+        $me = Auth::user();
+        $search = trim((string) $request->query('q', ''));
+
+        $all = Message::where('sender_id', $me->id)
+            ->orWhere('recipient_id', $me->id)
+            ->orderByDesc('created_at')
+            ->get();
+
+        $convos = [];
+        $conversationUserIds = [];
+
+        foreach ($all as $m) {
+            $otherId = $m->sender_id === $me->id ? $m->recipient_id : $m->sender_id;
+            $conversationUserIds[] = $otherId;
+
+            if (!isset($convos[$otherId])) {
+                $convos[$otherId] = [
+                    'other' => User::find($otherId),
+                    'latest' => $m,
+                    'unread' => 0
+                ];
+            }
+        }
+
+        $jobContacts = $this->getJobRelatedContacts($me);
+
+        foreach ($jobContacts as $contact) {
+            $contactId = $contact['user']->id;
+            $conversationUserIds[] = $contactId;
+
+            if (!isset($convos[$contactId])) {
+                $dummyMessage = new Message();
+                $dummyMessage->created_at = $contact['submission']->created_at;
+                $dummyMessage->body = '';
+
+                $convos[$contactId] = [
+                    'other' => $contact['user'],
+                    'latest' => $dummyMessage,
+                    'unread' => 0,
+                    'job_relationship' => $contact['role']
+                ];
+            } else {
+                $convos[$contactId]['job_relationship'] = $contact['role'];
+            }
+        }
+
+        $unreads = Message::where('recipient_id', $me->id)
+            ->whereNull('read_at')
+            ->select('sender_id', DB::raw('count(*) as cnt'))
+            ->groupBy('sender_id')
+            ->get()
+            ->keyBy('sender_id');
+
+        foreach ($convos as $id => &$c) {
+            $c['unread'] = $unreads->has($id) ? $unreads->get($id)->cnt : 0;
+        }
+
+        $conversations = collect($convos)->sortByDesc(function ($c) {
+            return $c['latest']->created_at;
+        })->values();
+
+        $users = User::query()
+            ->whereKeyNot($me->id)
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($query) use ($search) {
+                    $query->where('first_name', 'like', "%{$search}%")
+                        ->orWhere('last_name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy('first_name')
+            ->orderBy('last_name')
+            ->paginate(8)
+            ->withQueryString();
+
+        return view('messages.create', [
+            'conversations' => $conversations,
+            'users' => $users,
+            'search' => $search,
+            'conversationUserIds' => collect($conversationUserIds)->unique()->values(),
+        ]);
+    }
+
     // store a new message
     public function store(Request $request)
     {
@@ -286,7 +375,7 @@ class MessagesController extends Controller
                 }
             });
 
-            return redirect()->route('messages.conversation', ['user' => $data['recipient_id']])->with('success', 'Ziņojums nosūtīts.');
+            return redirect()->route('messages.conversation', ['user' => $data['recipient_id']]);
         } catch (\Exception $e) {
             \Log::error('Message upload error: ' . $e->getMessage());
             return back()->withErrors(['error' => 'Kļūda sūtot ziņojumu: ' . $e->getMessage()])->withInput();

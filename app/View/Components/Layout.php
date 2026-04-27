@@ -10,7 +10,11 @@ use Illuminate\View\Component;
 class Layout extends Component
 {
     // component constructor
-    public function __construct()
+    public function __construct(
+        public bool $hidePageHeader = false,
+        public bool $hideFooter = false,
+        public bool $stretchMain = false,
+    )
     {
     }
 

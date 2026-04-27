@@ -8,6 +8,8 @@ use App\Models\User;
 use App\Models\Transaction;
 use App\Models\ContactMessage;
 use App\Models\Job;
+use App\Models\Message;
+use App\Models\Review;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 
@@ -66,7 +68,7 @@ class AdminController extends Controller
             // commit transaction
             DB::commit();
             
-            return redirect('/profile')->with('success', 'Pieteikums apstiprinu0101ts un kredu012bti pu0101rnesti pieteiku0113jam.');
+            return redirect('/profile')->with('success', 'Pieteikums apstiprināts un kredīti pārnesti pieteicējam.');
             
         } catch (\Exception $e) {
             // rollback transaction on error
@@ -124,7 +126,7 @@ class AdminController extends Controller
 
         try {
             $message->delete();
-            return back()->with('success', 'Ziu0146ojums dzu0113sts.');
+            return back()->with('success', 'Ziņojums dzēsts.');
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Failed to delete contact message: ' . $e->getMessage());
             return back()->withErrors(['error' => 'Neizdevās dzēst ziņojumu.']);
@@ -136,37 +138,66 @@ class AdminController extends Controller
     {
         $this->checkAdmin();
 
-        // core admin stats
         $totalUsers = User::count();
         $newUsersWeek = User::where('created_at', '>=', now()->subDays(7))->count();
         $totalJobs = Job::count();
+        $newJobsWeek = Job::where('created_at', '>=', now()->subDays(7))->count();
         $recentJobs = Job::latest()->take(5)->with('user')->get();
         $totalSubmissions = JobSubmission::count();
         $pendingAdmin = JobSubmission::where('status', JobSubmission::STATUS_ADMIN_REVIEW)->count();
+        $activeDisputes = JobSubmission::whereIn('dispute_status', [
+            JobSubmission::DISPUTE_REQUESTED,
+            JobSubmission::DISPUTE_UNDER_REVIEW,
+        ])->count();
+        $resolvedDisputes = JobSubmission::where('dispute_status', JobSubmission::DISPUTE_RESOLVED)->count();
+        $approvedSubmissions = JobSubmission::where('status', JobSubmission::STATUS_APPROVED)->count();
+        $pendingSubmissions = JobSubmission::where('status', JobSubmission::STATUS_PENDING)->count();
+        $claimedSubmissions = JobSubmission::where('status', JobSubmission::STATUS_CLAIMED)->count();
+        $declinedSubmissions = JobSubmission::where('status', JobSubmission::STATUS_DECLINED)->count();
         $recentSignups = User::latest()->take(5)->get();
-        $recentTransactions = Transaction::latest()->take(5)->get();
+        $recentTransactions = Transaction::with('user')->latest()->take(6)->get();
         $contactMessagesCount = ContactMessage::count();
-
-        // get all items needing admin attention (disputes + admin reviews)
-        $adminAttentionItems = JobSubmission::with(['user', 'jobListing', 'jobListing.user', 'disputeInitiator'])
-            ->where(function($query) {
-                $query->where('dispute_status', '!=', JobSubmission::DISPUTE_NONE)
-                      ->orWhere('status', JobSubmission::STATUS_ADMIN_REVIEW);
-            })
-            ->orderBy('created_at', 'desc')
+        $unreadMessagesCount = Message::whereNull('read_at')->count();
+        $totalCredits = User::sum('time_credits');
+        $creditMovement30Days = Transaction::where('created_at', '>=', now()->subDays(30))->sum('amount');
+        $reviewsCount = Review::count();
+        $averageRating = Review::avg('rating') ?? 0;
+        $completionRate = $totalSubmissions > 0 ? ($approvedSubmissions / $totalSubmissions) * 100 : 0;
+        $submissionsPerJob = $totalJobs > 0 ? $totalSubmissions / $totalJobs : 0;
+        $jobsPerUser = $totalUsers > 0 ? $totalJobs / $totalUsers : 0;
+        $topCategories = Job::query()
+            ->select('category', DB::raw('count(*) as total'))
+            ->groupBy('category')
+            ->orderByDesc('total')
+            ->take(5)
             ->get();
 
         return view('admin.dashboard', compact(
-            'adminAttentionItems',
             'totalUsers',
             'newUsersWeek',
             'totalJobs',
+            'newJobsWeek',
             'recentJobs',
             'totalSubmissions',
             'pendingAdmin',
+            'activeDisputes',
+            'resolvedDisputes',
+            'approvedSubmissions',
+            'pendingSubmissions',
+            'claimedSubmissions',
+            'declinedSubmissions',
             'recentSignups',
             'recentTransactions',
-            'contactMessagesCount'
+            'contactMessagesCount',
+            'unreadMessagesCount',
+            'totalCredits',
+            'creditMovement30Days',
+            'reviewsCount',
+            'averageRating',
+            'completionRate',
+            'submissionsPerJob',
+            'jobsPerUser',
+            'topCategories'
         ));
     }
 }

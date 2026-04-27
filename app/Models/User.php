@@ -15,6 +15,32 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+    public const DEFAULT_AVATARS = [
+        'images/avatar-defaults/aurora.svg',
+        'images/avatar-defaults/circuit.svg',
+        'images/avatar-defaults/comet.svg',
+        'images/avatar-defaults/coral.svg',
+        'images/avatar-defaults/dawn.svg',
+        'images/avatar-defaults/ember.svg',
+        'images/avatar-defaults/forest.svg',
+        'images/avatar-defaults/glacier.svg',
+        'images/avatar-defaults/harbor.svg',
+        'images/avatar-defaults/iris.svg',
+        'images/avatar-defaults/mint.svg',
+        'images/avatar-defaults/solar.svg',
+    ];
+
+    public const STATIC_SEED_EMAILS = [
+        'admin@timerr.lat',
+        'user@timerr.lat',
+        'user1@timerr.lat',
+        'user2@timerr.lat',
+        'user3@timerr.lat',
+        'user4@timerr.lat',
+        'user5@timerr.lat',
+        'demo@local.test',
+    ];
+
     // fillable attributes for user model
     protected $fillable = [
         'first_name',
@@ -22,6 +48,7 @@ class User extends Authenticatable
         'email',
         'password',
         'time_credits',
+        'avatar_path',
         'role',
         'is_banned',
         'ban_reason',
@@ -107,6 +134,41 @@ class User extends Authenticatable
     public function completedJobsCount()
     {
         return $this->completedJobs()->count();
+    }
+
+    public function initials()
+    {
+        return strtoupper(substr($this->first_name, 0, 1) . substr($this->last_name, 0, 1));
+    }
+
+    public function avatarUrl()
+    {
+        if (!$this->avatar_path) {
+            return null;
+        }
+
+        if (str_starts_with($this->avatar_path, 'images/')) {
+            return asset($this->avatar_path);
+        }
+
+        return asset('storage/' . $this->avatar_path);
+    }
+
+    public static function defaultAvatarOptions()
+    {
+        return self::DEFAULT_AVATARS;
+    }
+
+    public static function defaultAvatarForSeed(int|string $seed)
+    {
+        $avatars = self::defaultAvatarOptions();
+
+        return $avatars[abs(crc32((string) $seed)) % count($avatars)];
+    }
+
+    public static function staticSeedEmails()
+    {
+        return self::STATIC_SEED_EMAILS;
     }
 
     // check if user is banned

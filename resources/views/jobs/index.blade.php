@@ -80,11 +80,20 @@
     <!-- jobs list -->
     <div class="space-y-4">
             @foreach ($jobs as $job)
-                <div class="px-4 py-6 border border-gray-700 rounded-lg bg-gray-800/40 backdrop-blur-sm hover:bg-gray-700/40 transition-colors duration-200 hover-card">
-                    <div class="font-bold text-neon-accent text-sm">
-                        <a href="{{ route('people.show', $job->user->id) }}" class="hover:text-neon-accent/80 transition-colors duration-200">
-                            {{ $job->user->first_name }} {{ $job->user->last_name }}
-                        </a> vajag palīdzību
+                <div class="overflow-hidden border border-gray-700 rounded-lg bg-gray-800/40 backdrop-blur-sm hover:bg-gray-700/40 transition-colors duration-200 hover-card">
+                    <div class="grid gap-0 md:grid-cols-[220px_1fr]">
+                        <a href="/jobs/{{ $job->id }}" class="block">
+                            <x-job-image :job="$job" ratio="aspect-[4/3]" class="h-full rounded-none border-0 border-r border-gray-700" />
+                        </a>
+
+                        <div class="p-5">
+                    <div class="font-bold text-neon-accent text-sm flex items-center gap-2">
+                        <x-avatar :user="$job->user" size="sm" />
+                        <span>
+                            <a href="{{ route('people.show', $job->user->id) }}" class="hover:text-neon-accent/80 transition-colors duration-200">
+                                {{ $job->user->first_name }} {{ $job->user->last_name }}
+                            </a> vajag palīdzību
+                        </span>
                     </div>
 
                     <div class="mt-2 text-white/90 font-semibold">
@@ -115,6 +124,8 @@
                         <span class="bg-neon-accent/20 text-neon-accent px-3 py-1 rounded-full text-xs font-semibold">
                             {{ $job['time_credits'] }} laika kredīti
                         </span>
+                    </div>
+                        </div>
                     </div>
                 </div>
             @endforeach

@@ -26,8 +26,9 @@
                 @php $isMe = auth()->check() && auth()->id() === $u->id; @endphp
                 @if($isMe)
                     <a href="/profile" class="block hover-card bg-gray-900/60 p-4 rounded-lg border border-neon-accent">
-                        <div class="flex justify-between items-center">
-                            <div>
+                        <div class="flex justify-between items-center gap-4">
+                            <x-avatar :user="$u" size="md" />
+                            <div class="flex-1 min-w-0">
                                 <div class="flex items-center gap-2">
                                     <h4 class="text-lg font-semibold text-white/90">{{ $u->first_name }} {{ $u->last_name }} <span class="ml-2 inline-block text-xs bg-neon-accent text-black px-2 py-0.5 rounded">Es</span></h4>
                                     @if($u->reviews_received_rating_avg && $u->reviews_received_rating_avg > 0)
@@ -58,8 +59,9 @@
                     </a>
                 @else
                     <a href="{{ route('people.show', $u->id) }}" class="block hover-card bg-gray-800/40 p-4 rounded-lg border border-gray-700">
-                        <div class="flex justify-between items-center">
-                            <div>
+                        <div class="flex justify-between items-center gap-4">
+                            <x-avatar :user="$u" size="md" />
+                            <div class="flex-1 min-w-0">
                                 <div class="flex items-center gap-2">
                                     <h4 class="text-lg font-semibold text-white/90">{{ $u->first_name }} {{ $u->last_name }}</h4>
                                     @if($u->reviews_received_rating_avg && $u->reviews_received_rating_avg > 0)

@@ -4,7 +4,9 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use App\Models\User;
 
 
 class UserFactory extends Factory
@@ -34,7 +36,7 @@ class UserFactory extends Factory
         $firstName = fake()->randomElement($latvianFirstNames);
         $lastName = fake()->randomElement($latvianLastNames);
         
-        return [
+        $attributes = [
             'first_name' => $firstName,
             'last_name' => $lastName,
             'email' => strtolower(str_replace(['ā', 'č', 'ē', 'ī', 'ķ', 'ļ', 'ņ', 'š', 'ū', 'ž'], ['a', 'c', 'e', 'i', 'k', 'l', 'n', 's', 'u', 'z'], $firstName . '.' . $lastName)) . '@' . fake()->randomElement(['gmail.com', 'inbox.lv', 'mail.lv', 'yahoo.com', 'outlook.com']),
@@ -43,6 +45,12 @@ class UserFactory extends Factory
             'remember_token' => Str::random(10),
             'time_credits' => 10,
         ];
+
+        if (Schema::hasColumn('users', 'avatar_path')) {
+            $attributes['avatar_path'] = fake()->randomElement(User::defaultAvatarOptions());
+        }
+
+        return $attributes;
     }
 
     public function unverified(): static

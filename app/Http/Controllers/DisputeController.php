@@ -16,7 +16,7 @@ class DisputeController extends Controller
         // check if user is involved in this job
         $user = Auth::user();
         if ($submission->user_id !== $user->id && $submission->jobListing->user_id !== $user->id) {
-            return back()->with('error', 'Jums nav ties\u012bbu str\u012bdu\u0113t par \u0161o iesniegumu.');
+            return back()->with('error', 'Jums nav tiesību strīdēties par šo iesniegumu.');
         }
 
         return view('disputes.create', [
@@ -37,7 +37,7 @@ class DisputeController extends Controller
         // check if user is involved in this job
         $user = Auth::user();
         if ($submission->user_id !== $user->id && $submission->jobListing->user_id !== $user->id) {
-            return back()->with('error', 'Jums nav ties\u012bbu str\u012bdu\u0113t par \u0161o iesniegumu.');
+            return back()->with('error', 'Jums nav tiesību strīdēties par šo iesniegumu.');
         }
 
         // create dispute and freeze submission
@@ -50,7 +50,7 @@ class DisputeController extends Controller
         ]);
 
         return redirect()->route('submissions.show', $submission)
-            ->with('success', 'Str\u012bds iesniegts. Administr\u0101tors to p\u0101rskat\u012bs dr\u012bz.');
+            ->with('success', 'Strīds iesniegts. Administrators to pārskatīs drīz.');
     }
 
     /**
@@ -62,7 +62,7 @@ class DisputeController extends Controller
             abort(403);
         }
 
-        $disputes = JobSubmission::with(['user', 'jobListing.user', 'disputeInitiator', 'disputeResolver'])
+        $disputes = JobSubmission::with(['user', 'jobListing.user', 'disputeInitiator', 'disputeResolver', 'files'])
             ->where(function($query) {
                 // show disputes and admin reviews
                 $query->where('dispute_status', '!=', JobSubmission::DISPUTE_NONE)

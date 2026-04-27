@@ -95,11 +95,14 @@
 
                 <div 
                     onclick="window.location='/jobs/{{ $job->id }}'" 
-                    class="cursor-pointer h-full flex flex-col justify-between p-4 bg-gray-800/40 rounded-lg border border-gray-700 hover:border-neon-accent transition-all duration-300 hover-card"
+                    class="cursor-pointer h-full overflow-hidden flex flex-col justify-between bg-gray-800/40 rounded-lg border border-gray-700 hover:border-neon-accent transition-all duration-300 hover-card"
                 >
+                    <x-job-image :job="$job" class="rounded-none border-0 border-b border-gray-700" />
 
+                    <div class="p-4 flex flex-1 flex-col">
                     <!-- User -->
-                    <div class="text-sm text-neon-accent font-semibold">
+                    <div class="text-sm text-neon-accent font-semibold flex items-center gap-2">
+                        <x-avatar :user="$job->user" size="sm" />
                         <a 
                             href="{{ route('people.show', $job->user->id) }}" 
                             onclick="event.stopPropagation()" 
@@ -115,7 +118,7 @@
                     </div>
 
                     <!-- Description -->
-                    <div class="mt-2 text-gray-400 text-sm">
+                    <div class="mt-2 text-gray-400 text-sm flex-1">
                         {{ Str::limit($job->description, 80) }}
                     </div>
 
@@ -127,6 +130,7 @@
                         <span class="text-gray-400 text-xs">
                             {{ $job->category }}
                         </span>
+                    </div>
                     </div>
 
                 </div>

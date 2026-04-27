@@ -5,9 +5,7 @@
         <div class="bg-gray-800/40 backdrop-blur-sm p-8 rounded-lg border border-gray-700">
             <div class="flex items-center space-x-6">
                 <div class="flex-shrink-0">
-                    <div class="w-24 h-24 rounded-full bg-gray-700 flex items-center justify-center text-3xl text-white/90">
-                        {{ strtoupper(substr($user->first_name, 0, 1) . substr($user->last_name, 0, 1)) }}
-                    </div>
+                    <x-avatar :user="$user" size="lg" />
                 </div>
                 <div class="flex-1">
                     <div class="flex items-center gap-2">
@@ -58,13 +56,16 @@
                     <h3 class="font-semibold text-white/90 mb-2">Palīdzības pieprasījumi</h3>
                     <div class="space-y-3">
                         @foreach($user->jobs as $job)
-                            <a href="/jobs/{{ $job->id }}" class="block bg-gray-900/60 p-3 rounded border border-gray-700 hover:border-neon-accent">
-                                <div class="flex justify-between items-center">
+                            <a href="/jobs/{{ $job->id }}" class="block overflow-hidden bg-gray-900/60 rounded border border-gray-700 hover:border-neon-accent">
+                                <div class="grid gap-0 sm:grid-cols-[140px_1fr]">
+                                    <x-job-image :job="$job" ratio="aspect-[4/3]" class="h-full rounded-none border-0 border-r border-gray-700" />
+                                    <div class="flex justify-between items-center gap-3 p-3">
                                     <div>
                                         <div class="text-white/90 font-medium">{{ $job->title }}</div>
                                         <div class="text-gray-400 text-sm">{{ Str::limit($job->description, 80) }}</div>
                                     </div>
                                     <div class="text-sm text-gray-300">{{ $job->time_credits }} kredīti</div>
+                                    </div>
                                 </div>
                             </a>
                         @endforeach

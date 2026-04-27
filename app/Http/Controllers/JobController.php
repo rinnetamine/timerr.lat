@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 // controller for managing job listings and credits
@@ -147,8 +148,15 @@ class JobController extends Controller
             'title' => ['required', 'min:3'],
             'description' => ['required', 'min:10'],
             'time_credits' => ['required', 'integer', 'min:1'],
-            'category' => ['required', Rule::in($allowed)]
+            'category' => ['required', Rule::in($allowed)],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
         ]);
+
+        if (request()->hasFile('image')) {
+            $attributes['image_path'] = request()->file('image')->store('job-images', 'public');
+        }
+
+        unset($attributes['image']);
 
         $user = auth()->user();
 
@@ -221,8 +229,19 @@ class JobController extends Controller
             'title' => ['required', 'min:3'],
             'description' => ['required', 'min:10'],
             'time_credits' => ['required', 'integer', 'min:1'],
-            'category' => ['required', Rule::in($allowed)]
+            'category' => ['required', Rule::in($allowed)],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
         ]);
+
+        if (request()->hasFile('image')) {
+            if ($job->image_path) {
+                Storage::disk('public')->delete($job->image_path);
+            }
+
+            $attributes['image_path'] = request()->file('image')->store('job-images', 'public');
+        }
+
+        unset($attributes['image']);
 
         $user = auth()->user();
         $originalCredits = $job->time_credits;
@@ -320,6 +339,10 @@ class JobController extends Controller
                 }
                 
                 // delete the job listing
+                if ($job->image_path) {
+                    Storage::disk('public')->delete($job->image_path);
+                }
+
                 $job->delete();
             });
             

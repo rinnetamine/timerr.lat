@@ -2,187 +2,157 @@
     <x-slot:heading>Admin panelis</x-slot:heading>
 
     <div class="space-y-6">
-
-        <!-- Admin stats -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            <div class="p-4 bg-gray-800/40 rounded-lg border border-gray-700">
-                <div class="text-sm text-gray-400">Kopējie lietotāji</div>
-                <div class="text-2xl font-bold text-white/90">{{ number_format($totalUsers) }}</div>
-                <div class="text-xs text-gray-400">Jauni pēdējās 7d: {{ $newUsersWeek }}</div>
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h2 class="text-2xl font-semibold text-white/90">Pārskats</h2>
+                <p class="mt-1 text-sm text-gray-400">Platformas aktivitāte, lietotāji, kredīti un jaunākie notikumi.</p>
             </div>
+            <a href="{{ route('disputes.index') }}" class="inline-flex items-center justify-center rounded-md border border-neon-accent/50 px-4 py-2 text-sm font-medium text-neon-accent transition-colors hover:bg-neon-accent hover:text-black">
+                Atvērt strīdus
+            </a>
+        </div>
 
-            <div class="p-4 bg-gray-800/40 rounded-lg border border-gray-700">
-                <div class="text-sm text-gray-400">Kopējie darbi</div>
-                <div class="text-2xl font-bold text-white/90">{{ number_format($totalJobs) }}</div>
-                <div class="text-xs text-gray-400">Nesenie: {{ $recentJobs->count() }}</div>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div class="rounded-lg border border-gray-700 bg-gray-800/40 p-4">
+                <div class="text-sm text-gray-400">Lietotāji</div>
+                <div class="mt-1 text-3xl font-semibold text-white/90">{{ number_format($totalUsers) }}</div>
+                <div class="mt-2 text-xs text-green-300">+{{ $newUsersWeek }} pēdējās 7 dienās</div>
             </div>
-
-            <div class="p-4 bg-gray-800/40 rounded-lg border border-gray-700">
-                <div class="text-sm text-gray-400">Iesniegumi</div>
-                <div class="text-2xl font-bold text-white/90">{{ number_format($totalSubmissions) }}</div>
-                <div class="text-xs text-gray-400">Admin pārskatīšana: {{ $pendingAdmin }}</div>
+            <div class="rounded-lg border border-gray-700 bg-gray-800/40 p-4">
+                <div class="text-sm text-gray-400">Vakances</div>
+                <div class="mt-1 text-3xl font-semibold text-white/90">{{ number_format($totalJobs) }}</div>
+                <div class="mt-2 text-xs text-green-300">+{{ $newJobsWeek }} pēdējās 7 dienās</div>
             </div>
+            <div class="rounded-lg border border-gray-700 bg-gray-800/40 p-4">
+                <div class="text-sm text-gray-400">Pieteikumi</div>
+                <div class="mt-1 text-3xl font-semibold text-white/90">{{ number_format($totalSubmissions) }}</div>
+                <div class="mt-2 text-xs text-gray-400">{{ number_format($completionRate, 1) }}% apstiprināti</div>
+            </div>
+            <div class="rounded-lg border border-gray-700 bg-gray-800/40 p-4">
+                <div class="text-sm text-gray-400">Laika kredīti sistēmā</div>
+                <div class="mt-1 text-3xl font-semibold text-neon-accent">{{ number_format($totalCredits) }}</div>
+                <div class="mt-2 text-xs {{ $creditMovement30Days >= 0 ? 'text-green-300' : 'text-red-300' }}">{{ $creditMovement30Days >= 0 ? '+' : '' }}{{ $creditMovement30Days }} pēd. 30d transakcijās</div>
+            </div>
+        </div>
 
-            <div class="p-4 bg-gray-800/40 rounded-lg border border-gray-700">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <a href="{{ route('disputes.index') }}" class="rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-4 transition-colors hover:border-yellow-400">
+                <div class="text-sm text-yellow-200">Aktīvi strīdi</div>
+                <div class="mt-1 text-2xl font-semibold text-white/90">{{ $activeDisputes }}</div>
+                <div class="mt-2 text-xs text-gray-400">{{ $resolvedDisputes }} atrisināti kopā</div>
+            </a>
+            <a href="{{ route('disputes.index') }}" class="rounded-lg border border-purple-500/30 bg-purple-500/10 p-4 transition-colors hover:border-purple-400">
+                <div class="text-sm text-purple-200">Admin pārskatīšana</div>
+                <div class="mt-1 text-2xl font-semibold text-white/90">{{ $pendingAdmin }}</div>
+                <div class="mt-2 text-xs text-gray-400">Atsevišķi strīdu lapā</div>
+            </a>
+            <a href="{{ route('admin.contact') }}" class="rounded-lg border border-gray-700 bg-gray-800/40 p-4 transition-colors hover:border-neon-accent">
                 <div class="text-sm text-gray-400">Kontaktziņojumi</div>
-                <div class="text-2xl font-bold text-white/90">{{ number_format($contactMessagesCount) }}</div>
-                <div class="text-xs text-gray-400">Skatīt <a href="/admin/contact" class="text-neon-accent">kontaktus</a></div>
-            </div>
-
-            <div class="p-4 bg-gray-800/40 rounded-lg border border-gray-700">
-                <div class="text-sm text-gray-400">Nesenie reģistrējumi</div>
-                <div class="text-2xl font-bold text-white/90">{{ $recentSignups->count() }}</div>
-                <div class="text-xs text-gray-400">Jaunākie lietotāji</div>
-            </div>
-
-            <div class="p-4 bg-gray-800/40 rounded-lg border border-gray-700">
-                <div class="text-sm text-gray-400">Nesās transakcijas</div>
-                <div class="text-2xl font-bold text-white/90">{{ $recentTransactions->count() }}</div>
-                <div class="text-xs text-gray-400">Pēdējie {{ $recentTransactions->count() }}</div>
+                <div class="mt-1 text-2xl font-semibold text-white/90">{{ $contactMessagesCount }}</div>
+                <div class="mt-2 text-xs text-neon-accent">Skatīt kontaktziņas</div>
+            </a>
+            <div class="rounded-lg border border-gray-700 bg-gray-800/40 p-4">
+                <div class="text-sm text-gray-400">Neizlasīti ziņojumi</div>
+                <div class="mt-1 text-2xl font-semibold text-white/90">{{ $unreadMessagesCount }}</div>
+                <div class="mt-2 text-xs text-gray-400">Visās sarunās</div>
             </div>
         </div>
 
-        <!-- Site Activity & Performance -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="bg-gray-800/40 backdrop-blur-sm p-6 rounded-lg border border-gray-700">
-                <h3 class="text-lg font-semibold text-white mb-4">Nesā aktivitāte</h3>
-                <div class="space-y-3">
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-400">Jauni lietotāji (7 dienas)</span>
-                        <span class="text-white font-medium">{{ $newUsersWeek }}</span>
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            <section class="rounded-lg border border-gray-700 bg-gray-800/40 p-6 lg:col-span-2">
+                <h3 class="text-lg font-semibold text-white/90">Pieteikumu statuss</h3>
+                <div class="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
+                    <div class="rounded-lg border border-blue-500/20 bg-blue-500/10 p-4">
+                        <div class="text-2xl font-semibold text-blue-200">{{ $claimedSubmissions }}</div>
+                        <div class="mt-1 text-xs text-gray-400">Saņemti</div>
                     </div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-400">Aktīvi strīdi</span>
-                        <span class="text-yellow-200 font-medium">{{ \App\Models\JobSubmission::where('dispute_status', '!=', \App\Models\JobSubmission::DISPUTE_NONE)->count() }}</span>
+                    <div class="rounded-lg border border-yellow-500/20 bg-yellow-500/10 p-4">
+                        <div class="text-2xl font-semibold text-yellow-200">{{ $pendingSubmissions }}</div>
+                        <div class="mt-1 text-xs text-gray-400">Gaida lēmumu</div>
                     </div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-400">Gaidošie pārskatījumi</span>
-                        <span class="text-blue-200 font-medium">{{ \App\Models\JobSubmission::where('status', \App\Models\JobSubmission::STATUS_ADMIN_REVIEW)->count() }}</span>
+                    <div class="rounded-lg border border-green-500/20 bg-green-500/10 p-4">
+                        <div class="text-2xl font-semibold text-green-200">{{ $approvedSubmissions }}</div>
+                        <div class="mt-1 text-xs text-gray-400">Apstiprināti</div>
                     </div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-400">Neizlasīti ziņojumi</span>
-                        <span class="text-green-200 font-medium">{{ \App\Models\Message::whereNull('read_at')->count() }}</span>
+                    <div class="rounded-lg border border-red-500/20 bg-red-500/10 p-4">
+                        <div class="text-2xl font-semibold text-red-200">{{ $declinedSubmissions }}</div>
+                        <div class="mt-1 text-xs text-gray-400">Noraidīti</div>
                     </div>
                 </div>
-            </div>
 
-            <div class="bg-gray-800/40 backdrop-blur-sm p-6 rounded-lg border border-gray-700">
-                <h3 class="text-lg font-semibold text-white mb-4">Platformas veselība</h3>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="text-center">
-                        <div class="text-3xl font-bold text-neon-accent">{{ number_format($totalJobs / max($totalUsers, 1), 1) }}</div>
-                        <div class="text-sm text-gray-400">Darbi uz lietotāju</div>
+                <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <div class="rounded-lg border border-gray-700 bg-gray-950/35 p-4 text-center">
+                        <div class="text-2xl font-semibold text-neon-accent">{{ number_format($jobsPerUser, 1) }}</div>
+                        <div class="mt-1 text-xs text-gray-400">Vakances uz lietotāju</div>
                     </div>
-                    <div class="text-center">
-                        <div class="text-3xl font-bold text-neon-accent">{{ number_format($totalSubmissions / max($totalJobs, 1), 1) }}</div>
-                        <div class="text-sm text-gray-400">Iesniegumi uz darbu</div>
+                    <div class="rounded-lg border border-gray-700 bg-gray-950/35 p-4 text-center">
+                        <div class="text-2xl font-semibold text-neon-accent">{{ number_format($submissionsPerJob, 1) }}</div>
+                        <div class="mt-1 text-xs text-gray-400">Pieteikumi uz vakanci</div>
                     </div>
-                </div>
-                <div class="mt-4 pt-4 border-t border-gray-600">
-                    <div class="text-sm text-gray-400">
-                        <div class="mb-2"><strong>Ātrā statistika:</strong></div>
-                        <div>• Kopējie kredīti sistēmā: {{ \App\Models\User::sum('time_credits') }}</div>
-                        @php
-    $earliestJobDate = \App\Models\Job::min('created_at');
-    $daysSinceFirstJob = $earliestJobDate ? now()->diffInDays(\Carbon\Carbon::parse($earliestJobDate)) + 1 : 1;
-    $avgSubmissionsPerDay = $totalSubmissions / max(1, $daysSinceFirstJob);
-    $completionRate = $totalSubmissions > 0 ? (\App\Models\JobSubmission::where('status', 'approved')->count() / $totalSubmissions) * 100 : 0;
-@endphp
-                        <div>• Vidējie iesniegumi dienā: {{ number_format($avgSubmissionsPerDay, 1) }}</div>
-                        <div>• Pabeigšanas rādītājs: {{ number_format($completionRate, 1) }}%</div>
+                    <div class="rounded-lg border border-gray-700 bg-gray-950/35 p-4 text-center">
+                        <div class="text-2xl font-semibold text-neon-accent">{{ number_format($averageRating, 1) }}</div>
+                        <div class="mt-1 text-xs text-gray-400">Vidējais vērtējums no {{ $reviewsCount }} atsauksmēm</div>
                     </div>
                 </div>
-            </div>
+            </section>
+
+            <section class="rounded-lg border border-gray-700 bg-gray-800/40 p-6">
+                <h3 class="text-lg font-semibold text-white/90">Populārās kategorijas</h3>
+                <div class="mt-5 space-y-3">
+                    @forelse($topCategories as $category)
+                        <div>
+                            <div class="mb-1 flex items-center justify-between gap-3 text-sm">
+                                <span class="truncate text-gray-300">{{ $category->category }}</span>
+                                <span class="text-gray-400">{{ $category->total }}</span>
+                            </div>
+                            <div class="h-2 overflow-hidden rounded-full bg-gray-900">
+                                <div class="h-full rounded-full bg-neon-accent" style="width: {{ min(100, ($category->total / max($totalJobs, 1)) * 100) }}%"></div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="text-sm text-gray-400">Vēl nav kategoriju datu.</div>
+                    @endforelse
+                </div>
+            </section>
         </div>
 
-        @if($adminAttentionItems->count() > 0)
-            <div class="space-y-4">
-                @foreach($adminAttentionItems as $item)
-                    <div class="bg-gray-800/40 backdrop-blur-sm p-6 rounded-lg border border-gray-700">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="flex-1">
-                                <h4 class="text-lg font-medium text-white/90 mb-2">
-                                    {{ $item->jobListing->title }}
-                                </h4>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                                    <div>
-                                        <span class="text-gray-400">Darba publicētājs:</span>
-                                        <a href="{{ route('people.show', $item->jobListing->user->id) }}" class="text-white ml-2 hover:text-neon-accent transition-colors duration-200">
-                                            {{ $item->jobListing->user->first_name }} {{ $item->jobListing->user->last_name }}
-                                        </a>
-                                    </div>
-                                    <div>
-                                        <span class="text-gray-400">Darbinieks:</span>
-                                        <a href="{{ route('people.show', $item->user->id) }}" class="text-white ml-2 hover:text-neon-accent transition-colors duration-200">
-                                            {{ $item->user->first_name }} {{ $item->user->last_name }}
-                                        </a>
-                                    </div>
-                                    <div>
-                                        <span class="text-gray-400">Veids:</span>
-                                        @if($item->status === \App\Models\JobSubmission::STATUS_ADMIN_REVIEW)
-                                            <span class="text-white ml-2">Admin pārskatīšana (Noraidīšana)</span>
-                                        @elseif($item->dispute_status === \App\Models\JobSubmission::DISPUTE_REQUESTED)
-                                            <span class="text-white ml-2">Manuāls strīds</span>
-                                        @elseif($item->dispute_status === \App\Models\JobSubmission::DISPUTE_UNDER_REVIEW)
-                                            <span class="text-white ml-2">Pārskatīšanā</span>
-                                        @elseif($item->dispute_status === \App\Models\JobSubmission::DISPUTE_RESOLVED)
-                                            <span class="text-white ml-2">Atrisināts strīds</span>
-                                        @endif
-                                    </div>
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <section class="rounded-lg border border-gray-700 bg-gray-800/40 p-6">
+                <h3 class="text-lg font-semibold text-white/90">Jaunākie lietotāji</h3>
+                <div class="mt-4 space-y-3">
+                    @foreach($recentSignups as $user)
+                        <a href="{{ route('people.show', $user) }}" class="flex items-center gap-3 rounded-md border border-gray-700 bg-gray-950/30 p-3 transition-colors hover:border-neon-accent">
+                            <x-avatar :user="$user" size="sm" />
+                            <div class="min-w-0 flex-1">
+                                <div class="truncate text-sm font-medium text-white/90">{{ $user->first_name }} {{ $user->last_name }}</div>
+                                <div class="truncate text-xs text-gray-400">{{ $user->email }}</div>
+                            </div>
+                            <div class="text-xs text-gray-500">{{ $user->created_at->diffForHumans() }}</div>
+                        </a>
+                    @endforeach
+                </div>
+            </section>
+
+            <section class="rounded-lg border border-gray-700 bg-gray-800/40 p-6">
+                <h3 class="text-lg font-semibold text-white/90">Jaunākās transakcijas</h3>
+                <div class="mt-4 space-y-3">
+                    @forelse($recentTransactions as $transaction)
+                        <div class="rounded-md border border-gray-700 bg-gray-950/30 p-3">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="min-w-0">
+                                    <div class="truncate text-sm text-white/90">{{ $transaction->description }}</div>
+                                    <div class="mt-1 text-xs text-gray-400">{{ $transaction->user?->first_name }} {{ $transaction->user?->last_name }} · {{ $transaction->created_at->translatedFormat('j. M Y, H:i') }}</div>
+                                </div>
+                                <div class="shrink-0 text-sm font-semibold {{ $transaction->amount >= 0 ? 'text-green-300' : 'text-red-300' }}">
+                                    {{ $transaction->amount >= 0 ? '+' : '' }}{{ $transaction->amount }}
                                 </div>
                             </div>
-                            <div class="ml-4">
-                                <span class="inline-flex px-3 py-1 text-xs font-medium rounded-full
-                                    @if($item->status === \App\Models\JobSubmission::STATUS_ADMIN_REVIEW)
-                                        bg-purple-500/20 text-purple-200 border border-purple-500
-                                    @elseif($item->dispute_status === \App\Models\JobSubmission::DISPUTE_REQUESTED)
-                                        bg-yellow-500/20 text-yellow-200 border border-yellow-500
-                                    @elseif($item->dispute_status === \App\Models\JobSubmission::DISPUTE_UNDER_REVIEW)
-                                        bg-blue-500/20 text-blue-200 border border-blue-500
-                                    @elseif($item->dispute_status === \App\Models\JobSubmission::DISPUTE_RESOLVED)
-                                        bg-green-500/20 text-green-200 border border-green-500
-                                    @endif
-                                ">
-                                    @if($item->status === \App\Models\JobSubmission::STATUS_ADMIN_REVIEW)
-                                        Admin pārskatīšana
-                                    @else
-                                        {{ ucfirst(str_replace('_', ' ', $item->dispute_status)) }}
-                                    @endif
-                                </span>
-                            </div>
                         </div>
-
-                        <div class="mb-4">
-                            @if($item->status === \App\Models\JobSubmission::STATUS_ADMIN_REVIEW)
-                                <p class="text-gray-300 text-sm mb-2"><strong>Admin pārskatīšanas detaļas:</strong></p>
-                                <p class="text-purple-200 bg-purple-900/20 p-3 rounded border border-purple-600">
-                                    {{ $item->admin_notes }}
-                                </p>
-                            @else
-                                <p class="text-gray-300 text-sm mb-2"><strong>Strīda iemesls:</strong></p>
-                                <p class="text-gray-200 bg-gray-800/40 p-3 rounded border border-gray-600">
-                                    {{ $item->dispute_reason }}
-                                </p>
-                            @endif
-                        </div>
-
-                        <div class="flex justify-end space-x-3">
-                            <a href="{{ route('disputes.show', $item) }}" 
-                               class="px-4 py-2 bg-neon-accent text-black font-medium rounded hover:bg-neon-accent/80 transition-colors duration-200">
-                                Pārskatīt un atrisināt
-                            </a>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        @else
-            <div class="text-center py-12 bg-gray-800/40 backdrop-blur-sm rounded-lg border border-gray-700">
-                <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-                <h3 class="mt-2 text-sm font-medium text-gray-400">Nav iesniegumu, kas prasa admin pārskatīšanu</h3>
-                <p class="mt-1 text-sm text-gray-500">Kad darba radītājs noraida pieteikumu, tas parādīsies šeit jūsu pārskatīšanai.</p>
-            </div>
-        @endif
+                    @empty
+                        <div class="text-sm text-gray-400">Transakciju vēl nav.</div>
+                    @endforelse
+                </div>
+            </section>
+        </div>
     </div>
 </x-layout>

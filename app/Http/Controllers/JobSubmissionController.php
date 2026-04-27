@@ -64,7 +64,7 @@ class JobSubmissionController extends Controller
         // prevent self-claiming
         if (auth()->id() === $job->user_id) {
             return back()->withErrors([
-                'error' => 'Ju016bs nevarat pieteikties savam pau0161am palu012bdzu012bbas pieprasu012bjumam.'
+                'error' => 'Jūs nevarat pieteikties savam pašam palīdzības pieprasījumam.'
             ]);
         }
 
@@ -75,7 +75,7 @@ class JobSubmissionController extends Controller
 
         if ($existingClaim) {
             return back()->withErrors([
-                'error' => 'u0160is palu012bdzu012bbas pieprasu012bjums jau ir sau0146u0113mis cits lietotu0101js.'
+                'error' => 'Šo palīdzības pieprasījumu jau ir saņēmis cits lietotājs.'
             ]);
         }
 
@@ -87,7 +87,7 @@ class JobSubmissionController extends Controller
 
         if ($disputedSubmission) {
             return back()->withErrors([
-                'error' => 'u0160is palu012bdzu012bbas pieprasu012bjums ir aizsaldzis strīdu dēļ un nav pieejams.'
+                'error' => 'Šis palīdzības pieprasījums ir aizsaldēts strīda dēļ un nav pieejams.'
             ]);
         }
 
@@ -114,7 +114,7 @@ class JobSubmissionController extends Controller
             }
             
             return back()->withErrors([
-                'error' => 'Ju016bs jau esat sau0146u0113mis vai pieteicies u0161im palu012bdzu012bbas pieprasu012bjumam.'
+                'error' => 'Jūs jau esat saņēmis vai pieteicies šim palīdzības pieprasījumam.'
             ]);
         }
 
@@ -133,7 +133,7 @@ class JobSubmissionController extends Controller
             Log::error('Job claim failed: ' . $e->getMessage());
             
             return back()->withErrors([
-                'error' => 'Neizdevu0101s sau0146emt palu012bdzu012bbas pieprasījumu: ' . $e->getMessage()
+                'error' => 'Neizdevās saņemt palīdzības pieprasījumu: ' . $e->getMessage()
             ]);
         }
     }
@@ -165,14 +165,14 @@ class JobSubmissionController extends Controller
         // only claimed submissions can be completed
         if ($submission->status !== JobSubmission::STATUS_CLAIMED) {
             return back()->withErrors([
-                'error' => 'u0160o pieteikumu nevar pabeigt, jo tas nav sau0146emu0161 stu0101voklu012b.'
+                'error' => 'Šo pieteikumu nevar pabeigt, jo tas nav saņemts.'
             ]);
         }
 
         // check if submission is disputed/frozen
         if ($submission->dispute_status !== JobSubmission::DISPUTE_NONE && $submission->dispute_status !== JobSubmission::DISPUTE_RESOLVED) {
             return back()->withErrors([
-                'error' => 'u0160is pieteikums ir aizsaldzis strīdu dēļ un nevar pabeigt.'
+                'error' => 'Šis pieteikums ir aizsaldēts strīda dēļ un to nevar pabeigt.'
             ]);
         }
 
@@ -240,21 +240,73 @@ class JobSubmissionController extends Controller
             return redirect('/login');
         }
 
+        $statuses = [
+            JobSubmission::STATUS_CLAIMED,
+            JobSubmission::STATUS_PENDING,
+            JobSubmission::STATUS_APPROVED,
+            JobSubmission::STATUS_DECLINED,
+            JobSubmission::STATUS_ADMIN_REVIEW,
+        ];
+
         // get submissions for jobs the user created (received applications)
-        $receivedSubmissions = JobSubmission::whereHas('jobListing', function ($query) {
+        $receivedSubmissionsQuery = JobSubmission::whereHas('jobListing', function ($query) {
             $query->where('user_id', auth()->id());
-        })->with(['jobListing', 'user'])->latest()->get();
+        })->with(['jobListing', 'user']);
+
+        $this->applyIndexFilters(
+            $receivedSubmissionsQuery,
+            request('received_status'),
+            request('received_search'),
+            $statuses
+        );
+
+        $receivedSubmissions = $receivedSubmissionsQuery->latest()->get();
 
         // get submissions the user made to other jobs (sent applications)
-        $sentSubmissions = JobSubmission::where('user_id', auth()->id())
-            ->with('jobListing.user')
-            ->latest()
-            ->get();
+        $sentSubmissionsQuery = JobSubmission::where('user_id', auth()->id())
+            ->with('jobListing.user');
+
+        $this->applyIndexFilters(
+            $sentSubmissionsQuery,
+            request('sent_status'),
+            request('sent_search'),
+            $statuses
+        );
+
+        $sentSubmissions = $sentSubmissionsQuery->latest()->get();
 
         return view('submissions.index', [
             'receivedSubmissions' => $receivedSubmissions,
-            'sentSubmissions' => $sentSubmissions
+            'sentSubmissions' => $sentSubmissions,
+            'submissionStatuses' => $statuses,
         ]);
+    }
+
+    private function applyIndexFilters($query, ?string $status, ?string $search, array $allowedStatuses): void
+    {
+        $search = trim((string) $search);
+
+        if (in_array($status, $allowedStatuses, true)) {
+            $query->where('status', $status);
+        }
+
+        if ($search !== '') {
+            $query->where(function ($query) use ($search) {
+                $query->where('message', 'like', "%{$search}%")
+                    ->orWhereHas('jobListing', function ($query) use ($search) {
+                        $query->where('title', 'like', "%{$search}%")
+                            ->orWhere('description', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('user', function ($query) use ($search) {
+                        $query->where('first_name', 'like', "%{$search}%")
+                            ->orWhere('last_name', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('jobListing.user', function ($query) use ($search) {
+                        $query->where('first_name', 'like', "%{$search}%")
+                            ->orWhere('last_name', 'like', "%{$search}%");
+                    });
+            });
+        }
     }
 
     // show details of a specific submission
@@ -411,7 +463,7 @@ class JobSubmissionController extends Controller
         // only claimed submissions can be canceled
         if ($submission->status !== JobSubmission::STATUS_CLAIMED) {
             return back()->withErrors([
-                'error' => 'Tikai sau0146emtos pieteikumus var atcelt.'
+                'error' => 'Tikai saņemtos pieteikumus var atcelt.'
             ]);
         }
 
@@ -429,7 +481,7 @@ class JobSubmissionController extends Controller
             $submission->delete();
 
             // redirect to job page so user can claim again if desired
-            return redirect('/jobs/' . $jobId)->with('success', 'Ju016bsu sau0146emu0161ana ir atcelta. Ju016bs tagad varat atkal sau0146emt šo palīdzības pieprasījumu, ja vu0113laties.');
+            return redirect('/jobs/' . $jobId)->with('success', 'Jūsu saņemšana ir atcelta. Jūs tagad varat atkal saņemt šo palīdzības pieprasījumu, ja vēlaties.');
         } catch (\Exception $e) {
             Log::error('Job claim cancellation failed: ' . $e->getMessage());
             

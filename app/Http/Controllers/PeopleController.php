@@ -127,7 +127,7 @@ class PeopleController extends Controller
 
         $user->adjustCredits($request->amount, $request->description);
 
-        return back()->with('success', "Kredu012bti pielu0101goti veiksmu012bgi. Jauns bilance: {$user->time_credits}");
+        return back()->with('success', "Kredīti pielāgoti veiksmīgi. Jaunā bilance: {$user->time_credits}");
     }
 
     /**
@@ -140,7 +140,7 @@ class PeopleController extends Controller
         }
 
         if ($user->isAdmin()) {
-            return back()->with('error', 'Nevar blou0137u0113t administratora lietotu0101ju.');
+            return back()->with('error', 'Nevar bloķēt administratora lietotāju.');
         }
 
         $request->validate([
@@ -155,7 +155,7 @@ class PeopleController extends Controller
             ->where('user_id', $user->id)
             ->delete();
 
-        return back()->with('success', 'Lietotu0101js ir blou0137u0113ts un nekavu0113joties izrakstu012bts.');
+        return back()->with('success', 'Lietotājs ir bloķēts un nekavējoties izrakstīts.');
     }
 
     /**
@@ -169,6 +169,6 @@ class PeopleController extends Controller
 
         $user->unban();
 
-        return back()->with('success', 'Lietotu0101ja blou0137u0113u0161ana atcelta.');
+        return back()->with('success', 'Lietotāja bloķēšana atcelta.');
     }
 }

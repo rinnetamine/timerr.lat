@@ -6,6 +6,7 @@ namespace Database\Factories;
 use App\Models\Job;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\Schema;
 
 class JobFactory extends Factory
 {
@@ -87,7 +88,7 @@ class JobFactory extends Factory
 
         [$minCredits, $maxCredits] = $creditRanges[$groupKey] ?? [1, 10];
 
-        return [
+        $attributes = [
             'title' => $title,
             'description' => $description,
             'time_credits' => fake()->numberBetween($minCredits, $maxCredits),
@@ -96,6 +97,12 @@ class JobFactory extends Factory
             'created_at' => now(),
             'updated_at' => now(),
         ];
+
+        if (Schema::hasColumn('job_listings', 'image_path')) {
+            $attributes['image_path'] = Job::defaultImagePathForCategory($category);
+        }
+
+        return $attributes;
     }
 
     /**
@@ -163,12 +170,18 @@ class JobFactory extends Factory
 
             [$minCredits, $maxCredits] = $creditRanges[$groupKey] ?? [1, 10];
 
-            return [
+            $attributes = [
                 'title' => $title,
                 'description' => $description,
                 'time_credits' => fake()->numberBetween($minCredits, $maxCredits),
                 'category' => $category,
             ];
+
+            if (Schema::hasColumn('job_listings', 'image_path')) {
+                $attributes['image_path'] = Job::defaultImagePathForCategory($category);
+            }
+
+            return $attributes;
         });
     }
 }
