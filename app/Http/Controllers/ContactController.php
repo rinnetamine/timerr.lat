@@ -21,10 +21,10 @@ class ContactController extends Controller
     {
         // validate the incoming request data
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:60',
             'email' => 'required|email|max:255',
-            'subject' => 'required|string|max:255',
-            'message' => 'required|string',
+            'subject' => 'required|string|max:120',
+            'message' => 'required|string|max:1000',
         ]);
 
         // create a new contact message with validated data

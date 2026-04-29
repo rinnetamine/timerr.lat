@@ -59,12 +59,12 @@
                             <a href="/jobs/{{ $job->id }}" class="block overflow-hidden bg-gray-900/60 rounded border border-gray-700 hover:border-neon-accent">
                                 <div class="grid gap-0 sm:grid-cols-[140px_1fr]">
                                     <x-job-image :job="$job" ratio="aspect-[4/3]" class="h-full rounded-none border-0 border-r border-gray-700" />
-                                    <div class="flex justify-between items-center gap-3 p-3">
-                                    <div>
-                                        <div class="text-white/90 font-medium">{{ $job->title }}</div>
+                                    <div class="flex min-w-0 items-center justify-between gap-3 p-3">
+                                    <div class="min-w-0">
+                                        <div class="truncate font-medium text-white/90">{{ $job->title }}</div>
                                         <div class="text-gray-400 text-sm">{{ Str::limit($job->description, 80) }}</div>
                                     </div>
-                                    <div class="text-sm text-gray-300">{{ $job->time_credits }} kredīti</div>
+                                    <div class="shrink-0 text-sm text-gray-300">{{ $job->time_credits }} kredīti</div>
                                     </div>
                                 </div>
                             </a>

@@ -115,7 +115,12 @@ class AdminController extends Controller
     {
         $this->checkAdmin();
 
-        $messages = ContactMessage::with('user')->orderBy('created_at', 'desc')->get();
+        $messages = ContactMessage::with('user')
+            ->when(request('status') === 'unread', fn ($query) => $query->where('status', 'unread'))
+            ->orderBy('created_at', 'desc')
+            ->paginate(12)
+            ->withQueryString();
+
         return view('admin.contact-messages', compact('messages'));
     }
 

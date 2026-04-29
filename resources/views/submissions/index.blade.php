@@ -29,15 +29,15 @@
         <section class="rounded-lg border border-gray-700 bg-gray-800/40 p-5 backdrop-blur-sm">
             <div class="grid gap-4 sm:grid-cols-3">
                 <div>
-                    <div class="text-2xl font-semibold text-white/90">{{ $receivedSubmissions->count() }}</div>
+                    <div class="text-2xl font-semibold text-white/90">{{ $receivedSubmissions->total() }}</div>
                     <div class="mt-1 text-sm text-gray-400">Saņemtie pieteikumi</div>
                 </div>
                 <div>
-                    <div class="text-2xl font-semibold text-white/90">{{ $sentSubmissions->count() }}</div>
+                    <div class="text-2xl font-semibold text-white/90">{{ $sentSubmissions->total() }}</div>
                     <div class="mt-1 text-sm text-gray-400">Mani iesniegtie pieteikumi</div>
                 </div>
                 <div>
-                    <div class="text-2xl font-semibold text-neon-accent">{{ $receivedSubmissions->where('status', 'pending')->count() + $sentSubmissions->where('status', 'pending')->count() }}</div>
+                    <div class="text-2xl font-semibold text-neon-accent">{{ $pendingSubmissionsCount ?? 0 }}</div>
                     <div class="mt-1 text-sm text-gray-400">Gaida apstiprinājumu</div>
                 </div>
             </div>
@@ -105,6 +105,12 @@
                     </div>
                 @endforelse
             </div>
+
+            @if($receivedSubmissions->hasPages())
+                <div>
+                    {{ $receivedSubmissions->links() }}
+                </div>
+            @endif
         </section>
 
         <section class="space-y-4">
@@ -161,6 +167,12 @@
                     </div>
                 @endforelse
             </div>
+
+            @if($sentSubmissions->hasPages())
+                <div>
+                    {{ $sentSubmissions->links() }}
+                </div>
+            @endif
         </section>
     </div>
 </x-layout>

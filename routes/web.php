@@ -11,11 +11,18 @@ use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\PeopleController;
 use App\Http\Controllers\MessagesController;
 use App\Http\Controllers\DisputeController;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Route;
 
 // home page route
 use App\Http\Controllers\HomeController;
 Route::get('/', [HomeController::class, 'index']);
+
+Route::get('/storage/{path}', function (string $path) {
+    abort_unless(Storage::disk('public')->exists($path), 404);
+
+    return response()->file(Storage::disk('public')->path($path));
+})->where('path', '.*');
 
 // contact form routes
 Route::get('/contact', [ContactController::class, 'index']);

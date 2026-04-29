@@ -153,40 +153,66 @@
         </section>
 
         @if($submission->dispute_status !== \App\Models\JobSubmission::DISPUTE_RESOLVED)
-            <form action="{{ route('disputes.resolve', $submission) }}" method="POST" class="rounded-lg border border-gray-700 bg-gray-900/60 p-6">
-                @csrf
-                <h3 class="text-lg font-semibold text-white/90">Atrisināt strīdu</h3>
-                
-                <div class="mt-4">
-                    <x-form-field>
-                        <x-form-label for="resolution">Atrisinājuma detaļas</x-form-label>
-                        <textarea id="resolution" name="resolution" rows="4" class="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-white placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-neon-accent" placeholder="Paskaidrojiet savu lēmumu un tā pamatojumu..." required>{{ old('resolution') }}</textarea>
-                        <x-form-error name="resolution" />
-                    </x-form-field>
-                </div>
+            <section class="overflow-hidden rounded-lg border border-gray-700 bg-gray-900/45">
+                <div class="grid grid-cols-1 lg:grid-cols-[0.9fr_1.1fr]">
+                    <aside class="border-b border-gray-700 bg-gray-950/45 p-6 lg:border-b-0 lg:border-r">
+                        <div class="inline-flex rounded-md border border-neon-accent/30 bg-neon-accent/10 px-3 py-2 text-sm font-semibold text-neon-accent">
+                            Admin lēmums
+                        </div>
+                        <h3 class="mt-5 text-2xl font-bold leading-tight text-white/95">Izvēlies skaidru rezultātu un atstāj pamatojumu.</h3>
+                        <p class="mt-3 text-sm leading-6 text-gray-300">Šis lēmums ietekmēs iesnieguma statusu, sasaldēšanu un kredītu pārsūtīšanu.</p>
+                        <div class="mt-6 space-y-3 border-y border-gray-800 py-5 text-sm">
+                            <div class="flex justify-between gap-4">
+                                <span class="text-gray-400">Darbs</span>
+                                <span class="text-right text-white/90">{{ Str::limit($submission->jobListing?->title, 42) }}</span>
+                            </div>
+                            <div class="flex justify-between gap-4">
+                                <span class="text-gray-400">Kredīti</span>
+                                <span class="text-neon-accent">{{ $submission->jobListing?->time_credits ?? 0 }}</span>
+                            </div>
+                            <div class="flex justify-between gap-4">
+                                <span class="text-gray-400">Statuss</span>
+                                <span class="text-white/90">{{ $statusLabels[$submission->status] ?? $submission->status }}</span>
+                            </div>
+                        </div>
+                    </aside>
 
-                <div class="mt-4">
-                    <x-form-field>
-                        <x-form-label for="action">Darbība, ko jāveic</x-form-label>
-                        <select id="action" name="action" class="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-white focus:border-transparent focus:outline-none focus:ring-2 focus:ring-neon-accent" required>
-                            <option value="">Izvēlieties darbību...</option>
-                            <option value="approve">Apstiprināt pieteikumu un pārsūtīt kredītus</option>
-                            <option value="decline">Noraidīt pieteikumu bez kredītu pārsūtīšanas</option>
-                            <option value="unfreeze">Atkausēt tikai un atļaut pusēm turpināt</option>
-                        </select>
-                        <x-form-error name="action" />
-                    </x-form-field>
-                </div>
+                    <form action="{{ route('disputes.resolve', $submission) }}" method="POST" class="p-6">
+                        @csrf
+                        <h3 class="text-lg font-semibold text-white/90">Atrisināt strīdu</h3>
+                        
+                        <div class="mt-4">
+                            <x-form-field>
+                                <x-form-label for="resolution">Atrisinājuma detaļas</x-form-label>
+                                <textarea id="resolution" name="resolution" rows="4" class="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-white placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-neon-accent" placeholder="Paskaidrojiet savu lēmumu un tā pamatojumu..." required>{{ old('resolution') }}</textarea>
+                                <x-form-error name="resolution" />
+                            </x-form-field>
+                        </div>
 
-                <div class="mt-5 rounded-md border border-yellow-500/50 bg-yellow-500/10 p-4 text-sm text-yellow-100">
-                    Apstiprinot, kredīti tiks pārsūtīti pieteicējam. Noraidot, pieteikums paliek bez kredītu pārsūtīšanas. Atkausēšana noņem tikai sasaldēšanu.
-                </div>
+                        <div class="mt-4">
+                            <x-form-field>
+                                <x-form-label for="action">Darbība, ko jāveic</x-form-label>
+                                <select id="action" name="action" class="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-white focus:border-transparent focus:outline-none focus:ring-2 focus:ring-neon-accent" required>
+                                    <option value="">Izvēlieties darbību...</option>
+                                    <option value="approve">Apstiprināt pieteikumu un pārsūtīt kredītus</option>
+                                    <option value="decline">Noraidīt pieteikumu bez kredītu pārsūtīšanas</option>
+                                    <option value="unfreeze">Atkausēt tikai un atļaut pusēm turpināt</option>
+                                </select>
+                                <x-form-error name="action" />
+                            </x-form-field>
+                        </div>
 
-                <div class="mt-6 flex justify-end gap-3">
-                    <a href="{{ route('disputes.index') }}" class="rounded-md border border-gray-600 px-4 py-2 text-gray-300 transition-colors hover:bg-gray-800 hover:text-white">Atcelt</a>
-                    <x-form-button type="submit" class="bg-green-600 text-white hover:bg-green-700">Atrisināt strīdu</x-form-button>
+                        <div class="mt-5 rounded-md border border-yellow-500/50 bg-yellow-500/10 p-4 text-sm text-yellow-100">
+                            Apstiprinot, kredīti tiks pārsūtīti pieteicējam. Noraidot, pieteikums paliek bez kredītu pārsūtīšanas. Atkausēšana noņem tikai sasaldēšanu.
+                        </div>
+
+                        <div class="mt-6 flex justify-end gap-3">
+                            <a href="{{ route('disputes.index') }}" class="rounded-md border border-gray-600 px-4 py-2 text-gray-300 transition-colors hover:bg-gray-800 hover:text-white">Atcelt</a>
+                            <x-form-button type="submit" class="bg-green-600 text-white hover:bg-green-700">Atrisināt strīdu</x-form-button>
+                        </div>
+                    </form>
                 </div>
-            </form>
+            </section>
         @else
             <section class="rounded-lg border border-green-700 bg-green-900/20 p-6">
                 <h3 class="text-lg font-semibold text-green-200">Strīds atrisināts</h3>

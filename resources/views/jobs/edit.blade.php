@@ -3,8 +3,37 @@
         Rediģēt darbu: {{ $job->title }}
     </x-slot:heading>
 
-    <div class="max-w-2xl mx-auto">
-        <div class="bg-gray-800/40 backdrop-blur-sm p-8 rounded-lg border border-gray-700">
+    <div class="mx-auto max-w-6xl overflow-hidden rounded-lg border border-gray-700 bg-gray-900/45 backdrop-blur-sm">
+        <div class="grid grid-cols-1 lg:grid-cols-[0.85fr_1.15fr]">
+            <aside class="border-b border-gray-700 bg-gray-950/45 p-8 lg:border-b-0 lg:border-r">
+                <div class="inline-flex rounded-md border border-neon-accent/30 bg-neon-accent/10 px-3 py-2 text-sm font-semibold text-neon-accent">
+                    Rediģēšana
+                </div>
+                <h2 class="mt-6 text-3xl font-bold leading-tight text-white/95">Noslīpē pieprasījumu, lai īstais cilvēks to saprot ātri.</h2>
+                <p class="mt-4 text-gray-300">Maini aprakstu, kredītus, kategoriju vai attēlu, nezaudējot esošā pieprasījuma kontekstu.</p>
+
+                <div class="mt-8 overflow-hidden rounded-lg border border-gray-700 bg-gray-900/55">
+                    <x-job-image :job="$job" class="rounded-none border-0 border-b border-gray-700" />
+                    <div class="space-y-4 p-5">
+                        <div>
+                            <div class="text-xs uppercase tracking-[0.16em] text-gray-500">Pašreizējais nosaukums</div>
+                            <div class="mt-1 font-semibold text-white/90">{{ Str::limit($job->title, 80) }}</div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 border-t border-gray-800 pt-4">
+                            <div>
+                                <div class="text-2xl font-bold text-neon-accent">{{ $job->time_credits }}</div>
+                                <div class="text-xs text-gray-400">kredīti tagad</div>
+                            </div>
+                            <div>
+                                <div class="text-sm font-semibold text-white/90">{{ $job->category }}</div>
+                                <div class="mt-1 text-xs text-gray-400">kategorija</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <div class="p-8">
             <form method="POST" action="/jobs/{{ $job->id }}" enctype="multipart/form-data">
                 @csrf
                 @method('PATCH')
@@ -22,7 +51,7 @@
                             <x-form-field>
                                 <x-form-label for="title">Ar ko jums nepieciešama palīdzība?</x-form-label>
                                 <div class="mt-2">
-                                    <x-form-input name="title" id="title" placeholder="piem., Nepieciešama palīdzība ar mājaslapas dizainu, Meklēju matemātikas skolotāju" value="{{ $job->title }}" />
+                                    <x-form-input name="title" id="title" maxlength="120" placeholder="piem., Nepieciešama palīdzība ar mājaslapas dizainu, Meklēju matemātikas skolotāju" value="{{ $job->title }}" />
                                     <x-form-error name="title" />
                                 </div>
                             </x-form-field>
@@ -30,7 +59,7 @@
                             <x-form-field>
                                 <x-form-label for="description">Apraksts</x-form-label>
                                 <div class="mt-2">
-                                    <textarea name="description" id="description" rows="4" required
+                                    <textarea name="description" id="description" rows="4" maxlength="1000" required
                                             class="mt-1 block w-full rounded-md bg-gray-900/60 border border-gray-700 text-gray-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-neon-accent/50 focus:border-neon-accent placeholder-gray-500"
                                             placeholder="Detalizēti aprakstiet savu pakalpojumu">{{ $job->description }}</textarea>
                                     <x-form-error name="description" />
@@ -105,6 +134,7 @@
                 @csrf
                 @method('DELETE')
             </form>
+            </div>
         </div>
     </div>
 </x-layout>

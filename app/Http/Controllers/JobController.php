@@ -145,8 +145,8 @@ class JobController extends Controller
         }
 
         $attributes = request()->validate([
-            'title' => ['required', 'min:3'],
-            'description' => ['required', 'min:10'],
+            'title' => ['required', 'string', 'min:3', 'max:120'],
+            'description' => ['required', 'string', 'min:10', 'max:1000'],
             'time_credits' => ['required', 'integer', 'min:1'],
             'category' => ['required', Rule::in($allowed)],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
@@ -226,8 +226,8 @@ class JobController extends Controller
         }
 
         $attributes = request()->validate([
-            'title' => ['required', 'min:3'],
-            'description' => ['required', 'min:10'],
+            'title' => ['required', 'string', 'min:3', 'max:120'],
+            'description' => ['required', 'string', 'min:10', 'max:1000'],
             'time_credits' => ['required', 'integer', 'min:1'],
             'category' => ['required', Rule::in($allowed)],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],

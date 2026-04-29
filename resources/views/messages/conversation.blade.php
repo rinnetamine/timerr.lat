@@ -111,6 +111,12 @@
 
             <!-- MESSAGES -->
             <div id="messages-list" class="flex-1 overflow-y-auto p-6 flex flex-col gap-3">
+                @if($messages->hasPages())
+                    <div class="mb-3 rounded-lg border border-gray-700 bg-gray-900/40 p-3">
+                        {{ $messages->links() }}
+                    </div>
+                @endif
+
                 @foreach($messages as $m)
 
                     <div class="flex {{ $m->sender_id === auth()->id() ? 'justify-end' : 'justify-start' }}">

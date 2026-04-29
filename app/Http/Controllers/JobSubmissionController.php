@@ -151,7 +151,7 @@ class JobSubmissionController extends Controller
         
         $attributes = request()->validate([
             'submission_id' => ['required', 'exists:job_submissions,id'],
-            'message' => ['required', 'min:10']
+            'message' => ['required', 'string', 'min:10', 'max:1000']
             // Files removed temporarily for testing
         ]);
 
@@ -260,7 +260,10 @@ class JobSubmissionController extends Controller
             $statuses
         );
 
-        $receivedSubmissions = $receivedSubmissionsQuery->latest()->get();
+        $receivedSubmissions = $receivedSubmissionsQuery
+            ->latest()
+            ->paginate(8, ['*'], 'received_page')
+            ->withQueryString();
 
         // get submissions the user made to other jobs (sent applications)
         $sentSubmissionsQuery = JobSubmission::where('user_id', auth()->id())
@@ -273,12 +276,19 @@ class JobSubmissionController extends Controller
             $statuses
         );
 
-        $sentSubmissions = $sentSubmissionsQuery->latest()->get();
+        $pendingSubmissionsCount = (clone $receivedSubmissionsQuery)->where('status', JobSubmission::STATUS_PENDING)->count()
+            + (clone $sentSubmissionsQuery)->where('status', JobSubmission::STATUS_PENDING)->count();
+
+        $sentSubmissions = $sentSubmissionsQuery
+            ->latest()
+            ->paginate(8, ['*'], 'sent_page')
+            ->withQueryString();
 
         return view('submissions.index', [
             'receivedSubmissions' => $receivedSubmissions,
             'sentSubmissions' => $sentSubmissions,
             'submissionStatuses' => $statuses,
+            'pendingSubmissionsCount' => $pendingSubmissionsCount,
         ]);
     }
 

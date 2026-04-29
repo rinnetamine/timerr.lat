@@ -3,8 +3,30 @@
         Reģistrēties
     </x-slot:heading>
 
-    <div class="max-w-2xl mx-auto">
-        <div class="bg-gray-800/40 backdrop-blur-sm p-8 rounded-lg border border-gray-700">
+    <div class="mx-auto max-w-6xl overflow-hidden rounded-lg border border-gray-700 bg-gray-900/45 backdrop-blur-sm">
+        <div class="grid grid-cols-1 lg:grid-cols-[0.85fr_1.15fr]">
+            <aside class="border-b border-gray-700 bg-gray-950/45 p-8 lg:border-b-0 lg:border-r">
+                <div class="inline-flex rounded-md border border-neon-accent/30 bg-neon-accent/10 px-3 py-2 text-sm font-semibold text-neon-accent">
+                    Pievienojies Timerr
+                </div>
+                <h2 class="mt-6 text-3xl font-bold leading-tight text-white/95">Sāc ar prasmēm, nevis maku.</h2>
+                <p class="mt-4 text-gray-300">Izveido profilu, saņem sākuma kredītus un atrodi cilvēkus, ar kuriem apmainīties ar palīdzību.</p>
+
+                <div class="mt-8 grid grid-cols-2 gap-4 border-y border-gray-800 py-6">
+                    <div>
+                        <div class="text-3xl font-bold text-neon-accent">10</div>
+                        <div class="mt-1 text-sm text-gray-400">sākuma kredīti</div>
+                    </div>
+                    <div>
+                        <div class="text-3xl font-bold text-cyan-300">1:1</div>
+                        <div class="mt-1 text-sm text-gray-400">stunda pret kredītu</div>
+                    </div>
+                </div>
+
+                <p class="mt-6 text-sm leading-6 text-gray-400">Jo skaidrāks profils, jo vieglāk citiem uzticēties tavām prasmēm un piedāvājumiem.</p>
+            </aside>
+
+            <div class="p-8">
             <form method="POST" action="/register">
                 @csrf
 
@@ -16,7 +38,7 @@
                                 <x-form-label for="first_name">Vārds</x-form-label>
 
                                 <div class="mt-2">
-                                    <x-form-input name="first_name" id="first_name" required />
+                                    <x-form-input name="first_name" id="first_name" maxlength="30" required />
                                     <x-form-error name="first_name" />
                                 </div>
                             </x-form-field>
@@ -25,7 +47,7 @@
                                 <x-form-label for="last_name">Uzvārds</x-form-label>
 
                                 <div class="mt-2">
-                                    <x-form-input name="last_name" id="last_name" required />
+                                    <x-form-input name="last_name" id="last_name" maxlength="30" required />
                                     <x-form-error name="last_name" />
                                 </div>
                             </x-form-field>
@@ -74,6 +96,7 @@
                     <x-form-button>Reģistrēties</x-form-button>
                 </div>
             </form>
+            </div>
         </div>
     </div>
 </x-layout>

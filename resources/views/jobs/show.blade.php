@@ -138,12 +138,24 @@
                                 </div>
                                 
                                 <div class="flex justify-between mt-6">
-                                    <button type="button" onclick="document.getElementById('cancel-form-{{ $userSubmission->id }}').submit();" class="bg-red-700 hover:bg-red-600 text-white px-4 py-2 rounded text-sm font-medium transition-colors duration-200 inline-flex items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
+                                    <div class="flex flex-wrap items-center gap-3">
+                                        <button type="button" onclick="document.getElementById('cancel-form-{{ $userSubmission->id }}').submit();" class="bg-red-700 hover:bg-red-600 text-white px-4 py-2 rounded text-sm font-medium transition-colors duration-200 inline-flex items-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
 Atcelt saņemšanu
-                                    </button>
+                                        </button>
+
+                                        <a href="{{ route('submissions.export', $userSubmission->id) }}" class="inline-flex rounded-md bg-gray-700 px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-gray-600">
+                                            Lejupielādēt PDF
+                                        </a>
+
+                                        @if($userSubmission->canBeDisputed())
+                                            <a href="{{ route('disputes.create', $userSubmission) }}" class="inline-flex rounded-md border border-red-500/50 px-4 py-2 text-sm font-medium text-red-300 transition-colors duration-200 hover:bg-red-500/10 hover:text-red-200">
+                                                Iesniegt strīdu
+                                            </a>
+                                        @endif
+                                    </div>
                                     
                                     <x-form-button>
 Iesniegt pieteikumu
@@ -155,13 +167,43 @@ Iesniegt pieteikumu
                         <div class="bg-yellow-500/20 text-yellow-300 p-4 rounded-md">
                             <p>Jūsu pieteikums ir iesniegts un gaida pārskatīšanu.</p>
                         </div>
+                        <div class="mt-4 flex flex-wrap gap-3">
+                            <a href="{{ route('submissions.export', $userSubmission->id) }}" class="inline-flex rounded-md bg-gray-700 px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-gray-600">
+                                Lejupielādēt PDF
+                            </a>
+                            @if($userSubmission->canBeDisputed())
+                                <a href="{{ route('disputes.create', $userSubmission) }}" class="inline-flex rounded-md border border-red-500/50 px-4 py-2 text-sm font-medium text-red-300 transition-colors duration-200 hover:bg-red-500/10 hover:text-red-200">
+                                    Iesniegt strīdu
+                                </a>
+                            @endif
+                        </div>
                     @elseif($userSubmission->status === 'approved')
                         <div class="bg-green-500/20 text-green-300 p-4 rounded-md">
                             <p>Apsveicu! Jūsu pieteikums ir apstiprināts.</p>
                         </div>
+                        <div class="mt-4 flex flex-wrap gap-3">
+                            <a href="{{ route('submissions.export', $userSubmission->id) }}" class="inline-flex rounded-md bg-gray-700 px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-gray-600">
+                                Lejupielādēt PDF
+                            </a>
+                            @if($userSubmission->canBeDisputed())
+                                <a href="{{ route('disputes.create', $userSubmission) }}" class="inline-flex rounded-md border border-red-500/50 px-4 py-2 text-sm font-medium text-red-300 transition-colors duration-200 hover:bg-red-500/10 hover:text-red-200">
+                                    Iesniegt strīdu
+                                </a>
+                            @endif
+                        </div>
                     @elseif($userSubmission->status === 'declined')
                         <div class="bg-red-500/20 text-red-300 p-4 rounded-md mb-4">
                             <p>Jūsu pieteikums tika noraidīts. Jūs varat atkal saņemt šo palīdzības pieprasījumu, ja vēlaties mēģināt vēlreiz.</p>
+                        </div>
+                        <div class="mb-4 flex flex-wrap gap-3">
+                            <a href="{{ route('submissions.export', $userSubmission->id) }}" class="inline-flex rounded-md bg-gray-700 px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-gray-600">
+                                Lejupielādēt PDF
+                            </a>
+                            @if($userSubmission->canBeDisputed())
+                                <a href="{{ route('disputes.create', $userSubmission) }}" class="inline-flex rounded-md border border-red-500/50 px-4 py-2 text-sm font-medium text-red-300 transition-colors duration-200 hover:bg-red-500/10 hover:text-red-200">
+                                    Iesniegt strīdu
+                                </a>
+                            @endif
                         </div>
                         
                         <form method="POST" action="{{ route('job-submissions.claim') }}">
@@ -177,8 +219,28 @@ Iesniegt pieteikumu
             @endif
             
             @can('edit-job', $job)
-                <div class="border-t border-gray-700 pt-6 mt-6 flex justify-between">
-                    <x-button href="/jobs/{{ $job->id }}/edit" class="bg-gray-700 hover:bg-gray-600">Rediģēt pieprasījumu</x-button>
+                @php
+                    $exportSubmission = \App\Models\JobSubmission::where('job_listing_id', $job->id)
+                        ->latest()
+                        ->first();
+                @endphp
+
+                <div class="border-t border-gray-700 pt-6 mt-6 flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <x-button href="/jobs/{{ $job->id }}/edit" class="bg-gray-700 hover:bg-gray-600">Rediģēt pieprasījumu</x-button>
+
+                        @if($exportSubmission)
+                            <a href="{{ route('submissions.export', $exportSubmission->id) }}" class="inline-flex rounded-md bg-gray-700 px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-gray-600">
+                                Lejupielādēt PDF
+                            </a>
+
+                            @if($exportSubmission->canBeDisputed())
+                                <a href="{{ route('disputes.create', $exportSubmission) }}" class="inline-flex rounded-md border border-red-500/50 px-4 py-2 text-sm font-medium text-red-300 transition-colors duration-200 hover:bg-red-500/10 hover:text-red-200">
+                                    Iesniegt strīdu
+                                </a>
+                            @endif
+                        @endif
+                    </div>
                     
                     <form method="POST" action="/jobs/{{ $job->id }}" onsubmit="return confirm('Vai esat pārliecināti, ka vēlaties dzēst šo palīdzības pieprasījumu?')">
                         @csrf

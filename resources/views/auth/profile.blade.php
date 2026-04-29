@@ -79,7 +79,7 @@
 		                                        <label class="group relative h-10 w-10 cursor-pointer">
 		                                            <input type="radio" name="default_avatar" value="{{ $avatar }}" class="peer sr-only" @checked($user->avatar_path === $avatar)>
 		                                            <span class="flex h-10 w-10 items-center justify-center rounded-full border border-gray-700 bg-gray-950/60 p-0.5 transition peer-checked:border-neon-accent peer-checked:bg-neon-accent/10 peer-checked:ring-2 peer-checked:ring-neon-accent/30 group-hover:border-neon-accent/60">
-		                                                <img src="{{ asset($avatar) }}" alt="Noklusējuma profila attēls" class="h-full w-full rounded-full object-cover">
+		                                                <img src="/{{ ltrim($avatar, '/') }}" alt="Noklusējuma profila attēls" class="h-full w-full rounded-full object-cover">
 		                                            </span>
 		                                            <span class="pointer-events-none absolute -right-1 -top-1 hidden h-4 w-4 items-center justify-center rounded-full bg-neon-accent text-[10px] font-bold text-black peer-checked:flex">✓</span>
 		                                        </label>
@@ -226,8 +226,8 @@
                         <a href="/jobs/{{ $service->id }}" class="group block overflow-hidden rounded-lg border border-gray-700 bg-gray-800/40 backdrop-blur-sm transition-colors hover:border-neon-accent hover:bg-gray-800/70">
                             <x-job-image :job="$service" class="rounded-none border-0 border-b border-gray-700" />
                             <div class="p-5">
-                            <div class="flex items-start justify-between gap-4">
-                                <h4 class="text-lg font-semibold text-white/90 transition-colors group-hover:text-neon-accent">{{ $service->title }}</h4>
+                            <div class="flex min-w-0 items-start justify-between gap-4">
+                                <h4 class="min-w-0 truncate text-lg font-semibold text-white/90 transition-colors group-hover:text-neon-accent">{{ $service->title }}</h4>
                                 <span class="shrink-0 rounded-full bg-neon-accent/20 px-3 py-1 text-xs font-semibold text-neon-accent">{{ $service->time_credits }} kredīti</span>
                             </div>
                             <p class="mt-3 line-clamp-3 text-sm text-gray-400">{{ $service->description }}</p>

@@ -144,14 +144,19 @@ class User extends Authenticatable
     public function avatarUrl()
     {
         if (!$this->avatar_path) {
-            return null;
+            return $this->defaultAvatarUrl();
         }
 
         if (str_starts_with($this->avatar_path, 'images/')) {
-            return asset($this->avatar_path);
+            return '/' . ltrim($this->avatar_path, '/');
         }
 
-        return asset('storage/' . $this->avatar_path);
+        return '/storage/' . ltrim($this->avatar_path, '/');
+    }
+
+    public function defaultAvatarUrl()
+    {
+        return '/' . ltrim(self::defaultAvatarForSeed($this->email ?? $this->id), '/');
     }
 
     public static function defaultAvatarOptions()

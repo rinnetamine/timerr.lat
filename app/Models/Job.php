@@ -43,18 +43,27 @@ class Job extends Model
     {
         if ($this->image_path) {
             if (str_starts_with($this->image_path, 'images/')) {
-                return asset($this->image_path);
+                if (str_starts_with($this->image_path, 'images/job-defaults/')) {
+                    return '/' . ltrim($this->defaultImagePath(), '/');
+                }
+
+                return '/' . ltrim($this->image_path, '/');
             }
 
-            return asset('storage/' . $this->image_path);
+            return '/storage/' . ltrim($this->image_path, '/');
         }
 
-        return asset($this->defaultImagePath());
+        return '/' . ltrim($this->defaultImagePath(), '/');
     }
 
     public function defaultImagePath()
     {
-        return 'images/job-defaults/' . $this->categoryRoot() . '.svg';
+        return self::defaultImagePathForCategory($this->category ?: 'other');
+    }
+
+    public function defaultImageUrl()
+    {
+        return '/' . ltrim($this->defaultImagePath(), '/');
     }
 
     public static function defaultImagePathForCategory(string $category)

@@ -87,17 +87,17 @@
                         </a>
 
                         <div class="p-5">
-                    <div class="font-bold text-neon-accent text-sm flex items-center gap-2">
+                    <div class="flex min-w-0 items-center gap-2 text-sm font-bold text-neon-accent">
                         <x-avatar :user="$job->user" size="sm" />
-                        <span>
-                            <a href="{{ route('people.show', $job->user->id) }}" class="hover:text-neon-accent/80 transition-colors duration-200">
+                        <span class="min-w-0 truncate">
+                            <a href="{{ route('people.show', $job->user->id) }}" class="transition-colors duration-200 hover:text-neon-accent/80">
                                 {{ $job->user->first_name }} {{ $job->user->last_name }}
                             </a> vajag palīdzību
                         </span>
                     </div>
 
-                    <div class="mt-2 text-white/90 font-semibold">
-                        <a href="/jobs/{{ $job->id }}" class="hover:text-neon-accent transition-colors duration-200">
+                    <div class="mt-2 min-w-0 truncate font-semibold text-white/90">
+                        <a href="/jobs/{{ $job->id }}" class="transition-colors duration-200 hover:text-neon-accent">
                             {{ $job['title'] }}
                         </a>
                     </div>
@@ -119,9 +119,9 @@
                             }
                         }
                     @endphp
-                    <div class="mt-1 text-gray-300 text-sm flex items-center justify-between">
-                        <span>Kategorija: <span class="capitalize">{{ $catLabel }}</span></span>
-                        <span class="bg-neon-accent/20 text-neon-accent px-3 py-1 rounded-full text-xs font-semibold">
+                    <div class="mt-1 flex min-w-0 items-center justify-between gap-3 text-sm text-gray-300">
+                        <span class="min-w-0 truncate">Kategorija: <span class="capitalize">{{ $catLabel }}</span></span>
+                        <span class="shrink-0 rounded-full bg-neon-accent/20 px-3 py-1 text-xs font-semibold text-neon-accent">
                             {{ $job['time_credits'] }} laika kredīti
                         </span>
                     </div>

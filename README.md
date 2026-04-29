@@ -25,7 +25,11 @@ Timerr is a modern web application built with Laravel that enables users to:
 
 ## System Requirements
 
-- PHP >= 8.1
+### Docker
+- Docker Desktop or Docker Engine with Docker Compose
+
+### Manual local setup
+- PHP >= 8.2
 - Composer
 - Laravel >= 10.0
 - SQLite
@@ -70,14 +74,22 @@ The application will be available at `http://localhost:8000`
 
 ## Docker Setup
 
-The project includes Docker support with SQLite configuration:
+The project can be started with Docker only; PHP, Composer, Node.js, npm, and SQLite do not need to be installed on the host machine.
 
 ```bash
-# Build and start the container
-docker-compose up --build
+docker compose up --build
 
 # The app will be available at http://localhost:8000
 ```
 
-The Docker configuration uses SQLite by default, eliminating the need for a separate database service.
+Docker uses SQLite by default and stores the database and uploaded files in Docker volumes, so no separate database service is required.
 
+Useful commands:
+
+```bash
+# Stop the app
+docker compose down
+
+# Stop the app and remove the local Docker database/storage volumes
+docker compose down -v
+```

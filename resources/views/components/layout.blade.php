@@ -59,6 +59,8 @@
         }
 
         html.light .bg-gray-900,
+        html.light .bg-gray-950,
+        html.light .bg-gray-950\/40,
         html.light .bg-gray-900\/60,
         html.light .bg-gray-800,
         html.light .bg-gray-800\/40,
@@ -69,6 +71,7 @@
 
         html.light .text-white,
         html.light .text-white\/90,
+        html.light .text-white\/95,
         html.light .text-gray-100 {
             color: #0f172a !important;
         }
@@ -130,6 +133,7 @@
     /* message panels light */
         html.light .bg-gray-800\/30,
         html.light .bg-gray-800\/40,
+        html.light .bg-gray-900\/50,
         html.light .bg-gray-900\/60 {
             background-color: #ffffff !important;
             color: #0f172a !important;
@@ -220,18 +224,46 @@
             border-color: rgba(0,255,157,0.28) !important;
         }
 
+        .timerr-hero-wordmark {
+            font-family: ui-rounded, "SF Pro Rounded", "Nunito", system-ui, sans-serif;
+            text-shadow: 0 0 22px rgba(0,255,157,0.28);
+            animation: timerrWordmarkPulse 3s ease-in-out infinite;
+        }
+
+        .hero-primary-button,
+        .hero-primary-button:hover {
+            color: #020617 !important;
+        }
+
+        @keyframes timerrWordmarkPulse {
+            0%, 100% {
+                letter-spacing: 0;
+                filter: drop-shadow(0 0 0 rgba(0,255,157,0));
+            }
+            50% {
+                letter-spacing: 0.02em;
+                filter: drop-shadow(0 0 10px rgba(0,255,157,0.35));
+            }
+        }
+
         html.light .hover-card:hover {
             transform: translateY(-4px);
             box-shadow: 0 10px 20px rgba(13,166,122,0.06);
             border-color: rgba(13,166,122,0.18) !important;
         }
 
+        html.light .timerr-hero-wordmark {
+            text-shadow: 0 0 18px rgba(13,166,122,0.18);
+        }
+
         @media (prefers-reduced-motion: reduce) {
             .hover-card,
-            .hover-card:hover {
+            .hover-card:hover,
+            .timerr-hero-wordmark {
                 transition: none !important;
                 transform: none !important;
                 box-shadow: none !important;
+                animation: none !important;
             }
         }
     </style>
@@ -303,12 +335,16 @@
             <div class="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
                 <div class="flex h-12 items-center justify-between">
                     <div class="flex items-center">
-                        <div class="flex-shrink-0">
+                        <a href="/" class="flex flex-shrink-0 items-center gap-3 rounded-md focus:outline-none focus:ring-2 focus:ring-neon-accent/50">
                             <img class="h-8 w-8 dark-logo" src="{{ asset('clock.svg') }}" alt="Timerr logo - clock">
                             <img class="h-8 w-8 light-logo hidden" src="{{ asset('clock-light.svg') }}" alt="Timerr logo - clock light">
-                        </div>
+                            <span class="hidden sm:flex flex-col leading-tight">
+                                <span class="text-base font-bold text-white/95">Timerr</span>
+                                <span class="text-[11px] font-medium uppercase tracking-[0.18em] text-neon-accent/80">laiks ir valūta</span>
+                            </span>
+                        </a>
                         <div class="hidden md:block">
-                            <div class="ml-10 flex items-baseline space-x-4">
+                            <div class="ml-8 flex items-baseline space-x-4">
                                 <x-nav-link href="/" :active="request()->is('/')" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Sākums</x-nav-link>
                                 <x-nav-link href="/jobs" :active="request()->is('jobs')" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Darbi</x-nav-link>
                                 <x-nav-link href="/people" :active="request()->is('people*')" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Cilvēki</x-nav-link>
@@ -317,9 +353,9 @@
                         </div>
                     </div>
                     <div class="hidden md:block">
-                        <div class="ml-4 flex items-center md:ml-6">
+                        <div class="ml-4 flex items-center gap-2 md:ml-6">
                             <!-- theme toggle button -->
-                            <button type="button" onclick="toggleTheme()" class="theme-toggle ml-3 inline-flex items-center rounded-md p-2 text-gray-300 hover:text-neon-accent hover:bg-gray-800/80 border border-gray-700 transition-all duration-200" aria-pressed="false" title="toggle theme">
+                            <button type="button" onclick="toggleTheme()" class="theme-toggle inline-flex items-center rounded-md p-2 text-gray-300 hover:text-neon-accent hover:bg-gray-800/80 border border-gray-700 transition-all duration-200" aria-pressed="false" title="toggle theme">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon-moon h-5 w-5" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
                                 </svg>
@@ -344,21 +380,27 @@
                                     Iesniegumi
                                 </x-nav-link>
                                 @if(auth()->user()->isAdmin())
-                                    <x-nav-link href="/admin" :active="request()->is('admin*')" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">
-                                        Administrācija
-                                    </x-nav-link>
-                                    <x-nav-link href="/disputes" :active="request()->is('disputes*')" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">
-                                        Strīdi
-                                    </x-nav-link>
+                                    <details class="group relative">
+                                        <summary class="{{ request()->is('admin*') || request()->is('disputes*') ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }} flex cursor-pointer list-none items-center gap-1 rounded-md px-3 py-2 text-sm font-medium [&::-webkit-details-marker]:hidden">
+                                            Admin
+                                            <svg class="h-4 w-4 transition-transform duration-200 group-open:rotate-180" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                                            </svg>
+                                        </summary>
+                                        <div class="absolute right-0 mt-2 w-48 overflow-hidden rounded-lg border border-gray-700 bg-gray-900/95 py-2 shadow-xl shadow-black/30 backdrop-blur">
+                                            <a href="/admin" class="{{ request()->is('admin*') ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white' }} block px-4 py-2 text-sm">Administrācija</a>
+                                            <a href="/disputes" class="{{ request()->is('disputes*') ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white' }} block px-4 py-2 text-sm">Strīdi</a>
+                                        </div>
+                                    </details>
                                 @endif
-                                <a href="/profile" aria-current="{{ request()->is('profile') ? 'page' : 'false' }}" class="{{ request()->is('profile') ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }} inline-flex items-center gap-2 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium leading-none">
+                                <a href="/profile" aria-current="{{ request()->is('profile') ? 'page' : 'false' }}" class="{{ request()->is('profile') ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }} inline-flex items-center gap-2 whitespace-nowrap rounded-md px-2 py-2 text-sm font-medium leading-none xl:px-3">
                                     <span class="inline-flex items-center gap-2">
-                                        <x-avatar :user="auth()->user()" size="sm" class="h-7 w-7 text-xs" />
-                                        Profils
+                                        <x-avatar :user="auth()->user()" size="xs" />
+                                        <span class="hidden xl:inline">Profils</span>
                                     </span>
-                                    <span class="inline-flex items-center text-sm text-neon-accent">{{ auth()->user()->time_credits }} kredīti</span>
+                                    <span class="inline-flex items-center text-sm text-neon-accent">{{ auth()->user()->time_credits }} kr.</span>
                                 </a>
-                                <form method="POST" action="/logout" class="ml-3">
+                                <form method="POST" action="/logout">
                                     @csrf
                                     <x-form-button class="text-gray-300 hover:text-neon-accent hover:bg-gray-800/80 border border-gray-700 transition-all duration-300">Izrakstīties</x-form-button>
                                 </form>
@@ -420,7 +462,7 @@
                             <a href="/disputes" class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium">Strīdi</a>
                         @endif
                         <a href="/profile" class="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-base font-medium flex items-center gap-2">
-                            <x-avatar :user="auth()->user()" size="sm" class="h-8 w-8 text-xs" />
+                            <x-avatar :user="auth()->user()" size="nav" />
                             Profils
                         </a>
                         <form method="POST" action="/logout">

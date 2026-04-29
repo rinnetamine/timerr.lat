@@ -18,7 +18,7 @@
             </div>
 
             <div class="space-y-4">
-                @foreach($messages as $message)
+                @forelse($messages as $message)
                     <div class="bg-gray-900/40 backdrop-blur-sm rounded-lg border border-gray-700 p-4">
                         <div class="flex justify-between items-start">
                             <div>
@@ -55,8 +55,18 @@
                             Nosūtīts: {{ $message->created_at->translatedFormat('j. F Y, H:i') }}
                         </p>
                     </div>
-                @endforeach
+                @empty
+                    <div class="rounded-lg border border-gray-700 bg-gray-900/40 p-6 text-gray-400">
+                        Nav atrastu kontaktziņojumu.
+                    </div>
+                @endforelse
             </div>
+
+            @if($messages->hasPages())
+                <div class="mt-6">
+                    {{ $messages->links() }}
+                </div>
+            @endif
         </div>
     </div>
 </x-layout>

@@ -14,6 +14,13 @@ use Illuminate\Support\Facades\Schema;
 
 class DatabaseSeeder extends Seeder
 {
+    private array $blankUserEmails = [
+        'user1@timerr.lat',
+        'user2@timerr.lat',
+        'user3@timerr.lat',
+        'user4@timerr.lat',
+    ];
+
     private array $statuses = [
         JobSubmission::STATUS_CLAIMED,
         JobSubmission::STATUS_PENDING,
@@ -32,9 +39,9 @@ class DatabaseSeeder extends Seeder
         $testUser = $users->firstWhere('email', 'user@timerr.lat');
 
         if ($testUser) {
-            $this->createReceivedSubmissionsForTestUser($testUser, $users, $jobs);
-            $this->createSentSubmissionsForTestUser($testUser, $users, $jobs);
-            $this->createReviewsForTestUser($testUser, $users, $jobs);
+            $receivedSubmissions = $this->createReceivedSubmissionsForTestUser($testUser, $users, $jobs);
+            $sentSubmissions = $this->createSentSubmissionsForTestUser($testUser, $users, $jobs);
+            $this->createReviewsForTestUser($testUser, $users, $receivedSubmissions, $sentSubmissions);
             $this->createTransactionsForTestUser($testUser);
         }
     }
@@ -86,6 +93,10 @@ class DatabaseSeeder extends Seeder
         $users = [
             ['Admin', 'Lietotājs', 'admin@timerr.lat', 'admin', 'admin', 1000],
             ['Test', 'User', 'user@timerr.lat', 'user', 'user', 150],
+            ['Blank', 'User 1', 'user1@timerr.lat', 'user1', 'user', 10],
+            ['Blank', 'User 2', 'user2@timerr.lat', 'user2', 'user', 10],
+            ['Blank', 'User 3', 'user3@timerr.lat', 'user3', 'user', 10],
+            ['Blank', 'User 4', 'user4@timerr.lat', 'user4', 'user', 10],
             ['Jānis', 'Bērziņš', 'janis.demo@timerr.lat', 'password', 'user', 82],
             ['Māra', 'Kalniņa', 'mara.demo@timerr.lat', 'password', 'user', 64],
             ['Līga', 'Ozola', 'liga.demo@timerr.lat', 'password', 'user', 91],
@@ -114,60 +125,102 @@ class DatabaseSeeder extends Seeder
         });
     }
 
+    private function demoParticipants($users)
+    {
+        return $users
+            ->reject(fn (User $user) => $user->email === 'admin@timerr.lat')
+            ->reject(fn (User $user) => in_array($user->email, $this->blankUserEmails, true))
+            ->values();
+    }
+
     private function createCategoryJobs($users)
     {
         $categories = $this->categorySlugs();
+        $topCategories = $this->topCategorySlugs();
         $hasImageColumn = Schema::hasColumn('job_listings', 'image_path');
+        $testUser = $users->firstWhere('email', 'user@timerr.lat');
+        $otherUsers = $this->demoParticipants($users)
+            ->filter(fn (User $user) => $testUser && $user->id !== $testUser->id)
+            ->values();
+        $jobs = collect();
 
-        return collect($categories)->map(function (array $category, int $index) use ($users, $hasImageColumn) {
-            $owner = $users[$index % $users->count()];
+        foreach ($topCategories as $index => $category) {
             $credits = 4 + ($index % 9) * 2;
 
-            return Job::create(array_filter([
+            if ($testUser) {
+                $jobs->push(Job::create(array_filter([
+                    'user_id' => $testUser->id,
+                    'title' => $this->jobTitle($category['slug'], $category['label']),
+                    'description' => $this->jobDescription($category['label'], $testUser->first_name),
+                    'time_credits' => $credits,
+                    'category' => $category['slug'],
+                    'image_path' => $hasImageColumn ? Job::defaultImagePathForCategory($category['slug']) : null,
+                    'created_at' => now()->subDays(60 - $index),
+                    'updated_at' => now()->subDays(60 - $index),
+                ], fn ($value) => $value !== null)));
+            }
+        }
+
+        foreach ($categories as $index => $category) {
+            $credits = 5 + ($index % 9) * 2;
+            $ownerPool = $otherUsers->isNotEmpty() ? $otherUsers : $users;
+            $owner = $ownerPool[$index % $ownerPool->count()];
+
+            $jobs->push(Job::create(array_filter([
                 'user_id' => $owner->id,
                 'title' => $this->jobTitle($category['slug'], $category['label']),
                 'description' => $this->jobDescription($category['label'], $owner->first_name),
-                'time_credits' => $credits,
+                'time_credits' => $credits + 1,
                 'category' => $category['slug'],
                 'image_path' => $hasImageColumn ? Job::defaultImagePathForCategory($category['slug']) : null,
                 'created_at' => now()->subDays(30 - $index),
                 'updated_at' => now()->subDays(30 - $index),
-            ], fn ($value) => $value !== null));
-        });
+            ], fn ($value) => $value !== null)));
+        }
+
+        return $jobs;
     }
 
-    private function createReceivedSubmissionsForTestUser(User $testUser, $users, $jobs): void
+    private function createReceivedSubmissionsForTestUser(User $testUser, $users, $jobs)
     {
         $testJobs = $jobs->where('user_id', $testUser->id)->values();
-        $applicants = $users->where('id', '!=', $testUser->id)->values();
+        $applicants = $this->demoParticipants($users)
+            ->where('id', '!=', $testUser->id)
+            ->values();
+        $submissions = collect();
 
         foreach ($this->statuses as $index => $status) {
-            $this->createSubmission(
+            $submissions->push($this->createSubmission(
                 $testJobs[$index % $testJobs->count()],
                 $applicants[$index % $applicants->count()],
                 $status,
                 "Saņemtais testa pieteikums statusam: {$status}.",
                 $index
-            );
+            ));
         }
+
+        return $submissions;
     }
 
-    private function createSentSubmissionsForTestUser(User $testUser, $users, $jobs): void
+    private function createSentSubmissionsForTestUser(User $testUser, $users, $jobs)
     {
         $availableJobs = $jobs->where('user_id', '!=', $testUser->id)->values();
+        $submissions = collect();
 
         foreach ($this->statuses as $index => $status) {
-            $this->createSubmission(
+            $submissions->push($this->createSubmission(
                 $availableJobs[$index],
                 $testUser,
                 $status,
                 "Testa lietotāja nosūtītais pieteikums statusam: {$status}.",
                 $index + 10
-            );
+            ));
         }
+
+        return $submissions;
     }
 
-    private function createReviewsForTestUser(User $testUser, $users, $jobs): void
+    private function createReviewsForTestUser(User $testUser, $users, $receivedSubmissions, $sentSubmissions): void
     {
         $reviewTexts = [
             [5, 'Ļoti patīkama sadarbība, viss tika sarunāts skaidri un bez liekas kavēšanās.'],
@@ -180,31 +233,32 @@ class DatabaseSeeder extends Seeder
             [4, 'Labs darba apraksts un savlaicīga apstiprināšana pēc pabeigšanas.'],
             [5, 'Viegli vienoties par detaļām, komunikācija bija profesionāla.'],
             [4, 'Pozitīva pieredze, viss nepieciešamais bija pieejams uzdevuma izpildei.'],
-            [5, 'Daudz skaidru piemēru un atsaucīga komunikācija visa darba laikā.'],
-            [5, 'Darbs tika pieņemts ātri, un visas norādes bija saprotamas.'],
         ];
 
-        $reviewJobs = $jobs->where('user_id', '!=', $testUser->id)->slice(5)->values();
-        $reviewers = $users->where('id', '!=', $testUser->id)->values();
+        $reviewers = $this->demoParticipants($users)
+            ->where('id', '!=', $testUser->id)
+            ->values();
+        $reviewSubmissions = $sentSubmissions
+            ->merge($receivedSubmissions)
+            ->values();
 
         foreach ($reviewTexts as $index => [$rating, $comment]) {
-            $job = $reviewJobs[$index % $reviewJobs->count()];
-            $submission = $this->createSubmission(
-                $job,
-                $testUser,
-                JobSubmission::STATUS_APPROVED,
-                "Atsauksmes testa pieteikums #{$index}.",
-                $index + 20
-            );
+            $submission = $reviewSubmissions[$index % $reviewSubmissions->count()];
+
+            if ($submission->user_id === $testUser->id) {
+                $reviewerId = $submission->jobListing?->user_id ?? $reviewers[$index % $reviewers->count()]->id;
+            } else {
+                $reviewerId = $submission->user_id;
+            }
 
             Review::create([
-                'reviewer_id' => $reviewers[$index % $reviewers->count()]->id,
+                'reviewer_id' => $reviewerId,
                 'reviewee_id' => $testUser->id,
                 'job_submission_id' => $submission->id,
                 'rating' => $rating,
                 'comment' => $comment,
-                'created_at' => now()->subDays(12 - $index),
-                'updated_at' => now()->subDays(12 - $index),
+                'created_at' => now()->subDays(10 - $index),
+                'updated_at' => now()->subDays(10 - $index),
             ]);
         }
     }
@@ -276,6 +330,17 @@ class DatabaseSeeder extends Seeder
         return $slugs;
     }
 
+    private function topCategorySlugs(): array
+    {
+        return collect(config('job_categories', []))
+            ->map(fn (array $category, string $slug) => [
+                'slug' => $slug,
+                'label' => $category['label'],
+            ])
+            ->values()
+            ->all();
+    }
+
     private function jobTitle(string $slug, string $label): string
     {
         return match (explode('.', $slug)[0]) {
@@ -290,7 +355,7 @@ class DatabaseSeeder extends Seeder
 
     private function jobDescription(string $label, string $ownerName): string
     {
-        return "{$ownerName} meklē palīdzību kategorijā “{$label}”. Uzdevums ir paredzēts kā skaidrs demo piemērs ar konkrētu rezultātu, saprotamu termiņu un draudzīgu komunikāciju.";
+        return "{$ownerName} meklē palīdzību kategorijā “{$label}”.";
     }
 
     private function resetSqliteSequences(array $tables): void

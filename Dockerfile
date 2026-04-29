@@ -1,62 +1,85 @@
-FROM php:8.3-fpm-alpine
+FROM node:20-alpine AS assets
 
-# Install Node.js for frontend dependencies
-RUN apk add --no-cache nodejs npm
+WORKDIR /app
 
-# Install system dependencies
+COPY package.json package-lock.json ./
+RUN npm ci --no-audit --no-fund
+
+COPY resources ./resources
+COPY vite.config.js ./
+RUN npm run build
+
+FROM php:8.3-cli-alpine
+
 RUN apk add --no-cache \
-    bash \
-    curl \
-    libpng-dev \
-    libjpeg-turbo-dev \
-    freetype-dev \
-    libzip-dev \
-    zip \
-    unzip \
-    git \
-    oniguruma-dev \
-    sqlite
-
-# Install PHP extensions
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) \
-        pdo \
-        pdo_sqlite \
-        pdo_mysql \
-        mbstring \
-        exif \
-        pcntl \
-        bcmath \
-        gd \
+        bash \
+        curl \
+        freetype \
+        git \
+        libjpeg-turbo \
+        libpng \
+        libzip \
+        sqlite \
+        unzip \
         zip \
-        opcache
+    && apk add --no-cache --virtual .build-deps \
+        $PHPIZE_DEPS \
+        freetype-dev \
+        libjpeg-turbo-dev \
+        libpng-dev \
+        libzip-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j"$(nproc)" \
+        bcmath \
+        exif \
+        gd \
+        pcntl \
+        pdo_mysql \
+        zip \
+    && apk del .build-deps
 
-# Match PHP transport limits with the app's attachment rules.
-RUN printf "upload_max_filesize=25M\npost_max_size=30M\nmax_file_uploads=20\n" > /usr/local/etc/php/conf.d/uploads.ini
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-# Set working directory
 WORKDIR /var/www/html
 
-# Copy application files
+ENV COMPOSER_ALLOW_SUPERUSER=1 \
+    APP_ENV=local \
+    APP_DEBUG=true \
+    APP_URL=http://localhost:8000 \
+    DB_CONNECTION=sqlite \
+    DB_DATABASE=/data/database.sqlite \
+    SESSION_DRIVER=file \
+    CACHE_STORE=file \
+    QUEUE_CONNECTION=sync
+
+COPY composer.json composer.lock ./
+RUN composer install \
+        --no-dev \
+        --no-interaction \
+        --no-progress \
+        --no-scripts \
+        --optimize-autoloader \
+        --prefer-dist
+
 COPY . .
+COPY --from=assets /app/public/build ./public/build
 
-# Install PHP dependencies
-RUN composer install --optimize-autoloader --no-dev --no-interaction
+RUN rm -f bootstrap/cache/*.php \
+    && composer dump-autoload --no-dev --no-interaction --no-scripts --optimize \
+    && mkdir -p \
+        /data \
+        bootstrap/cache \
+        storage/app/public \
+        storage/framework/cache/data \
+        storage/framework/sessions \
+        storage/framework/views \
+        storage/logs \
+    && chmod -R ug+rwX /data bootstrap/cache storage
 
-# Install Node.js dependencies and build assets
-RUN npm install && npm run build
-
-# Create SQLite database file
-RUN touch database/database.sqlite
-
-# Set permissions
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html/storage \
-    && chmod -R 755 /var/www/html/bootstrap/cache
+COPY docker/entrypoint.sh /usr/local/bin/docker-entrypoint
+RUN chmod +x /usr/local/bin/docker-entrypoint
 
 EXPOSE 8000
 
+ENTRYPOINT ["docker-entrypoint"]
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]

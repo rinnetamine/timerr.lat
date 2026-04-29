@@ -1,18 +1,26 @@
 services:
-
   app:
-    build: .
-    container_name: laravel_app
+    build:
+      context: .
+    image: timerr-app
+    container_name: timerr_app
     restart: unless-stopped
     ports:
-      - "8000:8000"
+      - "${APP_PORT:-8000}:8000"
     environment:
       APP_ENV: ${APP_ENV:-local}
-      APP_KEY: ${APP_KEY}
+      APP_DEBUG: ${APP_DEBUG:-true}
+      APP_KEY: ${APP_KEY:-base64:GdUh0f/cc/ta1rRIdsmWORGjGxuZk+oNWcBV4JEEoT4=}
+      APP_URL: ${APP_URL:-http://localhost:8000}
       DB_CONNECTION: sqlite
-      DB_DATABASE: /var/www/html/database/database.sqlite
+      DB_DATABASE: /data/database.sqlite
+      SESSION_DRIVER: file
+      CACHE_STORE: file
+      QUEUE_CONNECTION: sync
     volumes:
-      - .:/var/www/html
-      - ./database:/var/www/html/database
-    networks:
-      - laravel_network
+      - sqlite_data:/data
+      - app_storage:/var/www/html/storage
+
+volumes:
+  sqlite_data:
+  app_storage:

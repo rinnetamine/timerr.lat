@@ -76,7 +76,13 @@ class MessagesController extends Controller
             $q->where('sender_id', $me->id)->where('recipient_id', $user->id);
         })->orWhere(function ($q) use ($me, $user) {
             $q->where('sender_id', $user->id)->where('recipient_id', $me->id);
-        })->with('files')->orderBy('created_at')->get();
+        })
+            ->with('files')
+            ->orderByDesc('created_at')
+            ->paginate(50, ['*'], 'messages_page')
+            ->withQueryString();
+
+        $messages->setCollection($messages->getCollection()->reverse()->values());
 
         // build conversations list so the view can render a sidebar
         $all = Message::where('sender_id', $me->id)

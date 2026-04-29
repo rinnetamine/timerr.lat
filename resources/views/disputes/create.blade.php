@@ -1,34 +1,44 @@
 <x-layout>
     <x-slot name="heading">Iesniegt strīdu</x-slot>
 
-    <div class="max-w-2xl mx-auto">
-	        <div class="bg-gray-900/60 border border-gray-700 rounded-lg p-6 mb-6">
-	            <h2 class="text-xl font-bold text-white mb-4">Darba informācija</h2>
-                <x-job-image :job="$submission->jobListing" class="mb-4" />
-	            <div class="space-y-3">
-                <div>
-                    <span class="text-gray-400">Darba nosaukums:</span>
-                    <span class="text-white ml-2">{{ $submission->jobListing->title }}</span>
+    <div class="mx-auto max-w-6xl overflow-hidden rounded-lg border border-gray-700 bg-gray-900/45 backdrop-blur-sm">
+        <div class="grid grid-cols-1 lg:grid-cols-[0.9fr_1.1fr]">
+            <aside class="border-b border-gray-700 bg-gray-950/45 p-8 lg:border-b-0 lg:border-r">
+                <div class="inline-flex rounded-md border border-yellow-500/40 bg-yellow-500/10 px-3 py-2 text-sm font-semibold text-yellow-200">
+                    Strīda konteksts
                 </div>
-                <div>
-                    <span class="text-gray-400">Publicēja:</span>
-	                    <span class="inline-flex items-center gap-2 text-white ml-2"><x-avatar :user="$submission->jobListing->user" size="sm" />{{ $submission->jobListing->user->first_name }} {{ $submission->jobListing->user->last_name }}</span>
-                </div>
-                <div>
-                    <span class="text-gray-400">Iesniedza:</span>
-	                    <span class="inline-flex items-center gap-2 text-white ml-2"><x-avatar :user="$submission->user" size="sm" />{{ $submission->user->first_name }} {{ $submission->user->last_name }}</span>
-                </div>
-                <div>
-                    <span class="text-gray-400">Laika kredīti:</span>
-                    <span class="text-neon-accent ml-2">{{ $submission->jobListing->time_credits }}</span>
-                </div>
-                <div>
-                    <span class="text-gray-400">Pašreizējais statuss:</span>
-                    <span class="text-white ml-2">{{ ucfirst($submission->status) }}</span>
-                </div>
-            </div>
-        </div>
+                <h2 class="mt-6 text-3xl font-bold leading-tight text-white/95">Apraksti problēmu skaidri, lai admins var pieņemt godīgu lēmumu.</h2>
+                <p class="mt-4 text-gray-300">Jo konkrētāks iemesls, jo vieglāk saprast, kas notika un kā atrisināt situāciju.</p>
 
+                <div class="mt-8 rounded-lg border border-gray-700 bg-gray-900/55 p-5">
+                    <h3 class="mb-4 text-lg font-bold text-white">Darba informācija</h3>
+                    <x-job-image :job="$submission->jobListing" class="mb-4" />
+                    <div class="space-y-3">
+                        <div>
+                            <span class="text-gray-400">Darba nosaukums:</span>
+                            <span class="ml-2 text-white">{{ $submission->jobListing->title }}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-400">Publicēja:</span>
+                            <span class="ml-2 inline-flex items-center gap-2 text-white"><x-avatar :user="$submission->jobListing->user" size="sm" />{{ $submission->jobListing->user->first_name }} {{ $submission->jobListing->user->last_name }}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-400">Iesniedza:</span>
+                            <span class="ml-2 inline-flex items-center gap-2 text-white"><x-avatar :user="$submission->user" size="sm" />{{ $submission->user->first_name }} {{ $submission->user->last_name }}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-400">Laika kredīti:</span>
+                            <span class="ml-2 text-neon-accent">{{ $submission->jobListing->time_credits }}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-400">Pašreizējais statuss:</span>
+                            <span class="ml-2 text-white">{{ ucfirst($submission->status) }}</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <div class="p-8">
         <form action="{{ route('disputes.store', $submission) }}" method="POST" class="bg-gray-900/60 border border-gray-700 rounded-lg p-6">
             @csrf
             <div class="mb-6">
@@ -68,5 +78,7 @@
                 </x-form-button>
             </div>
         </form>
+            </div>
+        </div>
     </div>
 </x-layout>
