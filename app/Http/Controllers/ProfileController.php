@@ -1,5 +1,7 @@
 <?php
 
+// Šis fails sagatavo lietotāja profilu, profila filtrus, paroles maiņu un profila attēlu.
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -11,10 +13,9 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\Password;
 
-// controller for user profile and dashboard
 class ProfileController extends Controller
 {
-    // display user profile with all related data
+    // Parāda lietotāja profilu ar sludinājumiem, pieteikumiem, atsauksmēm un darījumiem.
     public function show(Request $request)
     {
         $user = auth()->user();
@@ -26,13 +27,13 @@ class ProfileController extends Controller
             JobSubmission::STATUS_ADMIN_REVIEW,
         ];
         
-        // load stats for display
+        // Profilam vajadzīgie skaitītāji tiek ielādēti vienā vietā, lai skats neveidotu liekus vaicājumus.
         $user->loadCount(['jobs', 'completedJobs', 'reviewsReceived']);
         
-        // add average rating calculation
+        // Vidējais vērtējums tiek aprēķināts atsevišķi, jo tas nav vienkāršs skaitītājs.
         $user->reviews_received_rating_avg = Review::where('reviewee_id', $user->id)->avg('rating') ?? 0;
         
-        // fetch user's job listings
+        // Sludinājumu vaicājums tiek papildināts ar profila meklēšanas un kārtošanas filtriem.
         $servicesQuery = $user->jobs()->withCount('submissions');
 
         if ($search = $request->string('vacancy_search')->trim()->toString()) {
@@ -62,7 +63,7 @@ class ProfileController extends Controller
             ->paginate(6, ['*'], 'vacancies_page')
             ->withQueryString();
         
-        // fetch submissions for user's jobs
+        // Saņemtie pieteikumi attiecas uz darbiem, kurus izveidojis pašreizējais lietotājs.
         $receivedSubmissionsQuery = JobSubmission::whereHas('jobListing', function ($query) use ($user) {
             $query->where('user_id', $user->id);
         })->with(['jobListing', 'user']);
@@ -79,7 +80,7 @@ class ProfileController extends Controller
             ->paginate(4, ['*'], 'received_page')
             ->withQueryString();
         
-        // fetch user's job submissions
+        // Nosūtītie pieteikumi rāda lietotāja darbu pie citu autoru sludinājumiem.
         $sentSubmissionsQuery = JobSubmission::where('user_id', $user->id)
             ->with('jobListing.user');
 
@@ -95,7 +96,7 @@ class ProfileController extends Controller
             ->paginate(4, ['*'], 'sent_page')
             ->withQueryString();
             
-        // fetch user's transaction history
+        // Darījumu vēsture tiek lapota atsevišķi, lai tā nesajauktos ar citiem profila sarakstiem.
         $lastTransaction = $user->transactions()->latest()->first();
         $transactions = $user->transactions()
             ->latest()
@@ -122,7 +123,7 @@ class ProfileController extends Controller
             ->paginate(4, ['*'], 'reviews_page')
             ->withQueryString();
         
-        // fetch admin review submissions if user is admin
+        // Administratoram profilā papildus tiek parādīti pieteikumi, kuri prasa pārskatīšanu.
         $adminReviewSubmissions = [];
         if ($user->isAdmin()) {
             $adminReviewSubmissions = JobSubmission::where('status', JobSubmission::STATUS_ADMIN_REVIEW)
@@ -145,6 +146,7 @@ class ProfileController extends Controller
         ]);
     }
 
+    // Piemēro statusa un teksta filtrus profila pieteikumu sarakstiem.
     private function applySubmissionFilters($query, string $status, string $search, array $allowedStatuses): void
     {
         if (in_array($status, $allowedStatuses, true)) {
@@ -170,7 +172,7 @@ class ProfileController extends Controller
         }
     }
 
-    // change user password
+    // Maina lietotāja paroli pēc pašreizējās paroles un drošības noteikumu pārbaudes.
     public function changePassword(Request $request)
     {
         $request->validate([
@@ -180,21 +182,19 @@ class ProfileController extends Controller
                 'string', 
                 'confirmed', 
                 'min:6',
-                'regex:/[0-9]/', // at least one number
-                'regex:/[!@#$%^&*()_+=\-\[\]{};:\'"<>,\.?\/]/' // at least one special character
+                'regex:/[0-9]/', // Parolē jābūt vismaz vienam ciparam.
+                'regex:/[!@#$%^&*()_+=\-\[\]{};:\'"<>,\.?\/]/' // Parolē jābūt vismaz vienai speciālajai rakstzīmei.
             ]
         ]);
 
         $user = auth()->user();
 
-        // verify current password
         if (!Hash::check($request->current_password, $user->password)) {
             return back()->withErrors([
                 'current_password' => 'The current password is incorrect.'
             ]);
         }
 
-        // update password
         $user->update([
             'password' => Hash::make($request->password)
         ]);
@@ -202,6 +202,7 @@ class ProfileController extends Controller
         return back()->with('password_success', 'Parole nomainīta veiksmīgi!');
     }
 
+    // Atjaunina profila attēlu ar augšupielādētu failu vai izvēlētu noklusējuma attēlu.
     public function updateAvatar(Request $request)
     {
         $attributes = $request->validate([
@@ -217,6 +218,7 @@ class ProfileController extends Controller
             ]);
         }
 
+        // Iepriekš augšupielādētais attēls tiek dzēsts, bet iebūvētie noklusējuma attēli paliek neskarti.
         if ($user->avatar_path && !str_starts_with($user->avatar_path, 'images/')) {
             Storage::disk('public')->delete($user->avatar_path);
         }

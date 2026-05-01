@@ -1,5 +1,7 @@
 <?php
-//$jobs = Job::factory(5)->create();
+
+// Šis fails ģenerē testa darba sludinājumus ar kategorijām, kredītiem un noklusējuma attēliem.
+
 namespace Database\Factories;
 
 
@@ -12,9 +14,10 @@ class JobFactory extends Factory
 {
     protected $model = Job::class;
 
+    // Atgriež noklusējuma darba sludinājuma datus testiem un sēklu datiem.
     public function definition(): array
     {
-        // build flat list of category slugs from config
+        // No konfigurācijas tiek izveidots plakans kategoriju identifikatoru saraksts.
         $categories = config('job_categories', []);
         $flat = [];
         foreach ($categories as $key => $group) {
@@ -26,10 +29,10 @@ class JobFactory extends Factory
 
         $category = fake()->randomElement($flat ?: ['other.general']);
 
-        // choose a group (top-level) for generating category-specific titles/descriptions
+        // Galvenā grupa nosaka virsrakstu, aprakstu un kredītu diapazonu.
         $groupKey = explode('.', $category)[0];
 
-        // category-aware title pools in Latvian
+        // Kategorijām pielāgoti virsrakstu saraksti latviski.
         $pools = [
             'creative' => [
                 'Izveidot modernu logotipu manam uzņēmumam',
@@ -67,16 +70,16 @@ class JobFactory extends Factory
             ],
         ];
 
-        // pick a title from pool or fallback
-    $titlePool = $pools[$groupKey] ?? [fake()->sentence(6)];
+        // Ja kategorijai nav sava saraksta, tiek izmantots Faker rezerves virsraksts.
+        $titlePool = $pools[$groupKey] ?? [fake()->sentence(6)];
         $title = fake()->randomElement($titlePool);
 
-        // build a slightly longer description using faker and a category hint in Latvian
+        // Aprakstā tiek saglabāta kategorijas norāde un ģenerēts īss teksts.
         $descIntro = "Kategorija: " . ($categories[$groupKey]['label'] ?? ucfirst($groupKey)) . ".\n";
         $descBody = fake()->paragraphs(2, true);
         $description = $descIntro . "\n" . $descBody;
 
-        // sensible credits ranges based on category
+        // Kredītu diapazoni atšķiras pēc darba sarežģītības kategorijas.
         $creditRanges = [
             'creative' => [1, 10],
             'technology' => [5, 40],
@@ -105,10 +108,7 @@ class JobFactory extends Factory
         return $attributes;
     }
 
-    /**
-     * Create a state for a specific category slug so seeded data can be
-     * generated with titles/descriptions appropriate to that category.
-     */
+    // Izveido stāvokli konkrētai kategorijai, lai dati atbilstu izvēlētajam virzienam.
     public function forCategory(string $category)
     {
         return $this->state(function (array $attributes) use ($category) {

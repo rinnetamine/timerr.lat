@@ -1,3 +1,4 @@
+{{-- Šis skats rāda administratora vadības paneļa statistiku un jaunākos ierakstus. --}}
 <x-layout>
     <x-slot:heading>Admin panelis</x-slot:heading>
 

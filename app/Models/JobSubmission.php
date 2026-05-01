@@ -1,5 +1,8 @@
 <?php
 
+// Šis fails apraksta darba pieteikumu, tā statusus, strīda statusus un saistītos ierakstus.
+// Statusu konstantes palīdz kontrolieriem vienādi pārvaldīt pieteikuma dzīves ciklu.
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -10,10 +13,9 @@ class JobSubmission extends Model
 {
     use HasFactory;
 
-    // table name for job submissions
     protected $table = 'job_submissions';
 
-    // fillable attributes for job submissions
+    // Šie lauki drīkst tikt masveidā aizpildīti no validētiem pieteikuma datiem.
     protected $fillable = [
         'job_listing_id',
         'user_id',
@@ -31,7 +33,7 @@ class JobSubmission extends Model
         'freeze_reason'
     ];
 
-    // cast attributes to proper types
+    // Datu tipu pārveidošana palīdz korekti apstrādāt datumus un loģiskās vērtības.
     protected $casts = [
         'admin_approved' => 'boolean',
         'is_frozen' => 'boolean',
@@ -40,73 +42,74 @@ class JobSubmission extends Model
         'updated_at' => 'datetime',
     ];
 
-    // status constants for tracking submission lifecycle
-    const STATUS_CLAIMED = 'claimed';     // initial state when user claims a job
-    const STATUS_PENDING = 'pending';     // user has submitted their application
-    const STATUS_APPROVED = 'approved';   // job owner approved the submission
-    const STATUS_DECLINED = 'declined';   // job owner or admin declined the submission
-    const STATUS_ADMIN_REVIEW = 'admin_review'; // submission needs admin decision
+    // Statusu konstantes apraksta pieteikuma galvenos dzīves cikla posmus.
+    const STATUS_CLAIMED = 'claimed';
+    const STATUS_PENDING = 'pending';
+    const STATUS_APPROVED = 'approved';
+    const STATUS_DECLINED = 'declined';
+    const STATUS_ADMIN_REVIEW = 'admin_review';
 
-    // dispute status constants
+    // Strīda statusi atsevišķi apraksta konflikta apstrādes stāvokli.
     const DISPUTE_NONE = 'none';
     const DISPUTE_REQUESTED = 'requested';
     const DISPUTE_UNDER_REVIEW = 'under_review';
     const DISPUTE_RESOLVED = 'resolved';
 
-    // relationship to the job listing
+    // Definē saiti ar darbu, uz kuru attiecas pieteikums.
     public function jobListing()
     {
         return $this->belongsTo(Job::class, 'job_listing_id');
     }
 
-    // relationship to the user who submitted the application
+    // Definē saiti ar lietotāju, kurš iesniedza pieteikumu.
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    // relationship to submission files
+    // Definē saiti ar pieteikumam pievienotajiem failiem.
     public function files()
     {
         return $this->hasMany(SubmissionFile::class);
     }
 
+    // Definē saiti ar atsauksmi par konkrēto pieteikumu.
     public function review()
     {
         return $this->hasOne(Review::class, 'job_submission_id');
     }
 
-    // relationship to user who initiated the dispute
+    // Definē saiti ar lietotāju, kurš uzsāka strīdu.
     public function disputeInitiator()
     {
         return $this->belongsTo(User::class, 'dispute_initiated_by');
     }
 
-    // relationship to admin who resolved the dispute
+    // Definē saiti ar administratoru, kurš atrisināja strīdu.
     public function disputeResolver()
     {
         return $this->belongsTo(User::class, 'dispute_resolved_by');
     }
 
-    // check if submission can be disputed
+    // Pārbauda, vai pieteikumam vēl drīkst atvērt strīdu.
     public function canBeDisputed()
     {
-        // if already has dispute, cannot dispute again
+        // Ja strīds jau pastāv, to nevar atvērt atkārtoti.
         if ($this->dispute_status !== self::DISPUTE_NONE) {
             return false;
         }
 
-        // always allow disputes for involved parties
+        // Iesaistītajām pusēm strīdu drīkst atvērt, ja tas vēl nav sākts.
         return true;
     }
 
-    // check if submission is frozen
+    // Nosaka, vai pieteikums pašlaik ir iesaldēts.
     public function isFrozen()
     {
         return $this->is_frozen;
     }
 
-    // freeze the submission
+    // Iesaldē pieteikumu un saglabā iesaldēšanas iemeslu.
     public function freeze($reason = null)
     {
         $this->is_frozen = true;
@@ -114,7 +117,7 @@ class JobSubmission extends Model
         $this->save();
     }
 
-    // unfreeze the submission
+    // Atceļ pieteikuma iesaldēšanu.
     public function unfreeze()
     {
         $this->is_frozen = false;

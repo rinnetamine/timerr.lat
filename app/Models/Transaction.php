@@ -1,5 +1,7 @@
 <?php
 
+// Šis fails apraksta laika kredītu kustības ierakstus lietotāju profilos.
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -9,14 +11,14 @@ class Transaction extends Model
 {
     use HasFactory;
 
-    // fillable attributes for transactions
+    // Šie lauki drīkst tikt aizpildīti, reģistrējot jaunu kredītu darījumu.
     protected $fillable = [
         'user_id',
         'amount',
         'description'
     ];
 
-    // relationship to the user who owns the transaction
+    // Definē saiti ar lietotāju, kuram pieder darījums.
     public function user()
     {
         return $this->belongsTo(User::class);

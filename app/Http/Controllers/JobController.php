@@ -1,5 +1,7 @@
 <?php
 
+// Šis fails pārvalda darba sludinājumu sarakstu, izveidi, labošanu un dzēšanu.
+
 namespace App\Http\Controllers;
 
 use App\Models\Job;
@@ -11,21 +13,19 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
-// controller for managing job listings and credits
 class JobController extends Controller
 {
-    // display list of available jobs
+    // Atlasa darba sludinājumus un piemēro meklēšanas, kategoriju un kārtošanas nosacījumus.
     public function index()
     {
-        // get current user id if logged in
         $userId = auth()->check() ? auth()->id() : null;
         
-        // get jobs without submissions
+        // Darbu vaicājums sākas kopā ar darba autoru un tikai brīvajiem sludinājumiem.
         $jobsQuery = Job::with('user')
             ->whereDoesntHave('submissions')
             ->from('job_listings');
 
-        // handle search
+        // Meklēšana pārbauda darba nosaukumu, aprakstu un autora vārdu.
         if ($search = request('search')) {
             $search = strtolower($search);
             $jobsQuery->where(function ($query) use ($search) {
@@ -38,10 +38,10 @@ class JobController extends Controller
             });
         }
 
-        // handle category filter
+        // Kategoriju filtrs atbalsta gan galvenās kategorijas, gan apakškategorijas.
         if ($category = request('category')) {
             $categories = config('job_categories', []);
-            // if top-level category selected, match subcategories too
+            // Ja izvēlēta galvenā kategorija, tiek iekļautas arī tās apakškategorijas.
             if (array_key_exists($category, $categories)) {
                 $jobsQuery->where(function ($q) use ($category) {
                     $q->where('category', $category)
@@ -52,14 +52,14 @@ class JobController extends Controller
             }
         }
 
-        // handle status filter
+        // Statusa filtrs atlasa sludinājumus pēc pieteikumu stāvokļa.
         if ($status = request('status')) {
             $jobsQuery->whereHas('submissions', function ($query) use ($status) {
                 $query->where('status', $status);
             });
         }
 
-        // handle numeric credit filters
+        // Kredītu filtri ierobežo sludinājumus pēc minimālās un maksimālās vērtības.
         if (($min = request('min_credits')) !== null) {
             $jobsQuery->where('time_credits', '>=', intval($min));
         }
@@ -68,9 +68,9 @@ class JobController extends Controller
             $jobsQuery->where('time_credits', '<=', intval($max));
         }
 
-        // handle sorting
         $sort = request('sort', 'latest');
 
+        // Kārtošana ļauj mainīt darbu secību pēc datuma, nosaukuma vai kredītu daudzuma.
         switch ($sort) {
             case 'latest':
                 $jobsQuery->orderBy('created_at', 'desc');
@@ -91,7 +91,7 @@ class JobController extends Controller
                 $jobsQuery->orderBy('time_credits', 'desc');
                 break;
             case 'seller_most_credits':
-                // join users table to order by seller's credits
+                // Lietotāju tabula tiek piesaistīta, lai kārtotu pēc sludinājuma autora kredītiem.
                 $jobsQuery->leftJoin('users', 'job_listings.user_id', '=', 'users.id')
                           ->select('job_listings.*')
                           ->orderBy('users.time_credits', 'desc');
@@ -101,7 +101,7 @@ class JobController extends Controller
                 break;
         }
 
-        // paginate results
+        // Rezultāti tiek sadalīti lapās.
         $jobs = $jobsQuery->paginate(10);
 
         return view('jobs.index', [
@@ -112,7 +112,7 @@ class JobController extends Controller
         ]);
     }
 
-    // show job creation form
+    // Sagatavo darba sludinājuma izveides formu.
     public function create()
     {
         if (!auth()->check()) {
@@ -121,7 +121,7 @@ class JobController extends Controller
         return view('jobs.create', ['categories' => config('job_categories')]);
     }
 
-    // display job details
+    // Sagatavo viena darba sludinājuma detalizētu skatu.
     public function show(Job $job)
     {
         return view('jobs.show', [
@@ -130,11 +130,10 @@ class JobController extends Controller
         ]);
     }
 
-    // create a new job listing
+    // Izveido darba sludinājumu un rezervē autora laika kredītus datubāzes transakcijā.
     public function store()
     {
-        // validate job creation input
-        // build allowed category list from config
+        // Atļauto kategoriju saraksts tiek izveidots no konfigurācijas.
         $categories = config('job_categories', []);
         $allowed = [];
         foreach ($categories as $key => $group) {
@@ -144,6 +143,7 @@ class JobController extends Controller
             }
         }
 
+        // Pirms saglabāšanas tiek validēti lietotāja ievaddati.
         $attributes = request()->validate([
             'title' => ['required', 'string', 'min:3', 'max:120'],
             'description' => ['required', 'string', 'min:10', 'max:1000'],
@@ -160,7 +160,7 @@ class JobController extends Controller
 
         $user = auth()->user();
 
-        // check if user has enough credits
+        // Šī pārbaude nepieļauj darbību, ja lietotājam nepietiek kredītu.
         if ($user->time_credits < $attributes['time_credits']) {
             return back()->withErrors([
                 'time_credits' => 'Jums nav pietiekami daudz laika kredītu. Lūdzu, papildiniet kredītus vai samaziniet nepieciešamo daudzumu.'
@@ -168,18 +168,18 @@ class JobController extends Controller
         }
 
         try {
-            // create job in a transaction
+            // Saistītās datubāzes izmaiņas tiek izpildītas vienā transakcijā.
             $job = DB::transaction(function () use ($attributes, $user) {
-                // create job listing
+                // Sludinājumam tiek piesaistīts pašreizējais lietotājs.
                 $attributes['user_id'] = $user->id;
                 $job = Job::create($attributes);
 
-                // deduct credits from user
+                // Rezervētie kredīti tiek noņemti no autora bilances.
                 $user->update([
                     'time_credits' => $user->time_credits - $attributes['time_credits']
                 ]);
 
-                // log transaction
+                // Kredītu kustība tiek pierakstīta darījumu vēsturē.
                 DB::table('transactions')->insert([
                     'user_id' => $user->id,
                     'amount' => -$attributes['time_credits'],
@@ -193,7 +193,7 @@ class JobController extends Controller
 
             return redirect('/jobs')->with('success', 'Serviss veiksmīgi izveidots! ' . $attributes['time_credits'] . ' kredīti ir rezervēti šim darbam.');
         } catch (\Exception $e) {
-            // log error and show user-friendly message
+            // Kļūda tiek pierakstīta žurnālā un parādīta lietotājam.
             Log::error('Job creation failed: ' . $e->getMessage());
             
             return back()->withErrors([
@@ -202,20 +202,19 @@ class JobController extends Controller
         }
     }
 
-    // show job edit form
+    // Sagatavo esoša darba sludinājuma labošanas formu.
     public function edit(Job $job)
     {
         return view('jobs.edit', ['job' => $job, 'categories' => config('job_categories')]);
     }
 
-    // update an existing job listing
+    // Labo sludinājumu un pārrēķina rezervēto kredītu apjomu, ja mainīta darba cena.
     public function update(Job $job)
     {
-        // authorize job editing
+        // Tiek pārbaudītas lietotāja tiesības labot konkrēto sludinājumu.
         Gate::authorize('edit-job', $job);
 
-        // validate update input
-        // build allowed category list from config 
+        // Atļauto kategoriju saraksts tiek izveidots no konfigurācijas.
         $categories = config('job_categories', []);
         $allowed = [];
         foreach ($categories as $key => $group) {
@@ -225,6 +224,7 @@ class JobController extends Controller
             }
         }
 
+        // Pirms saglabāšanas tiek validēti lietotāja ievaddati.
         $attributes = request()->validate([
             'title' => ['required', 'string', 'min:3', 'max:120'],
             'description' => ['required', 'string', 'min:10', 'max:1000'],
@@ -235,6 +235,7 @@ class JobController extends Controller
 
         if (request()->hasFile('image')) {
             if ($job->image_path) {
+                // Aizstājot attēlu, tiek sakopts arī iepriekšējais fails.
                 Storage::disk('public')->delete($job->image_path);
             }
 
@@ -247,11 +248,11 @@ class JobController extends Controller
         $originalCredits = $job->time_credits;
         $newCredits = $attributes['time_credits'];
 
-        // check if the credits amount has changed
+        // Ja kredītu apjoms ir mainīts, tiek pārrēķināta rezervētā summa.
         if ($originalCredits != $newCredits) {
             $netChange = $newCredits - $originalCredits;
 
-            // if the user needs more credits than before
+            // Šī pārbaude nepieļauj darbību, ja lietotājam nepietiek kredītu.
             if ($netChange > 0) {
                 if ($user->time_credits < $netChange) {
                     return back()->withErrors([
@@ -261,14 +262,14 @@ class JobController extends Controller
             }
 
             try {
-                // process the credit adjustment in a transaction
+                // Saistītās datubāzes izmaiņas tiek izpildītas vienā transakcijā.
                 DB::transaction(function () use ($job, $attributes, $user, $originalCredits, $newCredits) {
-                    // first return the original credits to the user
+                    // Vispirms lietotājam tiek atgriezti iepriekš rezervētie kredīti.
                     $user->update([
                         'time_credits' => $user->time_credits + $originalCredits
                     ]);
 
-                    // record the credit return transaction
+                    // Kredītu kustība tiek pierakstīta darījumu vēsturē.
                     DB::table('transactions')->insert([
                         'user_id' => $user->id,
                         'amount' => $originalCredits,
@@ -277,12 +278,12 @@ class JobController extends Controller
                         'updated_at' => now()
                     ]);
 
-                    // then deduct the new amount of credits
+                    // Pēc tam tiek rezervēts jaunais kredītu apjoms.
                     $user->update([
                         'time_credits' => $user->time_credits - $newCredits
                     ]);
 
-                    // record the new credit deduction transaction
+                    // Kredītu kustība tiek pierakstīta darījumu vēsturē.
                     DB::table('transactions')->insert([
                         'user_id' => $user->id,
                         'amount' => -$newCredits,
@@ -291,13 +292,13 @@ class JobController extends Controller
                         'updated_at' => now()
                     ]);
 
-                    // update the job listing
+                    // Sludinājums tiek atjaunināts ar jaunajiem datiem.
                     $job->update($attributes);
                 });
 
                 return redirect('/jobs/' . $job->id)->with('success', 'Serviss atjaunināts veiksmīgi! Kredītu pielāgojums ir apstrādāts.');
             } catch (\Exception $e) {
-                // log error and show message
+                // Kļūda tiek pierakstīta žurnālā un parādīta lietotājam.
                 Log::error('Job update failed: ' . $e->getMessage());
                 
                 return back()->withErrors([
@@ -305,30 +306,31 @@ class JobController extends Controller
                 ])->withInput();
             }
         } else {
-            // if credits haven't changed, just update the job
+            // Ja kredīti nav mainīti, tiek atjaunināti tikai sludinājuma dati.
             $job->update($attributes);
             return redirect('/jobs/' . $job->id)->with('success', 'Serviss atjaunināts veiksmīgi!');
         }
     }
 
-    // delete a job listing and return credits to the owner
+    // Dzēš sludinājumu, izņem tā attēlu un atgriež rezervētos kredītus īpašniekam.
     public function destroy(Job $job)
     {
-        // authorize job deletion
+        // Tiek pārbaudītas lietotāja tiesības dzēst konkrēto sludinājumu.
         Gate::authorize('edit-job', $job);
         
         try {
+            // Saistītās datubāzes izmaiņas tiek izpildītas vienā transakcijā.
             DB::transaction(function () use ($job) {
-                // get the job owner
+                // Tiek atrasts sludinājuma īpašnieks.
                 $jobOwner = User::find($job->user_id);
                 
                 if ($jobOwner) {
-                    // return credits to job owner
+                    // Rezervētie kredīti tiek atgriezti sludinājuma īpašniekam.
                     $jobOwner->update([
                         'time_credits' => $jobOwner->time_credits + $job->time_credits
                     ]);
                     
-                    // record credit return transaction
+                    // Kredītu kustība tiek pierakstīta darījumu vēsturē.
                     DB::table('transactions')->insert([
                         'user_id' => $jobOwner->id,
                         'amount' => $job->time_credits,
@@ -338,17 +340,18 @@ class JobController extends Controller
                     ]);
                 }
                 
-                // delete the job listing
                 if ($job->image_path) {
+                    // Dzēšot sludinājumu, tiek sakopts arī saistītais attēla fails.
                     Storage::disk('public')->delete($job->image_path);
                 }
 
+                // Sludinājums tiek dzēsts no datubāzes.
                 $job->delete();
             });
             
             return redirect('/jobs')->with('success', 'Serviss veiksmīgi dzēsts un kredīti ir atgriezti!');
         } catch (\Exception $e) {
-            // log error and show user-friendly message
+            // Kļūda tiek pierakstīta žurnālā un parādīta lietotājam.
             Log::error(message: 'Job deletion failed: ' . $e->getMessage());
             
             return back()->withErrors([

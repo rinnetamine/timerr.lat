@@ -1,3 +1,4 @@
+# Pirmais posms būvē Vite statiskos resursus.
 FROM node:20-alpine AS assets
 
 WORKDIR /app
@@ -9,6 +10,7 @@ COPY resources ./resources
 COPY vite.config.js ./
 RUN npm run build
 
+# Otrais posms sagatavo Laravel lietotni ar PHP, Composer un SQLite atbalstu.
 FROM php:8.3-cli-alpine
 
 RUN apk add --no-cache \
@@ -81,5 +83,6 @@ RUN chmod +x /usr/local/bin/docker-entrypoint
 
 EXPOSE 8000
 
+# Entrypoint sagatavo .env, datubāzi, storage saiti un migrācijas pirms servera starta.
 ENTRYPOINT ["docker-entrypoint"]
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]

@@ -1,5 +1,7 @@
 <?php
 
+// Šis fails sagatavo publisko cilvēku katalogu un administratora lietotāju pārvaldības darbības.
+
 namespace App\Http\Controllers;
 
 use App\Models\User;
@@ -7,9 +9,7 @@ use Illuminate\Http\Request;
 
 class PeopleController extends Controller
 {
-    /**
-     * display a searchable list of user profiles.
-     */
+    // Parāda meklējamu un kārtojamu lietotāju profilu sarakstu.
     public function index(Request $request)
     {
         $q = trim($request->query('q', ''));
@@ -26,13 +26,13 @@ class PeopleController extends Controller
             })
             ;
 
-        // add helpful aggregates
+        // Lietotāju kartītēm tiek pievienoti skaitītāji un vidējais vērtējums.
         $usersQuery->withCount('jobs')
                    ->withCount('completedJobs') 
                    ->withCount('reviewsReceived')
                    ->withAvg('reviewsReceived', 'rating');
         
-        // add a subquery to ensure average rating is calculated correctly
+        // Apakšvaicājums nodrošina korektu nulles vērtību lietotājiem bez atsauksmēm.
         $usersQuery->addSelect([
             'reviews_received_rating_avg' => function ($query) {
                 $query->selectRaw('COALESCE(AVG(rating), 0)')
@@ -41,7 +41,7 @@ class PeopleController extends Controller
             }
         ]);
 
-        // sorting options for people listing
+        // Kārtošanas izvēle tiek piemērota pirms lapošanas.
         switch ($sort) {
             case 'newest':
                 $usersQuery->orderBy('created_at', 'desc');
@@ -59,7 +59,7 @@ class PeopleController extends Controller
                 $usersQuery->orderBy('jobs_count', 'desc');
                 break;
             case 'top_rated':
-                // users with higher average rating first
+                // Lietotāji ar augstāku vidējo vērtējumu tiek rādīti vispirms.
                 $usersQuery->orderBy('reviews_received_rating_avg', 'desc');
                 break;
             case 'name_desc':
@@ -80,8 +80,7 @@ class PeopleController extends Controller
         ]);
     }
 
-    /**show a public profile for a user.
-     */
+    // Parāda lietotāja publisko profilu.
     public function show(User $user)
     {
         $user->loadCount(['jobs', 'completedJobs', 'reviewsReceived', 'transactions']);
@@ -92,9 +91,7 @@ class PeopleController extends Controller
         ]);
     }
 
-    /**
-     * show admin user management page
-     */
+    // Parāda administratora lietotāja pārvaldības lapu.
     public function manage(User $user)
     {
         if (!auth()->user()->isAdmin()) {
@@ -111,9 +108,7 @@ class PeopleController extends Controller
         ]);
     }
 
-    /**
-     * adjust user credits (admin only)
-     */
+    // Pielāgo lietotāja kredītus administratora vārdā.
     public function adjustCredits(Request $request, User $user)
     {
         if (!auth()->user()->isAdmin()) {
@@ -130,9 +125,7 @@ class PeopleController extends Controller
         return back()->with('success', "Kredīti pielāgoti veiksmīgi. Jaunā bilance: {$user->time_credits}");
     }
 
-    /**
-     * ban user (admin only)
-     */
+    // Bloķē lietotāju un anulē viņa aktīvās sesijas.
     public function ban(Request $request, User $user)
     {
         if (!auth()->user()->isAdmin()) {
@@ -147,10 +140,9 @@ class PeopleController extends Controller
             'reason' => 'required|string|max:255'
         ]);
 
-        // Ban the user
         $user->ban($request->reason);
 
-        // Invalidate all sessions for the banned user
+        // Visas sesijas tiek dzēstas, lai bloķēšana stātos spēkā nekavējoties.
         \Illuminate\Support\Facades\DB::table('sessions')
             ->where('user_id', $user->id)
             ->delete();
@@ -158,9 +150,7 @@ class PeopleController extends Controller
         return back()->with('success', 'Lietotājs ir bloķēts un nekavējoties izrakstīts.');
     }
 
-    /**
-     * unban user (admin only)
-     */
+    // Atbloķē lietotāju administratora vārdā.
     public function unban(User $user)
     {
         if (!auth()->user()->isAdmin()) {

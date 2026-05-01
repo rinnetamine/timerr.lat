@@ -1,1 +1,2 @@
+{{-- Šis komponents veido vienotu saites pogas noformējumu. --}}
 <a {{ $attributes->merge(['class' => 'relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-100 bg-gray-800/80 backdrop-blur-sm border border-gray-700 leading-5 rounded-lg hover:bg-gray-700/80 focus:outline-none focus:ring-2 ring-neon-accent/50 focus:border-neon-accent active:bg-gray-600/80 transition-all duration-300 ease-out hover:shadow-lg hover:shadow-neon-glow/20']) }}>{{ $slot }}</a>

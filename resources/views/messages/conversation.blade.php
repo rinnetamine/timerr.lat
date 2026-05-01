@@ -1,8 +1,9 @@
+{{-- Šis skats rāda privāto sarunu ar izvēlēto lietotāju un ziņojuma nosūtīšanas formu. --}}
 <x-layout :hidePageHeader="true" :stretchMain="true">
     <x-slot:heading>Ziņojumi</x-slot:heading>
 
     <div class="mx-auto max-w-7xl grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- SIDEBAR -->
+        <!-- Sānu josla -->
         <aside class="lg:col-span-1 bg-gray-800/30 rounded-lg border border-gray-700 p-4 h-[82vh] overflow-y-auto">
             <div class="mb-4 flex items-center justify-between gap-3">
                 <h3 class="text-lg font-semibold text-white/90">Iesūtne</h3>
@@ -24,14 +25,14 @@
                             : 'border-transparent hover:bg-gray-900/60 hover:border-neon-accent' }}"
                     >
 
-                        <!-- Avatar -->
+                        <!-- Profila attēls -->
                         <x-avatar :user="$c['other']" size="sm" />
 
-                        <!-- Content -->
+                        <!-- Saturs -->
                         <div class="flex-1 min-w-0">
                             <div class="flex justify-between items-center gap-2">
 
-                                <!-- Name -->
+                                <!-- Vārds -->
                                 <div class="truncate font-medium text-white/90 flex items-center gap-2">
                                     <a 
                                         href="{{ route('people.show', $c['other']->id) }}" 
@@ -49,19 +50,19 @@
                                     @endif
                                 </div>
 
-                                <!-- Time -->
+                                <!-- Laiks -->
                                 <div class="text-xs text-gray-400 whitespace-nowrap">
                                     {{ $c['latest']->created_at->diffForHumans() }}
                                 </div>
                             </div>
 
-                            <!-- Last message -->
+                            <!-- Pēdējais ziņojums -->
                             <div class="text-sm text-gray-400 truncate">
                                 {{ $c['latest']->body }}
                             </div>
                         </div>
 
-                        <!-- Unread -->
+                        <!-- Nelasīts -->
                         @if($c['unread'] > 0)
                             <span class="inline-block w-2 h-2 rounded-full bg-neon-accent"></span>
                         @endif
@@ -73,10 +74,10 @@
         </aside>
 
 
-        <!-- CHAT PANEL -->
+        <!-- Tērzēšanas panelis -->
         <div class="lg:col-span-2 bg-gray-800/30 rounded-lg border border-gray-700 flex flex-col h-[82vh] overflow-hidden">
 
-            <!-- HEADER -->
+            <!-- Galvene -->
             <header class="px-6 py-4 flex items-center justify-between border-b border-gray-700">
                 <div class="flex items-center gap-4">
                     <x-avatar :user="$other" size="md" />
@@ -109,7 +110,7 @@
             </header>
 
 
-            <!-- MESSAGES -->
+            <!-- Ziņojumi -->
             <div id="messages-list" class="flex-1 overflow-y-auto p-6 flex flex-col gap-3">
                 @if($messages->hasPages())
                     <div class="mb-3 rounded-lg border border-gray-700 bg-gray-900/40 p-3">
@@ -132,22 +133,21 @@
                                 </div>
                             @endif
 
-                            @if($m->files->count() > 0)
+                            @if($m->hasAttachment())
                                 <div class="{{ $m->body ? 'mt-2' : '' }} space-y-2">
-                                    @foreach($m->files as $file)
-                                        @if($file->isImage())
+                                        @if($m->attachmentIsImage())
                                             <div class="relative group">
-                                                <img src="{{ $file->url }}" 
-                                                     alt="{{ $file->file_name }}" 
+                                                <img src="{{ $m->attachment_url }}"
+                                                     alt="{{ $m->attachment_name }}"
                                                      class="max-w-[220px] rounded-xl cursor-pointer hover:opacity-90 transition"
-                                                     onclick="window.open('{{ $file->url }}', '_blank')">
+                                                     onclick="window.open('{{ $m->attachment_url }}', '_blank')">
                                                 <div class="absolute bottom-1 right-1 bg-black/70 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
-                                                    {{ $file->formatted_size }}
+                                                    {{ $m->attachment_formatted_size }}
                                                 </div>
                                             </div>
                                         @else
                                             <div class="flex items-center gap-2 text-[11px] bg-gray-700/50 rounded-xl px-3 py-2 hover:bg-gray-700/70 transition">
-                                                @if($file->isPdf())
+                                                @if($m->attachmentIsPdf())
                                                     <svg class="w-4 h-4 text-red-400" fill="currentColor" viewBox="0 0 24 24">
                                                         <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M10,19L12,15H9V10H15V15L13,19H10Z"/>
                                                     </svg>
@@ -156,15 +156,14 @@
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
                                                     </svg>
                                                 @endif
-                                                <a href="{{ $file->url }}" 
+                                                <a href="{{ $m->attachment_url }}"
                                                    target="_blank" 
                                                    class="text-neon-accent hover:underline flex-1 truncate">
-                                                    {{ $file->file_name }}
+                                                    {{ $m->attachment_name }}
                                                 </a>
-                                                <span class="text-gray-400 whitespace-nowrap">{{ $file->formatted_size }}</span>
+                                                <span class="text-gray-400 whitespace-nowrap">{{ $m->attachment_formatted_size }}</span>
                                             </div>
                                         @endif
-                                    @endforeach
                                 </div>
                             @endif
 
@@ -183,7 +182,7 @@
             </div>
 
 
-            <!-- INPUT -->
+            <!-- IEVADES LAUKS -->
             <form method="POST" action="{{ route('messages.store') }}" class="border-t border-gray-700/50 p-3" enctype="multipart/form-data">
                 @csrf
                 <input type="hidden" name="recipient_id" value="{{ $other->id }}">
@@ -209,7 +208,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21.44 11.05 12.25 20.24a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
                             </svg>
                         </label>
-                        <input type="file" name="files[]" multiple id="file-input" class="sr-only">
+                        <input type="file" name="files[]" id="file-input" class="sr-only">
 
                         <textarea
                             name="body"
@@ -233,8 +232,9 @@
     </div>
 
 
-    <!-- AUTO SCROLL -->
+    <!-- AUTOMĀTISKA RITINĀŠANA -->
     <script>
+        // Pēc lapas ielādes saruna tiek ritināta līdz jaunākajam ziņojumam.
         const el = document.getElementById('messages-list');
         if (el) {
             el.scrollTop = el.scrollHeight;
@@ -245,6 +245,7 @@
         const selectedFilesText = document.getElementById('selected-files-text');
         const clearFiles = document.getElementById('clear-files');
         if (fileInput && selectedFiles && selectedFilesText) {
+            // Atjaunina izvēlēto pielikumu nosaukumus ziņojuma ievades joslā.
             const updateSelectedFiles = () => {
                 const files = Array.from(fileInput.files || []);
                 const names = files.slice(0, 2).map(file => file.name).join(', ');

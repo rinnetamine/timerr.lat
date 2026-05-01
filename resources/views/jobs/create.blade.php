@@ -1,3 +1,4 @@
+{{-- Šis skats rāda darba sludinājuma izveides formu. --}}
 <x-layout>
     <x-slot:heading>
         Lūdziet palīdzību

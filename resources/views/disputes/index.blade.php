@@ -1,3 +1,4 @@
+{{-- Šis skats rāda administratoram pieejamo strīdu sarakstu. --}}
 <x-layout>
     <x-slot name="heading">Strīdu pārvaldība</x-slot>
 

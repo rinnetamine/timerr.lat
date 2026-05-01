@@ -1,3 +1,4 @@
+{{-- Šis skats rāda lietotāja profilu, darbus, pieteikumus, atsauksmes un darījumus. --}}
 <x-layout>
     <x-slot:heading>
         Mans profils
@@ -442,22 +443,26 @@
 </x-layout>
 
 <script>
+// Atver paroles maiņas modālo logu un aptur lapas ritināšanu.
 function openPasswordModal() {
     document.getElementById('passwordModal').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
 }
 
+// Aizver paroles maiņas modālo logu un atjauno lapas ritināšanu.
 function closePasswordModal() {
     document.getElementById('passwordModal').classList.add('hidden');
     document.body.style.overflow = 'auto';
 }
 
+// Klikšķis uz modālā loga fona aizver paroles maiņas logu.
 document.getElementById('passwordModal').addEventListener('click', function(event) {
     if (event.target === this) {
         closePasswordModal();
     }
 });
 
+// Escape taustiņš aizver paroles maiņas logu.
 document.addEventListener('keydown', function(event) {
     if (event.key === 'Escape') {
         closePasswordModal();

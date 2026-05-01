@@ -1,3 +1,4 @@
+{{-- Šis skats veido darījumu vēstures PDF dokumenta HTML saturu. --}}
 <!doctype html>
 <html lang="lv">
 <head>

@@ -1,5 +1,7 @@
 <?php
 
+// Šis fails pārvalda darba pieteikuma dzīves ciklu no darba saņemšanas līdz apstiprināšanai vai noraidīšanai.
+
 namespace App\Http\Controllers;
 
 use App\Models\Job;
@@ -14,61 +16,58 @@ use Illuminate\Support\Facades\Storage;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 
-// controller for managing job submissions
 class JobSubmissionController extends Controller
 {
-    // handle secure file downloads for submissions
+    // Pārbauda piekļuves tiesības un izsniedz pieteikumam pievienoto failu.
     public function downloadFile(SubmissionFile $file)
     {
-        // verify user has permission to download
         $submission = $file->jobSubmission;
         
-        // allow job owner, applicant, or admin to download
+        // Failu drīkst lejupielādēt darba īpašnieks, pieteicējs vai administrators.
         if (auth()->id() !== $submission->jobListing->user_id && 
             auth()->id() !== $submission->user_id && 
             !auth()->user()->isAdmin()) {
             abort(403, 'Jums nav atļauts lejupielādēt šo failu.');
         }
         
-        // verify file exists
+        // Pirms izsniegšanas tiek pārbaudīts, vai fails eksistē publiskajā krātuvē.
         if (!Storage::disk('public')->exists($file->file_path)) {
             abort(404, 'Fails nav atrasts.');
         }
         
-        // prepare file for download
         $path = Storage::disk('public')->path($file->file_path);
         $content = file_get_contents($path);
         $filename = $file->file_name;
         
-        // send file with proper headers
+        // Fails tiek atgriezts ar lejupielādei nepieciešamām galvenēm.
         return Response::make($content, 200, [
             'Content-Type' => $file->mime_type,
             'Content-Disposition' => 'attachment; filename="' . $filename . '"'
         ]);
     }
     
-    // handle job claiming process
+    // Ļauj lietotājam saņemt darbu, ja tas vēl nav aizņemts vai iesaldēts.
     public function claim()
     {
         if (!auth()->check()) {
             return redirect('/login');
         }
 
-        // validate job ID
+        // Pirms saglabāšanas tiek validēti lietotāja ievaddati.
         $attributes = request()->validate([
             'job_id' => ['required', 'exists:job_listings,id'],
         ]);
 
         $job = Job::findOrFail($attributes['job_id']);
 
-        // prevent self-claiming
+        // Lietotājs nevar pieteikties pats savam palīdzības pieprasījumam.
         if (auth()->id() === $job->user_id) {
             return back()->withErrors([
                 'error' => 'Jūs nevarat pieteikties savam pašam palīdzības pieprasījumam.'
             ]);
         }
 
-        // check for existing claims
+        // Pirms darba saņemšanas tiek pārbaudīts, vai darbs jau nav aizņemts.
         $existingClaim = JobSubmission::where('job_listing_id', $job->id)
             ->whereIn('status', [JobSubmission::STATUS_CLAIMED, JobSubmission::STATUS_PENDING, JobSubmission::STATUS_APPROVED])
             ->exists();
@@ -79,7 +78,7 @@ class JobSubmissionController extends Controller
             ]);
         }
 
-        // check for disputed submissions - prevent claiming if any dispute exists
+        // Darbu nevar saņemt, ja tam jau ir aktīvs strīds.
         $disputedSubmission = JobSubmission::where('job_listing_id', $job->id)
             ->where('dispute_status', '!=', JobSubmission::DISPUTE_NONE)
             ->where('dispute_status', '!=', JobSubmission::DISPUTE_RESOLVED)
@@ -91,21 +90,21 @@ class JobSubmissionController extends Controller
             ]);
         }
 
-        // check for existing user submission
+        // Tiek pārbaudīts, vai pašreizējam lietotājam jau ir pieteikums šim darbam.
         $userSubmission = JobSubmission::where('job_listing_id', $job->id)
             ->where('user_id', auth()->id())
             ->first();
 
         if ($userSubmission) {
-            // handle re-claiming for declined submissions
+            // Noraidītu pieteikumu lietotājs var saņemt atkārtoti.
             if ($userSubmission->status === JobSubmission::STATUS_DECLINED) {
                 $userSubmission->update([
                     'status' => JobSubmission::STATUS_CLAIMED,
                     'message' => null
                 ]);
                 
-                // clean up previous files
                 foreach ($userSubmission->files as $file) {
+                    // Atkārtoti saņemot darbu, iepriekšējie faili tiek sakopti.
                     Storage::disk('public')->delete($file->file_path);
                     $file->delete();
                 }
@@ -119,11 +118,11 @@ class JobSubmissionController extends Controller
         }
 
         try {
-            // create new submission with claimed status
+            // Tiek izveidots jauns pieteikums ar saņemta darba statusu.
             JobSubmission::create([
                 'job_listing_id' => $job->id,
                 'user_id' => auth()->id(),
-                'message' => null, // will be filled in during complete step
+                'message' => null,
                 'status' => JobSubmission::STATUS_CLAIMED,
                 'admin_approved' => false
             ]);
@@ -138,45 +137,45 @@ class JobSubmissionController extends Controller
         }
     }
 
-    // complete a claimed job by submitting work details and files
+    // Saglabā izpildītā darba aprakstu un pievienotos failus.
     public function complete()
     {
         if (!auth()->check()) {
             return redirect('/login');
         }
 
-        // Debug: Check what files are in the request
+        // Žurnālā tiek pierakstīta informācija par augšupielādētajiem failiem.
         Log::info('Request files: ' . json_encode(request()->allFiles()));
         Log::info('Request has files: ' . (request()->hasFile('files') ? 'true' : 'false'));
         
+        // Pirms saglabāšanas tiek validēti lietotāja ievaddati.
         $attributes = request()->validate([
             'submission_id' => ['required', 'exists:job_submissions,id'],
             'message' => ['required', 'string', 'min:10', 'max:1000']
-            // Files removed temporarily for testing
         ]);
 
         $submission = JobSubmission::findOrFail($attributes['submission_id']);
 
-        // verify submission belongs to current user
+        // Lietotājs drīkst pabeigt tikai savu pieteikumu.
         if ($submission->user_id !== auth()->id()) {
             abort(403, 'Nepietiekamas piekļuves tiesības.');
         }
 
-        // only claimed submissions can be completed
+        // Pabeigt drīkst tikai saņemtus pieteikumus.
         if ($submission->status !== JobSubmission::STATUS_CLAIMED) {
             return back()->withErrors([
                 'error' => 'Šo pieteikumu nevar pabeigt, jo tas nav saņemts.'
             ]);
         }
 
-        // check if submission is disputed/frozen
+        // Pieteikumu nevar pabeigt, ja tas pašlaik ir iesaldēts strīda dēļ.
         if ($submission->dispute_status !== JobSubmission::DISPUTE_NONE && $submission->dispute_status !== JobSubmission::DISPUTE_RESOLVED) {
             return back()->withErrors([
                 'error' => 'Šis pieteikums ir aizsaldēts strīda dēļ un to nevar pabeigt.'
             ]);
         }
 
-        // check if the job itself has any disputed submissions
+        // Tiek pārbaudīts, vai šim darbam nav citu aktīvu strīdu.
         $jobDisputedSubmission = JobSubmission::where('job_listing_id', $submission->job_listing_id)
             ->where('dispute_status', '!=', JobSubmission::DISPUTE_NONE)
             ->where('dispute_status', '!=', JobSubmission::DISPUTE_RESOLVED)
@@ -189,17 +188,18 @@ class JobSubmissionController extends Controller
         }
 
         try {
+            // Saistītās datubāzes izmaiņas tiek izpildītas vienā transakcijā.
             DB::transaction(function () use ($submission, $attributes) {
-                // update submission with message and change status to pending review
+                // Pieteikums tiek papildināts ar darba aprakstu un nodots pārskatīšanai.
                 $submission->update([
                     'message' => $attributes['message'],
                     'status' => JobSubmission::STATUS_PENDING
                 ]);
 
-                // handle file uploads if any were provided
+                // Ja pieteikumam ir pielikumi, tie tiek saglabāti atsevišķi publiskajā krātuvē.
                 if (request()->hasFile('files')) {
                     foreach (request()->file('files') as $index => $file) {
-                        // Debug: Check if file is valid
+                        // Nederīgi faili tiek izlaisti un pierakstīti žurnālā.
                         if (!$file->isValid()) {
                             Log::error("File {$index} is not valid: " . $file->getErrorMessage());
                             continue;
@@ -233,7 +233,7 @@ class JobSubmissionController extends Controller
         }
     }
 
-    // display a list of all submissions for the current user
+    // Sadala lietotāja pieteikumus nosūtītajos un saņemtajos pieteikumos.
     public function index()
     {
         if (!auth()->check()) {
@@ -248,7 +248,7 @@ class JobSubmissionController extends Controller
             JobSubmission::STATUS_ADMIN_REVIEW,
         ];
 
-        // get submissions for jobs the user created (received applications)
+        // Tiek atlasīti pieteikumi lietotāja izveidotajiem darbiem.
         $receivedSubmissionsQuery = JobSubmission::whereHas('jobListing', function ($query) {
             $query->where('user_id', auth()->id());
         })->with(['jobListing', 'user']);
@@ -265,7 +265,7 @@ class JobSubmissionController extends Controller
             ->paginate(8, ['*'], 'received_page')
             ->withQueryString();
 
-        // get submissions the user made to other jobs (sent applications)
+        // Tiek atlasīti pieteikumi, ko lietotājs nosūtījis citu autoru darbiem.
         $sentSubmissionsQuery = JobSubmission::where('user_id', auth()->id())
             ->with('jobListing.user');
 
@@ -292,6 +292,7 @@ class JobSubmissionController extends Controller
         ]);
     }
 
+    // Piemēro statusa un meklēšanas filtrus pieteikumu sarakstam.
     private function applyIndexFilters($query, ?string $status, ?string $search, array $allowedStatuses): void
     {
         $search = trim((string) $search);
@@ -319,10 +320,10 @@ class JobSubmissionController extends Controller
         }
     }
 
-    // show details of a specific submission
+    // Sagatavo viena pieteikuma detalizētu skatu.
     public function show(JobSubmission $submission)
     {
-        // only allow job owner or applicant to view submission details
+        // Pieteikumu drīkst skatīt tikai darba autors vai pieteikuma iesniedzējs.
         if (auth()->id() !== $submission->user_id && 
             auth()->id() !== $submission->jobListing->user_id) {
             abort(403, 'Nepietiekamas piekļuves tiesības.');
@@ -333,26 +334,26 @@ class JobSubmissionController extends Controller
         ]);
     }
 
-    // export submission details as PDF
+    // Sagatavo pieteikuma informāciju PDF eksportam.
     public function exportHtml(JobSubmission $submission)
     {
-        // only allow job owner or applicant to export
+        // PDF eksportu drīkst veikt tikai darba autors vai pieteikuma iesniedzējs.
         if (auth()->id() !== $submission->user_id && auth()->id() !== $submission->jobListing->user_id) {
             abort(403, 'Nepietiekamas piekļuves tiesības.');
         }
 
         $submission->load(['jobListing', 'user', 'files']);
 
-        // configure domPDF options
+        // Tiek sagatavoti PDF ģeneratora iestatījumi.
         $options = new Options();
         $options->set('defaultFont', 'Arial');
         $options->set('isRemoteEnabled', true);
         $options->set('isHtml5ParserEnabled', true);
         
-        // create new DomPDF instance
+        // Tiek izveidota DomPDF instance.
         $dompdf = new Dompdf($options);
         
-        // load HTML content
+        // HTML skats tiek pārvērsts PDF dokumentā.
         $html = view('submissions.pdf', ['submission' => $submission])->render();
         
         $dompdf->loadHtml($html);
@@ -367,15 +368,15 @@ class JobSubmissionController extends Controller
         ]);
     }
 
-    // approve a submission and transfer credits to the helper
+    // Apstiprina pieteikumu un pārskaita nopelnītos kredītus darba veicējam.
     public function approve(JobSubmission $submission)
     {
-        // verify user is the job owner
+        // Apstiprināt drīkst tikai darba īpašnieks.
         if (auth()->id() !== $submission->jobListing->user_id) {
             abort(403, 'Nepietiekamas piekļuves tiesības.');
         }
 
-        // only pending submissions can be approved
+        // Apstiprināt drīkst tikai gaidošus pieteikumus.
         if ($submission->status !== JobSubmission::STATUS_PENDING) {
             return back()->withErrors([
                 'error' => 'Apstiprināt var tikai gaidošus pieteikumus.'
@@ -383,22 +384,23 @@ class JobSubmissionController extends Controller
         }
 
         try {
+            // Saistītās datubāzes izmaiņas tiek izpildītas vienā transakcijā.
             DB::transaction(function () use ($submission) {
-                // mark submission as approved
+                // Pieteikums tiek atzīmēts kā apstiprināts.
                 $submission->update([
                     'status' => JobSubmission::STATUS_APPROVED
                 ]);
 
-                // get job and helper user
+                // Tiek iegūts darbs un darba veicējs.
                 $job = $submission->jobListing;
                 $helper = $submission->user;
 
-                // transfer credits to the helper
+                // Pēc apstiprināšanas kredīti tiek pieskaitīti darba veicējam.
                 $helper->update([
                     'time_credits' => $helper->time_credits + $job->time_credits
                 ]);
 
-                // record the transaction for audit purposes
+                // Kredītu kustība tiek pierakstīta darījumu vēsturē.
                 DB::table('transactions')->insert([
                     'user_id' => $helper->id,
                     'amount' => $job->time_credits,
@@ -407,14 +409,14 @@ class JobSubmissionController extends Controller
                     'updated_at' => now()
                 ]);
 
-                // mark all other submissions for this job as declined
+                // Pēc viena pieteikuma apstiprināšanas pārējie pieteikumi tiek noraidīti.
                 JobSubmission::where('job_listing_id', $job->id)
                     ->where('id', '!=', $submission->id)
                     ->update(['status' => JobSubmission::STATUS_DECLINED]);
                 
             });
 
-            // redirect to the submission detail so the job owner can leave a review
+            // Pēc apstiprināšanas darba īpašnieks tiek novirzīts uz atsauksmes pievienošanu.
             return redirect('/submissions/' . $submission->id)->with('success', 'Pieteikums apstiprināts, un kredīti ir pārskaitīti. Zemāk varat atstāt atsauksmi palīgam.');
         } catch (\Exception $e) {
             Log::error('Job submission approval failed: ' . $e->getMessage());
@@ -425,15 +427,15 @@ class JobSubmissionController extends Controller
         }
     }
 
-    // decline a submission and send it for admin review
+    // Noraida pieteikumu un nodod gadījumu administratora pārskatīšanai.
     public function decline(JobSubmission $submission)
     {
-        // verify user is the job owner
+        // Noraidīt drīkst tikai darba īpašnieks.
         if (auth()->id() !== $submission->jobListing->user_id) {
             abort(403, 'Nepietiekamas piekļuves tiesības.');
         }
         
-        // only pending submissions can be declined
+        // Noraidīt drīkst tikai gaidošus pieteikumus.
         if ($submission->status !== JobSubmission::STATUS_PENDING) {
             return back()->withErrors([
                 'error' => 'Noraidīt var tikai gaidošus pieteikumus.'
@@ -441,13 +443,14 @@ class JobSubmissionController extends Controller
         }
 
         try {
-            // send to admin review instead of direct decline - create automatic dispute
+            // Noraidījums tiek pārvērsts par strīdu administratora pārskatīšanai.
             $submission->update([
                 'status' => JobSubmission::STATUS_ADMIN_REVIEW,
                 'admin_notes' => request('admin_notes') ?? 'Darba īpašnieks noraidīja pieteikumu. Nepieciešama administratora pārskatīšana.',
                 'dispute_status' => JobSubmission::DISPUTE_REQUESTED,
                 'dispute_reason' => request('admin_notes') ?? 'Darba īpašnieks noraidīja šo iesniegumu. Iemesls: ' . (request('admin_notes') ?? 'Iemesls nav norādīts'),
                 'dispute_initiated_by' => auth()->id(),
+                // Iesaldēšana aptur turpmākas darbības līdz lēmuma pieņemšanai.
                 'is_frozen' => true,
                 'freeze_reason' => 'Automātiski iesaldēts darba īpašnieka noraidījuma dēļ'
             ]);
@@ -462,15 +465,15 @@ class JobSubmissionController extends Controller
         }
     }
 
-    // cancel a claimed job submission
+    // Ļauj darba veicējam atcelt vēl nepabeigtu pieteikumu.
     public function cancel(JobSubmission $submission)
     {
-        // verify user is the applicant
+        // Atcelt drīkst tikai pieteikuma iesniedzējs.
         if (auth()->id() !== $submission->user_id) {
             abort(403, 'Nepietiekamas piekļuves tiesības.');
         }
 
-        // only claimed submissions can be canceled
+        // Atcelt drīkst tikai saņemtu, vēl nepabeigtu pieteikumu.
         if ($submission->status !== JobSubmission::STATUS_CLAIMED) {
             return back()->withErrors([
                 'error' => 'Tikai saņemtos pieteikumus var atcelt.'
@@ -478,19 +481,19 @@ class JobSubmissionController extends Controller
         }
 
         try {
-            // save job id before deleting the submission
+            // Darba ID tiek saglabāts pirms pieteikuma dzēšanas.
             $jobId = $submission->job_listing_id;
             
-            // clean up any files associated with this submission
             foreach ($submission->files as $file) {
+                // Dzēšot pieteikumu, tiek sakopts arī saistītais fails.
                 Storage::disk('public')->delete($file->file_path);
                 $file->delete();
             }
             
-            // delete the submission entirely
+            // Pieteikums tiek pilnībā dzēsts.
             $submission->delete();
 
-            // redirect to job page so user can claim again if desired
+            // Lietotājs tiek atgriezts darba lapā, lai pēc vajadzības varētu to saņemt vēlreiz.
             return redirect('/jobs/' . $jobId)->with('success', 'Jūsu saņemšana ir atcelta. Jūs tagad varat atkal saņemt šo palīdzības pieprasījumu, ja vēlaties.');
         } catch (\Exception $e) {
             Log::error('Job claim cancellation failed: ' . $e->getMessage());

@@ -1,3 +1,4 @@
+{{-- Šis skats rāda lietotāja saņemtos un nosūtītos darba pieteikumus. --}}
 <x-layout>
     <x-slot:heading>
         Mani pieteikumi

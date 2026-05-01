@@ -1,14 +1,14 @@
 <?php
 
+// Šis fails izveido pieteikumiem pievienoto failu tabulu.
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+    // Izveido failu tabulu un sasaista katru failu ar darba pieteikumu.
     public function up(): void
     {
         Schema::create('submission_files', function (Blueprint $table) {
@@ -22,6 +22,7 @@ return new class extends Migration
         });
     }
 
+    // Dzēš pieteikumu failu tabulu.
     public function down(): void
     {
         Schema::dropIfExists('submission_files');

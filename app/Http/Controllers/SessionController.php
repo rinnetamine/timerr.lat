@@ -1,38 +1,36 @@
 <?php
 
+// Šis fails apstrādā lietotāja pieslēgšanos, bloķēta konta pārbaudi un izrakstīšanos.
+
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
-// controller for user authentication
 class SessionController extends Controller
 {
-    // show login form
+    // Parāda pieslēgšanās formu.
     public function create()
     {
         return view('auth.login');
     }
 
-    // handle user login
+    // Validē pieslēgšanās datus un izveido aktīvu lietotāja sesiju.
     public function store()
     {
-        // validate login credentials
         $attributes = request()->validate([
             'email' => ['required', 'email'],
             'password' => ['required']
         ]);
 
-        // attempt to authenticate user
         if (! Auth::attempt($attributes)) {
             throw ValidationException::withMessages([
                 'email' => 'Norādītie pieslēgšanās dati nav pareizi.'
             ]);
         }
 
-        // check if user is banned after successful authentication
+        // Bloķēts lietotājs tiek izrakstīts uzreiz pēc veiksmīgas paroles pārbaudes.
         if (Auth::user()->isBanned()) {
-            // logout the banned user immediately
             Auth::logout();
             
             throw ValidationException::withMessages([
@@ -40,14 +38,13 @@ class SessionController extends Controller
             ]);
         }
 
-        // regenerate session for security
+        // Sesijas atjaunošana pasargā pret sesijas fiksācijas uzbrukumiem.
         request()->session()->regenerate();
 
-        // redirect to jobs page after successful login
         return redirect('/jobs');
     }
 
-    // handle user logout
+    // Izraksta lietotāju no pašreizējās sesijas.
     public function destroy()
     {
         Auth::logout();

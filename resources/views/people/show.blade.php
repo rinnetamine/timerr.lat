@@ -1,3 +1,4 @@
+{{-- Šis skats rāda lietotāja publisko profilu un atsauksmes. --}}
 <x-layout>
     <x-slot:heading>Profils: {{ $user->first_name }} {{ $user->last_name }}</x-slot:heading>
 
@@ -73,7 +74,7 @@
                 </div>
             @endif
             
-            {{-- Reviews received --}}
+            {{-- Lietotāja saņemtās atsauksmes. --}}
             <div class="mt-6">
                 <h3 class="font-semibold text-white/90 mb-2">Atsauksmes</h3>
                 @if($user->reviewsReceived()->count() === 0)

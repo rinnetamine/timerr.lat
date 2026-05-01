@@ -1,5 +1,8 @@
 <?php
 
+// Šis fails pārvalda strīdu iesniegšanu un administratora lēmumu piemērošanu.
+// Strīda laikā pieteikums tiek iesaldēts, lai sistēmas stāvoklis līdz lēmumam nemainītos nekontrolēti.
+
 namespace App\Http\Controllers;
 
 use App\Models\JobSubmission;
@@ -8,12 +11,10 @@ use Illuminate\Support\Facades\Auth;
 
 class DisputeController extends Controller
 {
-    /**
-     * show the dispute form for a job submission
-     */
+    // Sagatavo strīda izveides formu konkrētam pieteikumam.
     public function create(JobSubmission $submission)
     {
-        // check if user is involved in this job
+        // Strīdu drīkst sākt tikai pieteikumā iesaistīts lietotājs.
         $user = Auth::user();
         if ($submission->user_id !== $user->id && $submission->jobListing->user_id !== $user->id) {
             return back()->with('error', 'Jums nav tiesību strīdēties par šo iesniegumu.');
@@ -24,27 +25,26 @@ class DisputeController extends Controller
         ]);
     }
 
-    /**
-     * store a new dispute
-     */
+    // Reģistrē strīda iemeslu un iesaldē pieteikumu līdz administratora lēmumam.
     public function store(Request $request, JobSubmission $submission)
     {
-        // validate request
+        // Pirms saglabāšanas tiek validēts strīda pamatojums.
         $request->validate([
             'reason' => 'required|string|min:10|max:1000'
         ]);
 
-        // check if user is involved in this job
+        // Atkārtota piekļuves pārbaude aizsargā tiešo POST pieprasījumu.
         $user = Auth::user();
         if ($submission->user_id !== $user->id && $submission->jobListing->user_id !== $user->id) {
             return back()->with('error', 'Jums nav tiesību strīdēties par šo iesniegumu.');
         }
 
-        // create dispute and freeze submission
+        // Pieteikums tiek nodots administratora pārskatīšanai kā aktīvs strīds.
         $submission->update([
             'dispute_status' => JobSubmission::DISPUTE_REQUESTED,
             'dispute_reason' => $request->reason,
             'dispute_initiated_by' => $user->id,
+            // Iesaldēšana aptur turpmākas darbības līdz lēmuma pieņemšanai.
             'is_frozen' => true,
             'freeze_reason' => 'Strīdu uzsāka ' . $user->first_name . ' ' . $user->last_name
         ]);
@@ -53,18 +53,17 @@ class DisputeController extends Controller
             ->with('success', 'Strīds iesniegts. Administrators to pārskatīs drīz.');
     }
 
-    /**
-     * show admin dispute management page
-     */
+    // Parāda administratoram aktīvos un atrisinātos strīdus.
     public function index()
     {
+        // Administratora skati un darbības nav pieejamas parastiem lietotājiem.
         if (!Auth::user()->isAdmin()) {
             abort(403);
         }
 
         $disputes = JobSubmission::with(['user', 'jobListing.user', 'disputeInitiator', 'disputeResolver', 'files'])
             ->where(function($query) {
-                // show disputes and admin reviews
+                // Tiek atlasīti gan aktīvie strīdi, gan pieteikumi administratora pārskatīšanā.
                 $query->where('dispute_status', '!=', JobSubmission::DISPUTE_NONE)
                       ->orWhere('status', JobSubmission::STATUS_ADMIN_REVIEW);
             })
@@ -74,11 +73,10 @@ class DisputeController extends Controller
         return view('disputes.index', compact('disputes'));
     }
 
-    /**
-     * show dispute details for admin
-     */
+    // Parāda administratoram viena strīda detalizētu informāciju.
     public function show(JobSubmission $submission)
     {
+        // Administratora skati un darbības nav pieejamas parastiem lietotājiem.
         if (!Auth::user()->isAdmin()) {
             abort(403);
         }
@@ -88,11 +86,10 @@ class DisputeController extends Controller
         return view('disputes.show', compact('submission'));
     }
 
-    /**
-     * resolve a dispute (admin only)
-     */
+    // Saglabā administratora lēmumu un piemēro izvēlēto strīda risinājumu.
     public function resolve(Request $request, JobSubmission $submission)
     {
+        // Administratora skati un darbības nav pieejamas parastiem lietotājiem.
         if (!Auth::user()->isAdmin()) {
             abort(403);
         }
@@ -102,7 +99,7 @@ class DisputeController extends Controller
             'action' => 'required|in:approve,decline,unfreeze'
         ]);
 
-        // update submission with resolution
+        // Pieteikumam tiek saglabāta administratora rezolūcija un atrisināšanas metadati.
         $submission->update([
             'dispute_status' => JobSubmission::DISPUTE_RESOLVED,
             'dispute_resolution' => $request->resolution,
@@ -110,9 +107,10 @@ class DisputeController extends Controller
             'dispute_resolved_at' => now()
         ]);
 
-        // apply the chosen action
+        // Administratora izvēlētā darbība nosaka strīda gala rezultātu.
         switch ($request->action) {
             case 'approve':
+                // Apstiprināšanas gadījumā darbs tiek atzīts par izpildītu.
                 $submission->update([
                     'status' => JobSubmission::STATUS_APPROVED,
                     'admin_approved' => true,
@@ -120,11 +118,11 @@ class DisputeController extends Controller
                     'freeze_reason' => null
                 ]);
                 
-                // transfer credits
+                // Pēc apstiprināšanas kredīti tiek pārskaitīti darba izpildītājam.
                 $submission->user->increment('time_credits', $submission->jobListing->time_credits);
                 $submission->jobListing->user->decrement('time_credits', $submission->jobListing->time_credits);
                 
-                // create transaction records
+                // Katra administratora kredītu korekcija tiek saglabāta darījumu vēsturē.
                 \App\Models\Transaction::create([
                     'user_id' => $submission->user_id,
                     'amount' => $submission->jobListing->time_credits,
@@ -139,6 +137,7 @@ class DisputeController extends Controller
                 break;
 
             case 'decline':
+                // Noraidīšanas gadījumā pieteikums tiek atzīmēts kā neveiksmīgs.
                 $submission->update([
                     'status' => JobSubmission::STATUS_DECLINED,
                     'admin_approved' => false,
@@ -148,6 +147,7 @@ class DisputeController extends Controller
                 break;
 
             case 'unfreeze':
+                // Atiesaldēšana ļauj turpināt darbu bez statusa maiņas.
                 $submission->update([
                     'is_frozen' => false,
                     'freeze_reason' => null

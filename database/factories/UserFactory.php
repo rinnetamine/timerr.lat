@@ -1,5 +1,7 @@
 <?php
-// php artisan tinker --execute="App\Models\User::factory(X)->create()"
+
+// Šis fails ģenerē testa lietotājus ar latviskiem vārdiem un noklusējuma profila attēliem.
+
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -15,9 +17,10 @@ class UserFactory extends Factory
     protected static ?string $password;
 
 
+    // Atgriež noklusējuma lietotāja datus testiem un sēklu datiem.
     public function definition(): array
     {
-        // Latvian first names
+        // Vārdu saraksts dod testa datiem latviskāku izskatu.
         $latvianFirstNames = [
             'Jānis', 'Andris', 'Mārtiņš', 'Guntis', 'Aldis', 'Juris', 'Edgars', 'Kārlis',
             'Roberts', 'Miks', 'Oskars', 'Emīls', 'Ričards', 'Kristaps', 'Markuss',
@@ -25,7 +28,7 @@ class UserFactory extends Factory
             'Linda', 'Dace', 'Zane', 'Elīna', 'Monika', 'Sabīne', 'Rebecca', 'Katrina'
         ];
         
-        // Latvian last names
+        // Uzvārdu saraksts tiek izmantots e-pasta un publiskā profila datu ģenerēšanai.
         $latvianLastNames = [
             'Kalniņš', 'Bērziņš', 'Ozoliņš', 'Jānis', 'Liepiņš', 'Krūmiņš', 'Vītoliņš',
             'Lejiņš', 'Mālnieks', 'Zariņš', 'Birkavs', 'Puriņš', 'Šmits', 'Kauliņš',
@@ -53,6 +56,7 @@ class UserFactory extends Factory
         return $attributes;
     }
 
+    // Atgriež lietotāja stāvokli bez verificētas e-pasta adreses.
     public function unverified(): static
     {
         return $this->state(fn (array $attributes) => [

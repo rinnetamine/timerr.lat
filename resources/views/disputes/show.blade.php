@@ -1,3 +1,4 @@
+{{-- Šis skats rāda viena strīda detaļas un administratora lēmuma formu. --}}
 <x-layout>
     <x-slot name="heading">Atrisināt strīdu</x-slot>
 

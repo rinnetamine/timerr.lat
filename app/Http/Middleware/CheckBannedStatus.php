@@ -1,5 +1,7 @@
 <?php
 
+// Šis fails pārtrauc bloķētu lietotāju sesijas pirms pieprasījums nonāk pie kontrolieriem.
+
 namespace App\Http\Middleware;
 
 use Closure;
@@ -9,26 +11,18 @@ use Illuminate\Support\Facades\Auth;
 
 class CheckBannedStatus
 {
-    /**
-     * handle an incoming request
-     *
-     */
+    // Pārbauda, vai pieslēgtais lietotājs nav bloķēts, un vajadzības gadījumā izraksta viņu.
     public function handle(Request $request, Closure $next): Response
     {
-        // check if user is authenticated and banned
         if (Auth::check() && Auth::user()->isBanned()) {
-            // logout the user immediately
             Auth::logout();
             
-            // invalidate the session
+            // Sesija un CSRF marķieris tiek atjaunoti, lai bloķētais konts nevarētu turpināt darbību.
             $request->session()->invalidate();
-            
-            // regenerate CSRF token
             $request->session()->regenerateToken();
             
-            // redirect to login with error message
             return redirect()->route('login')
-                ->with('error', 'Your account has been banned. Contact administrator for more information.');
+                ->with('error', 'Jūsu konts ir bloķēts. Sazinieties ar administratoru, lai saņemtu vairāk informācijas.');
         }
         
         return $next($request);

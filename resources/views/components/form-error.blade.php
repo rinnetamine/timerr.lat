@@ -1,3 +1,4 @@
+{{-- Šis komponents rāda validācijas kļūdu konkrētam formas laukam. --}}
 @props(['name'])
 
 @error($name)

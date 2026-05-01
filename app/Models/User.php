@@ -1,5 +1,8 @@
 <?php
 
+// Šis fails apraksta lietotāju, viņa lomu, kredītus, profila attēlu un saistītos sistēmas ierakstus.
+// Īpaši svarīga ir administratora pārbaude, konta bloķēšana un kredītu korekciju reģistrēšana.
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,6 +18,7 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+    // Noklusējuma profila attēli tiek izmantoti, ja lietotājs nav augšupielādējis savu attēlu.
     public const DEFAULT_AVATARS = [
         'images/avatar-defaults/aurora.svg',
         'images/avatar-defaults/circuit.svg',
@@ -41,7 +45,7 @@ class User extends Authenticatable
         'demo@local.test',
     ];
 
-    // fillable attributes for user model
+    // Šie lauki drīkst tikt masveidā aizpildīti no validētiem datiem.
     protected $fillable = [
         'first_name',
         'last_name',
@@ -55,23 +59,23 @@ class User extends Authenticatable
         'banned_at'
     ];
 
-    // default values for new users
+    // Jaunam lietotājam tiek piešķirta sākotnējā kredītu bilance un parasta lietotāja loma.
     protected $attributes = [
         'time_credits' => 10,
         'role' => 'user',
         'is_banned' => false
     ];
 
-    // guarded attributes (empty array means all attributes are fillable)
+    // Tukšs guarded saraksts ļauj izmantot masveida aizpildi atļautajiem laukiem.
     protected $guarded = [];
 
-    // hidden attributes for serialization
+    // Šie lauki netiek parādīti serializētā lietotāja datos.
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    // attribute casts for data type conversion
+    // Definē automātisku datu tipu pārveidošanu lietotāja modelī.
     protected function casts(): array
     {
         return [
@@ -82,65 +86,68 @@ class User extends Authenticatable
         ];
     }
 
-    // relationship to job listings created by user
+    // Definē lietotāja izveidoto darbu saiti.
     public function jobs()
     {
         return $this->hasMany(Job::class);
     }
 
-    // reviews that this user has received
+    // Definē lietotāja saņemto atsauksmju saiti.
     public function reviewsReceived()
     {
         return $this->hasMany(Review::class, 'reviewee_id');
     }
 
-    // reviews that this user has given
+    // Definē lietotāja uzrakstīto atsauksmju saiti.
     public function reviewsGiven()
     {
         return $this->hasMany(Review::class, 'reviewer_id');
     }
     
-    // check if user has admin privileges
+    // Pārbauda, vai lietotājam ir administratora loma.
     public function isAdmin()
     {
+        // Administratora loma tiek noteikta pēc role lauka.
         return $this->role === 'admin';
     }
-    
-    // relationship to user's credit transactions
+
+    // Definē lietotāja kredītu darījumu vēstures saiti.
     public function transactions()
     {
         return $this->hasMany(Transaction::class);
     }
 
-    // count unread messages where this user is the recipient
+    // Saskaita lietotājam neizlasītos ziņojumus.
     public function unreadMessagesCount()
     {
         return \App\Models\Message::where('recipient_id', $this->id)->whereNull('read_at')->count();
     }
 
-    // relationship to job submissions (jobs the user has completed)
+    // Definē lietotāja iesniegto pieteikumu saiti.
     public function jobSubmissions()
     {
         return $this->hasMany(JobSubmission::class);
     }
 
-    // relationship to successfully completed jobs (approved submissions)
+    // Atlasa lietotāja apstiprinātos un pabeigtos darbus.
     public function completedJobs()
     {
         return $this->hasMany(JobSubmission::class)->where('status', JobSubmission::STATUS_APPROVED);
     }
 
-    // count of successfully completed jobs
+    // Saskaita lietotāja pabeigtos darbus.
     public function completedJobsCount()
     {
         return $this->completedJobs()->count();
     }
 
+    // Izveido lietotāja iniciāļus profila attēla aizvietošanai.
     public function initials()
     {
         return strtoupper(substr($this->first_name, 0, 1) . substr($this->last_name, 0, 1));
     }
 
+    // Atgriež lietotāja profila attēla adresi.
     public function avatarUrl()
     {
         if (!$this->avatar_path) {
@@ -154,16 +161,19 @@ class User extends Authenticatable
         return '/storage/' . ltrim($this->avatar_path, '/');
     }
 
+    // Atgriež noklusējuma profila attēla adresi.
     public function defaultAvatarUrl()
     {
         return '/' . ltrim(self::defaultAvatarForSeed($this->email ?? $this->id), '/');
     }
 
+    // Atgriež visus pieejamos noklusējuma profila attēlus.
     public static function defaultAvatarOptions()
     {
         return self::DEFAULT_AVATARS;
     }
 
+    // Izvēlas stabilu noklusējuma profila attēlu pēc lietotāja identifikatora vai e-pasta.
     public static function defaultAvatarForSeed(int|string $seed)
     {
         $avatars = self::defaultAvatarOptions();
@@ -171,18 +181,19 @@ class User extends Authenticatable
         return $avatars[abs(crc32((string) $seed)) % count($avatars)];
     }
 
+    // Atgriež statiskos testa kontu e-pastus, kurus izmanto sākuma dati.
     public static function staticSeedEmails()
     {
         return self::STATIC_SEED_EMAILS;
     }
 
-    // check if user is banned
+    // Pārbauda, vai lietotājs ir bloķēts.
     public function isBanned()
     {
         return $this->is_banned;
     }
 
-    // ban the user
+    // Bloķē lietotāju un saglabā bloķēšanas iemeslu.
     public function ban($reason = null)
     {
         $this->update([
@@ -192,7 +203,7 @@ class User extends Authenticatable
         ]);
     }
 
-    // unban the user
+    // Atceļ lietotāja bloķēšanu.
     public function unban()
     {
         $this->update([
@@ -202,13 +213,13 @@ class User extends Authenticatable
         ]);
     }
 
-    // adjust user credits
+    // Koriģē lietotāja kredītu bilanci un reģistrē darījumu vēsturē.
     public function adjustCredits($amount, $description = null)
     {
         $oldCredits = $this->time_credits;
         $this->increment('time_credits', $amount);
         
-        // Create transaction record
+        // Kredītu korekcija tiek saglabāta darījumu vēsturē.
         \App\Models\Transaction::create([
             'user_id' => $this->id,
             'amount' => $amount,

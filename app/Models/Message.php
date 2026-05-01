@@ -1,5 +1,7 @@
 <?php
 
+// Šis fails apraksta privāto ziņojumu datus, pielikumus un ziņojuma satura šifrēšanu.
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -11,34 +13,71 @@ class Message extends Model
 {
     use HasFactory;
 
+    // Šie lauki drīkst tikt aizpildīti, veidojot ziņojumu no validēta pieprasījuma.
     protected $fillable = [
         'sender_id',
         'recipient_id',
         'body',
+        'attachment_name',
+        'attachment_path',
+        'attachment_mime_type',
+        'attachment_size',
         'read_at'
     ];
 
+    // Definē saiti ar ziņojuma sūtītāju.
     public function sender()
     {
         return $this->belongsTo(User::class, 'sender_id');
     }
 
+    // Definē saiti ar ziņojuma saņēmēju.
     public function recipient()
     {
         return $this->belongsTo(User::class, 'recipient_id');
     }
 
-    public function files()
+    // Pārbauda, vai ziņojumam ir pievienots fails.
+    public function hasAttachment()
     {
-        return $this->hasMany(MessageFile::class);
+        return filled($this->attachment_path);
     }
 
-    /**
-     * encrypt the message body when saving to the database
-     */
+    // Izveido pielikuma lejupielādes adresi skatiem.
+    public function getAttachmentUrlAttribute()
+    {
+        return $this->hasAttachment() ? route('messages.files.download', $this) : null;
+    }
+
+    // Pārveido pielikuma izmēru cilvēkam saprotamā formātā.
+    public function getAttachmentFormattedSizeAttribute()
+    {
+        $bytes = (int) $this->attachment_size;
+        $units = ['B', 'KB', 'MB', 'GB'];
+
+        for ($i = 0; $bytes > 1024 && $i < count($units) - 1; $i++) {
+            $bytes /= 1024;
+        }
+
+        return round($bytes, 2) . ' ' . $units[$i];
+    }
+
+    // Nosaka, vai pielikumu var rādīt kā attēlu pārlūkā.
+    public function attachmentIsImage()
+    {
+        return str_starts_with((string) $this->attachment_mime_type, 'image/');
+    }
+
+    // Nosaka, vai pielikums ir PDF dokuments.
+    public function attachmentIsPdf()
+    {
+        return $this->attachment_mime_type === 'application/pdf';
+    }
+
+    // Šifrē ziņojuma saturu pirms saglabāšanas datubāzē.
     public function setBodyAttribute($value)
     {
-        // if already encrypted or null, just set it
+        // Tukšs teksts netiek šifrēts, lai faila ziņojumi bez teksta paliktu derīgi.
         if (is_null($value) || $value === '') {
             $this->attributes['body'] = $value;
             return;
@@ -47,14 +86,12 @@ class Message extends Model
         try {
             $this->attributes['body'] = Crypt::encryptString($value);
         } catch (\Exception $e) {
-            // fallback to raw value if encryption fails for any reason
+            // Ja šifrēšana neizdodas, tiek saglabāta sākotnējā vērtība, lai nezaudētu ziņojumu.
             $this->attributes['body'] = $value;
         }
     }
 
-    /**
-     * decrypt the message body when accessing it
-     */
+    // Atšifrē ziņojuma saturu piekļuves brīdī.
     public function getBodyAttribute($value)
     {
         if (is_null($value) || $value === '') {
@@ -64,7 +101,7 @@ class Message extends Model
         try {
             return Crypt::decryptString($value);
         } catch (DecryptException $e) {
-            // value was not encrypted with Crypt::encryptString; return raw
+            // Vecāki vai testa ieraksti var būt nešifrēti, tāpēc tos atgriež bez izmaiņām.
             return $value;
         } catch (\Exception $e) {
             return $value;

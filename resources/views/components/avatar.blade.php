@@ -1,3 +1,4 @@
+{{-- Šis komponents attēlo lietotāja profila attēlu vai noklusējuma alternatīvu. --}}
 @props(['user', 'size' => 'md'])
 
 @php

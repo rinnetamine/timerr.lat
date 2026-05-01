@@ -1,5 +1,7 @@
 <?php
 
+// Šis fails aizpilda noklusējuma profila un sludinājumu attēlus esošajiem ierakstiem.
+
 namespace Database\Seeders;
 
 use App\Models\Job;
@@ -9,6 +11,7 @@ use Illuminate\Support\Facades\Schema;
 
 class DefaultImagesSeeder extends Seeder
 {
+    // Piešķir noklusējuma attēlus, ja attiecīgās kolonnas migrācijās ir pieejamas.
     public function run(): void
     {
         if (!Schema::hasColumn('users', 'avatar_path') || !Schema::hasColumn('job_listings', 'image_path')) {

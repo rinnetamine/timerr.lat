@@ -1,5 +1,7 @@
 <?php
 
+// Šis fails izveido demonstrācijas lietotājus, sludinājumus, pieteikumus, atsauksmes un darījumus.
+
 namespace Database\Seeders;
 
 use App\Models\Job;
@@ -29,6 +31,7 @@ class DatabaseSeeder extends Seeder
         JobSubmission::STATUS_ADMIN_REVIEW,
     ];
 
+    // Palaiž sākuma datu izveidi noteiktā secībā, lai saistītie ieraksti būtu pieejami.
     public function run(): void
     {
         $this->clearDemoData();
@@ -46,17 +49,12 @@ class DatabaseSeeder extends Seeder
         }
     }
 
-    public function runWithDefaults(): void
-    {
-        $this->run();
-    }
-
+    // Notīra demonstrācijas tabulas pirms jaunu sākuma datu ielādes.
     private function clearDemoData(): void
     {
         Schema::disableForeignKeyConstraints();
 
         foreach ([
-            'message_files',
             'messages',
             'reviews',
             'submission_files',
@@ -72,7 +70,6 @@ class DatabaseSeeder extends Seeder
         }
 
         $this->resetSqliteSequences([
-            'message_files',
             'messages',
             'reviews',
             'submission_files',
@@ -86,6 +83,7 @@ class DatabaseSeeder extends Seeder
         Schema::enableForeignKeyConstraints();
     }
 
+    // Izveido administratoru, testa kontus un vairākus publiskus demonstrācijas lietotājus.
     private function createUsers()
     {
         $hasAvatarColumn = Schema::hasColumn('users', 'avatar_path');
@@ -125,6 +123,7 @@ class DatabaseSeeder extends Seeder
         });
     }
 
+    // Atgriež demonstrācijas lietotājus, kas piedalās sludinājumos un pieteikumos.
     private function demoParticipants($users)
     {
         return $users
@@ -133,6 +132,7 @@ class DatabaseSeeder extends Seeder
             ->values();
     }
 
+    // Izveido sludinājumus visām definētajām kategorijām.
     private function createCategoryJobs($users)
     {
         $categories = $this->categorySlugs();
@@ -181,6 +181,7 @@ class DatabaseSeeder extends Seeder
         return $jobs;
     }
 
+    // Izveido pieteikumus, kurus testa lietotājs saņem par saviem sludinājumiem.
     private function createReceivedSubmissionsForTestUser(User $testUser, $users, $jobs)
     {
         $testJobs = $jobs->where('user_id', $testUser->id)->values();
@@ -202,6 +203,7 @@ class DatabaseSeeder extends Seeder
         return $submissions;
     }
 
+    // Izveido pieteikumus, kurus testa lietotājs nosūta citu lietotāju sludinājumiem.
     private function createSentSubmissionsForTestUser(User $testUser, $users, $jobs)
     {
         $availableJobs = $jobs->where('user_id', '!=', $testUser->id)->values();
@@ -220,6 +222,7 @@ class DatabaseSeeder extends Seeder
         return $submissions;
     }
 
+    // Izveido atsauksmes, lai testa lietotāja profilā būtu reālistiska reputācijas vēsture.
     private function createReviewsForTestUser(User $testUser, $users, $receivedSubmissions, $sentSubmissions): void
     {
         $reviewTexts = [
@@ -263,6 +266,7 @@ class DatabaseSeeder extends Seeder
         }
     }
 
+    // Izveido testa lietotāja kredītu kustības vēsturi.
     private function createTransactionsForTestUser(User $testUser): void
     {
         $transactions = [
@@ -291,6 +295,7 @@ class DatabaseSeeder extends Seeder
         }
     }
 
+    // Izveido vienu pieteikuma ierakstu ar norādīto statusu un laika nobīdi.
     private function createSubmission(Job $job, User $user, string $status, string $message, int $offset): JobSubmission
     {
         return JobSubmission::create([
@@ -309,6 +314,7 @@ class DatabaseSeeder extends Seeder
         ]);
     }
 
+    // Izveido plakanu kategoriju sarakstu no konfigurācijas.
     private function categorySlugs(): array
     {
         $slugs = [];
@@ -330,6 +336,7 @@ class DatabaseSeeder extends Seeder
         return $slugs;
     }
 
+    // Atgriež tikai galvenās kategorijas sākumlapas un sēklu datu vajadzībām.
     private function topCategorySlugs(): array
     {
         return collect(config('job_categories', []))
@@ -341,6 +348,7 @@ class DatabaseSeeder extends Seeder
             ->all();
     }
 
+    // Ģenerē kategorijai atbilstošu sludinājuma virsrakstu.
     private function jobTitle(string $slug, string $label): string
     {
         return match (explode('.', $slug)[0]) {
@@ -353,11 +361,13 @@ class DatabaseSeeder extends Seeder
         };
     }
 
+    // Ģenerē īsu sludinājuma aprakstu demonstrācijas datiem.
     private function jobDescription(string $label, string $ownerName): string
     {
         return "{$ownerName} meklē palīdzību kategorijā “{$label}”.";
     }
 
+    // Atiestata SQLite automātiskos identifikatorus pēc demonstrācijas datu dzēšanas.
     private function resetSqliteSequences(array $tables): void
     {
         if (DB::connection()->getDriverName() !== 'sqlite') {
@@ -369,7 +379,7 @@ class DatabaseSeeder extends Seeder
                 DB::table('sqlite_sequence')->where('name', $table)->delete();
             }
         } catch (\Throwable) {
-            //
+            // SQLite sekvences atiestatīšanas kļūda tiek ignorēta, jo tā neietekmē datu izveidi.
         }
     }
 }

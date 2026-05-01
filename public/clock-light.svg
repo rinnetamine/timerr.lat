@@ -8,8 +8,8 @@
   </defs>
   <rect width="64" height="64" rx="12" fill="#ffffff" />
   <circle cx="32" cy="32" r="20" fill="none" stroke="url(#g2)" stroke-width="3" />
-  <!-- hour hand -->
+  <!-- STUNDU RĀDĪTĀJS -->
   <line x1="32" y1="32" x2="32" y2="20" stroke="#07583d" stroke-width="3" stroke-linecap="round" />
-  <!-- minute hand -->
+  <!-- MINŪŠU RĀDĪTĀJS -->
   <line x1="32" y1="32" x2="44" y2="32" stroke="#07583d" stroke-width="2" stroke-linecap="round" />
 </svg>

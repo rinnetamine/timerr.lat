@@ -1,8 +1,9 @@
+{{-- Šis skats rāda administratora lietotāja pārvaldības lapu. --}}
 <x-layout>
     <x-slot:heading>Lietotāja pārvaldība: {{ $user->first_name }} {{ $user->last_name }}</x-slot>
 
     <div class="max-w-6xl mx-auto">
-        <!-- User Profile Card -->
+        <!-- Lietotāja profila kartīte. -->
         <div class="bg-gray-800/40 backdrop-blur-sm p-8 rounded-lg border border-gray-700 mb-6">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-6">
@@ -39,9 +40,9 @@
             </div>
         </div>
 
-        <!-- Admin Actions -->
+        <!-- Administratora darbības. -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Credit Management -->
+            <!-- Kredītu pārvaldība. -->
             <div class="bg-gray-800/40 backdrop-blur-sm p-6 rounded-lg border border-gray-700">
                 <h3 class="text-lg font-semibold text-white mb-4">Kredītu pārvaldība</h3>
                 
@@ -90,7 +91,7 @@
                 </form>
             </div>
 
-            <!-- Account Status -->
+            <!-- Konta statuss. -->
             <div class="bg-gray-800/40 backdrop-blur-sm p-6 rounded-lg border border-gray-700">
                 <h3 class="text-lg font-semibold text-white mb-4">Konta statuss</h3>
                 
@@ -152,7 +153,7 @@
             </div>
         </div>
 
-        <!-- Recent Transactions -->
+        <!-- Neseno darījumu saraksts. -->
         <div class="bg-gray-800/40 backdrop-blur-sm p-6 rounded-lg border border-gray-700 mt-6">
             <h3 class="text-lg font-semibold text-white mb-4">Nesenas transakcijas (kopā {{ $user->transactions_count }})</h3>
             
@@ -183,7 +184,7 @@
             @endif
         </div>
 
-        <!-- Navigation -->
+        <!-- Pārvaldības lapas navigācija. -->
         <div class="mt-6 flex justify-between">
             <a href="{{ route('people.show', $user) }}" class="text-gray-400 hover:text-white transition-colors">
                 ← Skatīt publisko profilu

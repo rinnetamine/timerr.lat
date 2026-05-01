@@ -1,3 +1,4 @@
+{{-- Šis skats rāda lietotāju sarakstu jaunas privātās sarunas sākšanai. --}}
 <x-layout :hidePageHeader="true" :stretchMain="true">
     <x-slot:heading>Jauna saruna</x-slot:heading>
 

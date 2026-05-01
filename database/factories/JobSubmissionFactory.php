@@ -1,5 +1,7 @@
 <?php
 
+// Šis fails ģenerē testa darba pieteikumus ar dažādiem statusiem.
+
 namespace Database\Factories;
 
 use App\Models\Job;
@@ -11,6 +13,7 @@ class JobSubmissionFactory extends Factory
 {
     protected $model = JobSubmission::class;
 
+    // Atgriež noklusējuma pieteikuma datus testiem un sēklu datiem.
     public function definition(): array
     {
         return [
@@ -25,7 +28,7 @@ class JobSubmissionFactory extends Factory
                 JobSubmission::STATUS_ADMIN_REVIEW
             ]),
             'admin_notes' => fake('lv_LV')->optional(0.3)->paragraph(2),
-            'admin_approved' => fake()->boolean(70), // 70% chance of being approved
+            'admin_approved' => fake()->boolean(70), // 70% iespēja, ka pieteikums būs apstiprināts.
         ];
     }
 }

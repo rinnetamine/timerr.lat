@@ -1,3 +1,4 @@
+{{-- Šis skats rāda administratoram saņemtos kontaktziņojumus un to statusus. --}}
 <x-layout>
     <x-slot:heading>Kontaktziņojumi</x-slot:heading>
 

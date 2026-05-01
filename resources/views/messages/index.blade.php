@@ -1,8 +1,9 @@
+{{-- Šis skats rāda lietotāja privāto sarunu sarakstu. --}}
 <x-layout :hidePageHeader="true" :stretchMain="true">
     <x-slot:heading>Ziņojumi</x-slot:heading>
 
     <div class="mx-auto max-w-7xl grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- SIDEBAR -->
+        <!-- Sānu josla ar sarunu sarakstu. -->
         <aside class="lg:col-span-1 bg-gray-800/30 rounded-lg border border-gray-700 p-4 h-[82vh] overflow-y-auto">
             <div class="mb-4 flex items-center justify-between gap-3">
                 <h3 class="text-lg font-semibold text-white/90">Iesūtne</h3>
@@ -19,14 +20,14 @@
                         onclick="window.location='{{ route('messages.conversation', $c['other']->id) }}'" 
                         class="cursor-pointer flex items-center gap-3 p-3 rounded border transition hover:bg-gray-900/60 hover:border-neon-accent border-transparent">
 
-                        <!-- Avatar -->
+                        <!-- Profila attēls. -->
                         <x-avatar :user="$c['other']" size="sm" />
 
-                        <!-- Content -->
+                        <!-- Sarunas saturs. -->
                         <div class="flex-1 min-w-0">
                             <div class="flex justify-between items-center gap-2">
 
-                                <!-- Name -->
+                                <!-- Sarunas dalībnieka vārds. -->
                                 <div class="truncate font-medium text-white/90 flex items-center gap-2">
                                     <a 
                                         href="{{ route('people.show', $c['other']->id) }}" 
@@ -44,13 +45,13 @@
                                     @endif
                                 </div>
 
-                                <!-- Time -->
+                                <!-- Pēdējā ziņojuma laiks. -->
                                 <div class="text-xs text-gray-400 whitespace-nowrap">
                                     {{ $c['latest']->created_at->diffForHumans() }}
                                 </div>
                             </div>
 
-                            <!-- Last message -->
+                            <!-- Pēdējais ziņojums. -->
                             <div class="text-sm text-gray-400 truncate">
                                 @if($c['latest']->body)
                                     {{ $c['latest']->body }}
@@ -60,7 +61,7 @@
                             </div>
                         </div>
 
-                        <!-- Unread -->
+                        <!-- Nelasīta ziņojuma indikators. -->
                         @if($c['unread'] > 0)
                             <span class="inline-block w-2 h-2 rounded-full bg-neon-accent"></span>
                         @endif
@@ -72,10 +73,10 @@
             </div>
         </aside>
 
-        <!-- CHAT PANEL -->
+        <!-- Tērzēšanas panelis. -->
         <div class="lg:col-span-2 bg-gray-800/30 rounded-lg border border-gray-700 flex flex-col h-[82vh] overflow-hidden">
 
-            <!-- HEADER -->
+            <!-- Tērzēšanas paneļa galvene. -->
             <header class="px-6 py-4 flex items-center justify-between border-b border-gray-700">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center text-white text-lg font-semibold">M</div>
@@ -93,7 +94,7 @@
                 </a>
             </header>
 
-            <!-- WELCOME CONTENT -->
+            <!-- Sākuma saturs bez izvēlētas sarunas. -->
             <div class="flex-1 p-6 flex items-center justify-center">
                 <div class="text-center max-w-md">
                     <div class="w-20 h-20 rounded-full bg-gray-700 flex items-center justify-center text-white text-2xl font-semibold mx-auto mb-4">M</div>

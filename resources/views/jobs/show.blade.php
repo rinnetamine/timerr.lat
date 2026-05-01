@@ -1,3 +1,4 @@
+{{-- Šis skats rāda viena darba sludinājuma detaļas un pieteikšanās darbības. --}}
 <x-layout>
     <x-slot:heading>
         Palīdzības pieprasījums
@@ -64,7 +65,7 @@
                             ->whereIn('status', ['claimed', 'pending', 'approved'])
                             ->exists();
                         
-                        // Check if job has any disputed submissions
+                        // Pārbauda, vai darbam ir aktīvi strīdi par kādu pieteikumu.
                         $jobDisputed = \App\Models\JobSubmission::where('job_listing_id', $job->id)
                             ->where('dispute_status', '!=', 'none')
                             ->where('dispute_status', '!=', 'resolved')
@@ -81,7 +82,7 @@
                             <p>Šo palīdzības pieprasījumu jau ir saņēmis cits lietotājs.</p>
                         </div>
                     @elseif(!$userSubmission)
-                        <!-- Step 1: Claim the job -->
+                        <!-- Pirmais solis: darba saņemšana. -->
                         <form method="POST" action="{{ route('job-submissions.claim') }}">
                             @csrf
                             <input type="hidden" name="job_id" value="{{ $job->id }}">
@@ -98,7 +99,7 @@
                             </div>
                         </form>
                     @elseif($userSubmission->status === 'claimed')
-                        <!-- Step 2: Complete the application -->
+                        <!-- Otrais solis: pieteikuma pabeigšana. -->
                         <div class="bg-green-500/20 text-green-300 p-4 rounded-md mb-4">
                             <p>Jūs esat saņēmis šo palīdzības pieprasījumu. Lūdzu, pabeidziet savu pieteikumu zemāk.</p>
                         </div>

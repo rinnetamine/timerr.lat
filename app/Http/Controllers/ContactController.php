@@ -1,5 +1,7 @@
 <?php
 
+// Šis fails apstrādā publisko kontaktformu un saglabā ziņojumus administratora pārskatīšanai.
+
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
@@ -7,19 +9,18 @@ use App\Models\ContactMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-// controller for handling contact form submissions
 class ContactController extends Controller
 {
-    // show the contact form view
+    // Parāda kontaktformas skatu.
     public function index()
     {
         return view('contact');
     }
 
-    // validates input, creates message, and saves to database
+    // Validē ievadi, piesaista lietotāju, ja tas ir pieslēdzies, un saglabā kontaktziņojumu.
     public function store(Request $request)
     {
-        // validate the incoming request data
+        // Ienākošie dati tiek ierobežoti, lai kontaktziņojumi paliktu īsi un droši glabājami.
         $validated = $request->validate([
             'name' => 'required|string|max:60',
             'email' => 'required|email|max:255',
@@ -27,17 +28,15 @@ class ContactController extends Controller
             'message' => 'required|string|max:1000',
         ]);
 
-        // create a new contact message with validated data
         $contactMessage = new ContactMessage($validated);
         
-        // if user is logged in, associate the message with their account
+        // Pieslēgta lietotāja ziņojumu vēlāk var saistīt ar viņa profilu administratora panelī.
         if (Auth::check()) {
             $contactMessage->user_id = Auth::id();
         }
         
         $contactMessage->save();
 
-        // redirect back with success message
         return redirect()->back()->with('success', 'Jūsu ziņojums ir nosūtīts veiksmīgi!');
     }
 }

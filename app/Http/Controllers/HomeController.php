@@ -1,5 +1,7 @@
 <?php
 
+// Šis fails sagatavo sākumlapas darba sludinājumus, aktīvos lietotājus un platformas kopsavilkumu.
+
 namespace App\Http\Controllers;
 
 use App\Models\Job;
@@ -9,14 +11,15 @@ use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
+    // Apkopo publiskās sākumlapas datus un īsos statistikas blokus.
     public function index(Request $request)
     {
         $availableJobsQuery = Job::query()->whereDoesntHave('submissions');
 
-        // featured / recent jobs
+        // Sākumlapā tiek rādīti tikai vēl nepieņemtie un nesen publicētie darbi.
         $featuredJobs = (clone $availableJobsQuery)->with('user')->orderBy('created_at', 'desc')->take(8)->get();
 
-        // top sellers by number of jobs
+        // Aktīvākie lietotāji tiek noteikti pēc publicēto darbu skaita.
         $topSellers = User::withCount('jobs')->orderBy('jobs_count', 'desc')->take(8)->get();
 
         $categories = config('job_categories', []);
@@ -31,6 +34,7 @@ class HomeController extends Controller
             ->orderByDesc('total')
             ->value('category');
 
+        // Kategorijas nosaukums tiek meklēts gan pēc pilna identifikatora, gan pēc galvenās grupas.
         $categoryLabel = function (?string $category) use ($categories) {
             if (!$category) {
                 return 'Jauna kopiena';

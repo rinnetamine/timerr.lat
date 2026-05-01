@@ -1,5 +1,7 @@
 <?php
 
+// Šis fails saglabā atsauksmes par apstiprinātiem darba pieteikumiem.
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -8,22 +10,22 @@ use App\Models\Review;
 
 class ReviewController extends Controller
 {
-    /** store a newly created review.*/
+    // Saglabā jaunu atsauksmi, ja to pievieno darba īpašnieks un pieteikums ir apstiprināts.
     public function store(Request $request, JobSubmission $submission)
     {
         $user = $request->user();
 
-        // only the job owner can leave a review for this submission
+        // Atsauksmi drīkst atstāt tikai tas lietotājs, kurš izveidoja darbu.
         if ($user->id !== $submission->jobListing->user_id) {
             abort(403);
         }
 
-        // only allow reviews for completed/approved submissions
+        // Atsauksme ir pieejama tikai pēc darba apstiprināšanas.
         if ($submission->status !== JobSubmission::STATUS_APPROVED) {
             return back()->withErrors(['submission' => 'Atsauksmi var atstāt tikai pēc tam, kad darbs ir apstiprināts.']);
         }
 
-        // prevent duplicate reviews
+        // Vienam pieteikumam tiek ļauta tikai viena atsauksme.
         if ($submission->review) {
             return back()->withErrors(['review' => 'Šim iesniegumam atsauksme jau ir atstāta.']);
         }

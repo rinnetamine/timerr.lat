@@ -1,3 +1,4 @@
+{{-- Šis komponents veido kopīgo lapas izkārtojumu, navigāciju, paziņojumus un kājeni. --}}
 <!doctype html>
 <html lang="lv" class="min-h-screen bg-fixed">
 <head>
@@ -112,7 +113,7 @@
             color: #0da67a !important;
         }
 
-    /* neon backgrounds for light theme */
+        /* Neona akcentu foni gaišajai tēmai. */
         html.light .bg-neon-accent {
             background-color: rgba(13,166,122,0.14) !important;
             color: #0f172a !important;
@@ -130,7 +131,7 @@
             border-color: #0da67a !important;
         }
 
-    /* message panels light */
+        /* Ziņojumu paneļu foni gaišajā tēmā. */
         html.light .bg-gray-800\/30,
         html.light .bg-gray-800\/40,
         html.light .bg-gray-900\/50,
@@ -140,19 +141,19 @@
             border-color: #e6eef5 !important;
         }
 
-    /* lighten message bubble backgrounds */
+        /* Ziņojumu burbuļu foni gaišajā tēmā. */
         html.light .bg-gray-900 {
             background-color: #ffffff !important;
             color: #0f172a !important;
         }
 
-    /* stronger neon bg for sent messages */
+        /* Nosūtītajiem ziņojumiem saglabā izteiktāku neona fonu. */
         html.light .bg-neon-accent.text-black {
             background-color: rgba(13,166,122,0.18) !important;
             color: #0f172a !important;
         }
 
-    /* flash/alert colors for light theme */
+        /* Paziņojumu krāsas gaišajai tēmai. */
         html.light .bg-green-700\/10,
         html.light .bg-red-700\/10,
         html.light .bg-yellow-500\/10 {
@@ -162,18 +163,18 @@
         }
 
         html.light .text-green-200 {
-            color: #065f46 !important; /* darker green for visibility */
+            color: #065f46 !important; /* Tumšāks zaļais labākai salasāmībai. */
         }
 
         html.light .text-red-200 {
-            color: #7f1d1d !important; /* darker red */
+            color: #7f1d1d !important; /* Tumšāks sarkanais labākai salasāmībai. */
         }
 
         html.light .text-yellow-200 {
-            color: #92400e !important; /* darker amber */
+            color: #92400e !important; /* Tumšāks dzintara tonis labākai salasāmībai. */
         }
 
-        /* additional background variants used across views */
+        /* Papildu fonu varianti, kas tiek izmantoti vairākos skatos. */
         html.light .bg-green-900\/30,
         html.light .bg-green-900\/40,
         html.light .bg-red-900\/30,
@@ -185,7 +186,7 @@
             border-color: #e6eef5 !important;
         }
 
-        /* additional text shades used for badges */
+        /* Papildu teksta toņi statusu nozīmītēm. */
         html.light .text-green-300 {
             color: #065f46 !important;
         }
@@ -194,7 +195,7 @@
             color: #7f1d1d !important;
         }
 
-    /* tweak muted text color */
+        /* Klusinātā teksta krāsa gaišajā tēmā. */
         html.light .text-gray-400 {
             color: #64748b !important;
         }
@@ -271,7 +272,7 @@
 
 <body class="min-h-screen text-gray-900">
     <script>
-        // mobile menu toggle
+        // Pārslēdz mobilo izvēlni un atjaunina pogas piekļūstamības stāvokli.
         function toggleMobileMenu() {
             const menu = document.getElementById('mobile-menu');
             const button = document.querySelector('[aria-controls="mobile-menu"]');
@@ -286,7 +287,7 @@
             button.setAttribute('aria-expanded', isExpanded);
         }
 
-        // theme handling
+        // Iestata gaišo vai tumšo tēmu un saglabā izvēli pārlūkā.
         function setTheme(theme) {
             const html = document.documentElement;
             if (theme === 'light') html.classList.add('light'); else html.classList.remove('light');
@@ -294,18 +295,21 @@
             updateThemeButtonIcons(theme);
         }
 
+        // Inicializē tēmu no saglabātās izvēles vai sistēmas iestatījumiem.
         function initTheme() {
             let theme = 'dark';
             try { theme = localStorage.getItem('theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'); } catch (e) {}
             setTheme(theme);
         }
 
+        // Pārslēdz tēmu starp gaišo un tumšo režīmu.
         function toggleTheme() {
             const html = document.documentElement;
             const isLight = html.classList.contains('light');
             setTheme(isLight ? 'dark' : 'light');
         }
 
+        // Atjaunina tēmas pogu ikonas un piekļūstamības vērtības.
         function updateThemeButtonIcons(theme) {
             const btns = document.querySelectorAll('.theme-toggle');
             btns.forEach(btn => {
@@ -316,7 +320,7 @@
                 else { sun.classList.add('hidden'); moon.classList.remove('hidden'); btn.setAttribute('aria-pressed', 'false'); }
             });
 
-            // toggle logos
+            // Logotipi tiek pārslēgti atbilstoši aktīvajai tēmai.
             const darkLogos = document.querySelectorAll('.dark-logo');
             const lightLogos = document.querySelectorAll('.light-logo');
             if (theme === 'light') {
@@ -354,7 +358,7 @@
                     </div>
                     <div class="hidden md:block">
                         <div class="ml-4 flex items-center gap-2 md:ml-6">
-                            <!-- theme toggle button -->
+                            <!-- Tēmas pārslēgšanas poga. -->
                             <button type="button" onclick="toggleTheme()" class="theme-toggle inline-flex items-center rounded-md p-2 text-gray-300 hover:text-neon-accent hover:bg-gray-800/80 border border-gray-700 transition-all duration-200" aria-pressed="false" title="toggle theme">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon-moon h-5 w-5" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
@@ -408,7 +412,7 @@
                         </div>
                     </div>
                     <div class="-mr-2 flex md:hidden">
-                        <!-- mobile menu button -->
+                        <!-- Mobilās izvēlnes poga. -->
                         <button type="button" onclick="toggleMobileMenu()"
                                 class="relative inline-flex items-center justify-center rounded-md bg-gray-800 p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
                                 aria-controls="mobile-menu" aria-expanded="false">
@@ -428,12 +432,12 @@
                 </div>
             </div>
 
-            <!-- mobile menu, show/hide based on menu state -->
+            <!-- Mobilā izvēlne tiek rādīta vai paslēpta pēc pogas stāvokļa. -->
             <div class="md:hidden hidden" id="mobile-menu">
                 <div class="space-y-1 px-2 pb-3 pt-2 sm:px-3">
                     <a href="/" class="bg-gray-900 text-white block rounded-md px-3 py-2 text-base font-medium"
                        aria-current="page">Sākums</a>
-                    <!-- mobile theme toggle -->
+                    <!-- Mobilā tēmas pārslēgšanas poga. -->
                     <button type="button" onclick="toggleTheme()" class="theme-toggle w-full text-left inline-flex items-center rounded-md p-2 text-gray-300 hover:text-neon-accent hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium" aria-pressed="false" title="toggle theme">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon-moon h-5 w-5 mr-2" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
@@ -491,7 +495,7 @@
                 'mx-auto max-w-7xl py-6 sm:px-6 lg:px-8',
                 'min-h-[calc(100vh-5rem)]' => $stretchMain,
             ])>
-                <!-- flash messages -->
+                <!-- Sistēmas paziņojumi. -->
                 @if(session('success'))
                     <div class="mb-4 rounded-md p-3 bg-green-700/10 border border-green-700 text-green-200">
                         {{ session('success') }}
@@ -519,11 +523,11 @@
         </main>
 
         @unless($hideFooter)
-            <!-- Footer -->
+            <!-- Lapas kājene. -->
             <footer class="mt-auto border-t border-gray-800 bg-gray-900/80 backdrop-blur-md">
                 <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                        <!-- Platform Info -->
+                        <!-- Platformas informācija. -->
                         <div class="col-span-1 md:col-span-2">
                             <div class="flex items-center space-x-3 mb-4">
                                 <img class="h-8 w-8 dark-logo" src="{{ asset('clock.svg') }}" alt="Timerr logo">
@@ -543,7 +547,7 @@
                             </div>
                         </div>
 
-                        <!-- Quick Links -->
+                        <!-- Ātrās saites. -->
                         <div>
                             <h4 class="text-white font-semibold mb-4">Ātrās saites</h4>
                             <ul class="space-y-2">
@@ -556,7 +560,7 @@
                             </ul>
                         </div>
 
-                        <!-- Resources -->
+                        <!-- Resursi. -->
                         <div>
                             <h4 class="text-white font-semibold mb-4">Resursi</h4>
                             <ul class="space-y-2">
@@ -566,7 +570,7 @@
                         </div>
                     </div>
 
-                    <!-- Bottom Bar -->
+                    <!-- Kājenes apakšējā josla. -->
                     <div class="mt-8 pt-8 border-t border-gray-800">
                         <div class="flex flex-col md:flex-row justify-between items-center">
                             <p class="text-gray-400 text-sm mb-4 md:mb-0">
@@ -585,7 +589,7 @@
         @endunless
     </div>
 
-    <!-- Modals -->
+    <!-- Informatīvie modālie logi. -->
     <div id="howItWorks" class="fixed inset-0 z-50 hidden">
         <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" onclick="closeModal('howItWorks')"></div>
         <div class="fixed inset-0 flex items-center justify-center p-4">
@@ -689,17 +693,19 @@
     </div>
 
     <script>
+        // Atver norādīto modālo logu un aptur lapas ritināšanu.
         function openModal(modalId) {
             document.getElementById(modalId).classList.remove('hidden');
             document.body.style.overflow = 'hidden';
         }
 
+        // Aizver norādīto modālo logu un atjauno lapas ritināšanu.
         function closeModal(modalId) {
             document.getElementById(modalId).classList.add('hidden');
             document.body.style.overflow = 'auto';
         }
 
-        // Close modal on Escape key
+        // Escape taustiņš aizver atvērto modālo logu.
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 ['howItWorks', 'faq'].forEach(id => {

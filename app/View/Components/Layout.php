@@ -1,15 +1,16 @@
 <?php
 
+// Šis fails nodod kopīgā lapas izkārtojuma iestatījumus Blade komponentam.
+
 namespace App\View\Components;
 
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
-// layout component for shared page structure
 class Layout extends Component
 {
-    // component constructor
+    // Saņem izkārtojuma slēdžus, kurus skati izmanto galvenes, kājenes un platuma maiņai.
     public function __construct(
         public bool $hidePageHeader = false,
         public bool $hideFooter = false,
@@ -18,7 +19,7 @@ class Layout extends Component
     {
     }
 
-    // render the component view
+    // Atgriež kopīgā izkārtojuma Blade skatu.
     public function render(): View|Closure|string
     {
         return view('components.layout');

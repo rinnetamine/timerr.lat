@@ -1,3 +1,4 @@
+{{-- Šis komponents attēlo darba sludinājuma augšupielādēto vai noklusējuma attēlu. --}}
 @props(['job', 'ratio' => 'aspect-[16/9]'])
 
 <img

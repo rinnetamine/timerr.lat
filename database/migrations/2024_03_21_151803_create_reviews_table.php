@@ -1,14 +1,14 @@
 <?php
 
+// Šis fails izveido atsauksmju tabulu starp pieteikuma pusēm.
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+    // Izveido atsauksmju tabulu, ja tā vēl nepastāv.
     public function up(): void
     {
         if (!Schema::hasTable('reviews')) {
@@ -21,15 +21,13 @@ return new class extends Migration
             $table->text('comment')->nullable();
             $table->timestamps();
 
-            // ensure one review per submission
+            // Katram pieteikumam drīkst būt tikai viena atsauksme.
             $table->unique('job_submission_id');
             });
         }
     }
 
-    /**
-     * Reverse the migrations.
-     */
+    // Dzēš atsauksmju tabulu.
     public function down(): void
     {
         Schema::dropIfExists('reviews');

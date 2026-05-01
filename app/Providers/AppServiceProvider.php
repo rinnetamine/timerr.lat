@@ -1,5 +1,7 @@
 <?php
 
+// Šis fails inicializē lietotnes kopīgos iestatījumus un autorizācijas vārtus.
+
 namespace App\Providers;
 
 use App\Models\Job;
@@ -12,27 +14,28 @@ use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
+    // Reģistrē lietotnes pakalpojumus, ja tiem vēlāk nepieciešama papildu konfigurācija.
     public function register(): void
     {
     }
 
-    // bootstrap application services
+    // Sākot lietotni, iestata lokalizāciju, modeļu uzvedību un autorizācijas vārtus.
     public function boot(): void
     {
         app()->setLocale(config('app.locale'));
         Carbon::setLocale(config('app.locale'));
 
-        // prevent lazy loading of models
+        // Slinkās ielādes aizliegums palīdz ātrāk pamanīt nepietiekami definētas attiecības.
         Model::preventLazyLoading();
 
-        // define gates for authorization
+        // Vārti centralizē darba labošanas tiesības.
         Gate::define('edit-job', function (User $user, Job $job) {
-            // allow admins to edit any job
+            // Administrators drīkst labot jebkuru sludinājumu.
             if ($user->role === 'admin') {
                 return true;
             }
             
-            // allow users to edit their own jobs
+            // Parasts lietotājs drīkst labot tikai savus sludinājumus.
             return $user->id === $job->user_id;
         });
     }

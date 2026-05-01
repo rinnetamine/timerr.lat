@@ -1,5 +1,7 @@
 <?php
 
+// Šis fails sagatavo lietotāja kredītu darījumu eksportus HTML, PDF, CSV un XLSX formātā.
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -13,9 +15,7 @@ use ZipArchive;
 
 class TransactionController extends Controller
 {
-    /**
-     * export transactions
-     */
+    // Parāda darījumu vēsturi PDF skata veidnē.
     public function exportPdf(Request $request)
     {
         if (!Auth::check()) {
@@ -33,6 +33,7 @@ class TransactionController extends Controller
         ]);
     }
 
+    // Ģenerē un lejupielādē darījumu vēstures PDF failu.
     public function download(Request $request)
     {
         if (!Auth::check()) {
@@ -44,16 +45,15 @@ class TransactionController extends Controller
 
         $filename = 'transakcijas-' . $user->id . '-' . now()->format('Ymd') . '.pdf';
 
-        // configure domPDF options
+        // DomPDF tiek konfigurēts ar Unicode fontu, lai latviešu rakstzīmes PDF failā attēlotos korekti.
         $options = new Options();
         $options->set('defaultFont', 'DejaVu Sans');
         $options->set('isRemoteEnabled', true);
         $options->set('isHtml5ParserEnabled', true);
         
-        // create new domPDF instance
         $dompdf = new Dompdf($options);
         
-        // load HTML content
+        // PDF saturs tiek veidots no tās pašas Blade veidnes, ko izmanto priekšskatam.
         $html = view('transactions.pdf', [
             'user' => $user,
             'transactions' => $transactions
@@ -69,6 +69,7 @@ class TransactionController extends Controller
         ]);
     }
 
+    // Eksportē darījumu vēsturi CSV failā.
     public function exportCsv(Request $request)
     {
         if (!Auth::check()) {
@@ -81,7 +82,7 @@ class TransactionController extends Controller
         $filename = 'transakcijas-' . $user->id . '-' . now()->format('Ymd') . '.csv';
 
         $handle = fopen('php://temp', 'r+');
-        fwrite($handle, "\xEF\xBB\xBF"); // UTF-8 BOM for Excel compatibility
+        fwrite($handle, "\xEF\xBB\xBF"); // UTF-8 BOM nodrošina korektu atvēršanu Excel programmā.
         fputcsv($handle, ['Datums', 'Apraksts', 'Kredīti'], ',', '"', '');
 
         foreach ($transactions as $transaction) {
@@ -102,6 +103,7 @@ class TransactionController extends Controller
         ]);
     }
 
+    // Eksportē darījumu vēsturi vienkāršā XLSX failā bez ārējām bibliotēkām.
     public function exportExcel(Request $request)
     {
         if (!Auth::check()) {
@@ -129,6 +131,7 @@ class TransactionController extends Controller
         ])->deleteFileAfterSend(true);
     }
 
+    // Izveido XLSX darblapas XML ar darījumu rindām.
     private function xlsxSheet($transactions): string
     {
         $rows = [
@@ -168,16 +171,19 @@ class TransactionController extends Controller
 </worksheet>';
     }
 
+    // Formatē darījuma datumu lietotājam saprotamā Latvijas lokalizācijas formātā.
     private function formattedTransactionDate(Transaction $transaction): string
     {
         return $transaction->created_at?->translatedFormat('j. M Y, H:i') ?? '';
     }
 
+    // Pievieno plusa zīmi pozitīvām kredītu izmaiņām.
     private function formattedCredits(int $amount): string
     {
         return ($amount > 0 ? '+' : '') . $amount;
     }
 
+    // Atgriež XLSX satura tipu aprakstu.
     private function xlsxContentTypes(): string
     {
         return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -190,6 +196,7 @@ class TransactionController extends Controller
 </Types>';
     }
 
+    // Atgriež XLSX saknes relāciju XML.
     private function xlsxRootRelationships(): string
     {
         return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -198,6 +205,7 @@ class TransactionController extends Controller
 </Relationships>';
     }
 
+    // Atgriež XLSX darbgrāmatas XML.
     private function xlsxWorkbook(): string
     {
         return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -208,6 +216,7 @@ class TransactionController extends Controller
 </workbook>';
     }
 
+    // Atgriež XLSX darbgrāmatas relāciju XML.
     private function xlsxWorkbookRelationships(): string
     {
         return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -217,6 +226,7 @@ class TransactionController extends Controller
 </Relationships>';
     }
 
+    // Atgriež minimālu XLSX stilu XML galvenes izcelšanai.
     private function xlsxStyles(): string
     {
         return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -232,11 +242,13 @@ class TransactionController extends Controller
 </styleSheet>';
     }
 
+    // Aizsargā tekstu pirms ievietošanas XML dokumentā.
     private function xml($value): string
     {
         return htmlspecialchars((string) $value, ENT_QUOTES | ENT_XML1, 'UTF-8');
     }
 
+    // Pārveido kolonnas numuru Excel kolonnas burtā.
     private function columnName(int $column): string
     {
         $name = '';

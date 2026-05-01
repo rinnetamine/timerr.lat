@@ -1,10 +1,11 @@
+{{-- Šis skats rāda darba sludinājumu sarakstu ar meklēšanu, filtriem un kārtošanu. --}}
 <x-layout>
     <x-slot:heading>
         Palīdzības pieprasījumi
     </x-slot:heading>
 
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <!-- categories sidebar -->
+        <!-- Kategoriju sānu josla. -->
         <aside class="lg:col-span-1 bg-gray-800/30 rounded-lg border border-gray-700 p-4">
             <div class="flex justify-between items-center mb-3">
                 <h3 class="text-lg font-semibold text-white/90">Kategorijas</h3>
@@ -42,9 +43,9 @@
         </aside>
 
         <div class="lg:col-span-3 space-y-4">
-        <!-- search and sort controls -->
+        <!-- Meklēšanas un kārtošanas vadīklas. -->
         <div class="flex flex-col sm:flex-row gap-4 mb-6">
-            <!-- search -->
+            <!-- Meklēšanas forma. -->
             <div class="flex-1">
                 <form action="/jobs" method="GET" class="flex gap-2">
                     <input type="hidden" name="category" value="{{ request('category') }}">
@@ -57,7 +58,7 @@
                 </form>
             </div>
 
-            <!-- sort by -->
+            <!-- Kārtošanas un kredītu filtri. -->
             <div class="flex gap-2">
                 <form action="/jobs" method="GET" class="flex gap-2">
                     <input type="hidden" name="search" value="{{ request('search') }}">
@@ -77,7 +78,7 @@
             </div>
         </div>
 
-    <!-- jobs list -->
+    <!-- Darba sludinājumu saraksts. -->
     <div class="space-y-4">
             @foreach ($jobs as $job)
                 <div class="overflow-hidden border border-gray-700 rounded-lg bg-gray-800/40 backdrop-blur-sm hover:bg-gray-700/40 transition-colors duration-200 hover-card">

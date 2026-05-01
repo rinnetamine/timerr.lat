@@ -1,5 +1,7 @@
 <?php
 
+// Šis fails apraksta darba sludinājuma datus, tā attiecības un noklusējuma attēlu izvēli.
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -9,10 +11,9 @@ class Job extends Model
 {
     use HasFactory;
 
-    // table name for job listings
     protected $table = 'job_listings';
 
-    // fillable attributes for job listings
+    // Šie lauki drīkst tikt aizpildīti, veidojot vai labojot darba sludinājumu.
     protected $fillable = [
         'title',
         'description',
@@ -22,23 +23,25 @@ class Job extends Model
         'user_id'
     ];
 
-    // relationship to user who created the job
+    // Definē saiti ar lietotāju, kuram pieder sludinājums.
     public function user()
     {
         return $this->belongsTo(User::class);
     }
     
-    // relationship to job submissions
+    // Definē saiti ar darba pieteikumiem.
     public function submissions()
     {
         return $this->hasMany('App\Models\JobSubmission', 'job_listing_id');
     }
 
+    // Nosaka galveno kategoriju no pilnā kategorijas identifikatora.
     public function categoryRoot()
     {
         return explode('.', $this->category ?: 'other')[0] ?: 'other';
     }
 
+    // Atgriež sludinājuma attēla adresi, izmantojot augšupielādētu vai noklusējuma attēlu.
     public function imageUrl()
     {
         if ($this->image_path) {
@@ -56,16 +59,19 @@ class Job extends Model
         return '/' . ltrim($this->defaultImagePath(), '/');
     }
 
+    // Nosaka noklusējuma darba attēla faila ceļu.
     public function defaultImagePath()
     {
         return self::defaultImagePathForCategory($this->category ?: 'other');
     }
 
+    // Atgriež noklusējuma darba attēla URL adresi.
     public function defaultImageUrl()
     {
         return '/' . ltrim($this->defaultImagePath(), '/');
     }
 
+    // Izvēlas noklusējuma attēla ceļu pēc kategorijas galvenās grupas.
     public static function defaultImagePathForCategory(string $category)
     {
         $root = explode('.', $category ?: 'other')[0] ?: 'other';

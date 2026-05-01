@@ -1,11 +1,14 @@
 <?php
 
+// Šis fails izveido publiskās kontaktformas ziņojumu tabulu.
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    // Izveido kontaktziņojumu tabulu un pēc iespējas sasaista ziņojumu ar lietotāju.
     public function up()
     {
         Schema::create('contact_messages', function (Blueprint $table) {
@@ -19,6 +22,7 @@ return new class extends Migration
         });
     }
 
+    // Dzēš kontaktziņojumu tabulu.
     public function down()
     {
         Schema::dropIfExists('contact_messages');

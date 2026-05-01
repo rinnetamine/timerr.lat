@@ -1,3 +1,4 @@
+{{-- Šis skats rāda strīda iesniegšanas formu konkrētam pieteikumam. --}}
 <x-layout>
     <x-slot name="heading">Iesniegt strīdu</x-slot>
 

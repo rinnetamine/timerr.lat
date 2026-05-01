@@ -1,3 +1,4 @@
+{{-- Šis skats rāda darba sludinājuma labošanas formu. --}}
 <x-layout>
     <x-slot:heading>
         Rediģēt darbu: {{ $job->title }}

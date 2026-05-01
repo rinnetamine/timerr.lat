@@ -1,3 +1,4 @@
+{{-- Šis skats rāda viena darba pieteikuma detaļas, failus, darbības un atsauksmi. --}}
 <x-layout>
     <x-slot:heading>
         Pieteikuma detaļas
@@ -5,7 +6,7 @@
 
     <div class="max-w-3xl mx-auto">
         <div class="bg-gray-800/40 backdrop-blur-sm p-8 rounded-lg border border-gray-700">
-            <!-- help request info-->
+            <!-- Palīdzības pieprasījuma informācija. -->
             <div class="mb-6">
                 <x-job-image :job="$submission->jobListing" class="mb-5" />
                 <h2 class="text-xl font-semibold text-white/90">{{ $submission->jobListing->title }}</h2>
@@ -26,7 +27,7 @@
                 </div>
             </div>
 
-            <!-- application Status -->
+            <!-- Pieteikuma statuss. -->
             <div class="border-t border-gray-700 pt-4 mb-6">
                 <div class="flex items-center">
                     <span class="text-gray-400 text-sm">Statuss: </span>
@@ -44,7 +45,7 @@
                 </div>
             </div>
 
-            <!-- Applicant Info -->
+            <!-- Pieteicēja informācija. -->
             <div class="border-t border-gray-700 pt-4 mb-6">
                 <h3 class="font-semibold text-white/90 mb-2">Pieteicējs</h3>
                 <p class="text-gray-300">
@@ -98,7 +99,7 @@
                 </div>
             @endif
             
-            <!-- admin notes -->
+            <!-- Administratora piezīmes. -->
             @if($submission->status === 'admin_review' && $submission->admin_notes)
                 <div class="border-t border-gray-700 pt-4 mb-6">
                     <h3 class="font-semibold text-white/90 mb-2">Admin piezīmes</h3>
@@ -109,7 +110,7 @@
                 </div>
             @endif
 
-            <!-- attached files -->
+            <!-- Pievienotie faili. -->
             @if($submission->files->count() > 0)
                 <div class="border-t border-gray-700 pt-4 mb-6">
                     <h3 class="font-semibold text-white/90 mb-2">Pievienotie faili</h3>
@@ -131,7 +132,7 @@
                 </div>
             @endif
 
-            <!-- actions -->
+            <!-- Pieteikuma darbības. -->
             @if(auth()->id() === $submission->jobListing->user_id && $submission->status === 'pending')
                 <div class="border-t border-gray-700 pt-6 mt-6">
                     <div class="flex justify-between">
@@ -188,7 +189,7 @@
                 </div>
             @endif
 
-            {{-- Review form: allow job owner to leave a review after approval/completion --}}
+            {{-- Atsauksmes forma ļauj darba īpašniekam novērtēt izpildītāju pēc apstiprināšanas. --}}
             @if(auth()->check() && auth()->id() === $submission->jobListing->user_id && $submission->status === 'approved')
                 <div class="border-t border-gray-700 pt-6 mt-6">
                     <h3 class="font-semibold text-white/90 mb-3">Atstājiet atsauksmi {{ $submission->user->first_name }}</h3>
@@ -243,7 +244,7 @@
                 </div>
             @endif
 
-            <!-- Dispute button for both parties -->
+            <!-- Strīda poga abām iesaistītajām pusēm. -->
             @if(auth()->check() && 
                (auth()->id() === $submission->jobListing->user_id || auth()->id() === $submission->user_id))
                 <div class="border-t border-gray-700 pt-6 mt-6">
@@ -274,7 +275,7 @@
                 </div>
             @endif
 
-            <!-- Frozen status indicator -->
+            <!-- Iesaldēta pieteikuma statusa norāde. -->
             @if($submission->is_frozen)
                 <div class="border-t border-gray-700 pt-6 mt-6">
                     <div class="bg-red-500/10 border border-red-500 rounded-md p-4">

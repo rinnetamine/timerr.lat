@@ -1,3 +1,4 @@
+{{-- Šis skats rāda kontaktformu ziņojuma nosūtīšanai administratoram. --}}
 <x-layout>
     <x-slot:heading>Sazināties ar mums</x-slot:heading>
 
@@ -63,21 +64,5 @@
             </form>
             </div>
         </div>
-
-        <!-- Contact Information
-        <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bg-gray-800/40 backdrop-blur-sm p-6 rounded-lg border border-gray-700">
-                <h3 class="text-lg font-medium text-white/90 mb-2">Email Us</h3>
-                <p class="text-gray-300">support@timerr.lat</p>
-            </div>
-            <div class="bg-gray-800/40 backdrop-blur-sm p-6 rounded-lg border border-gray-700">
-                <h3 class="text-lg font-medium text-white/90 mb-2">Follow Us</h3>
-                <div class="flex space-x-4 text-gray-300">
-                    <a href="#" class="hover:text-neon-accent">Twitter</a>
-                    <a href="#" class="hover:text-neon-accent">LinkedIn</a>
-                    <a href="#" class="hover:text-neon-accent">GitHub</a>
-                </div>
-            </div>
-        </div> -->
     </div>
 </x-layout>

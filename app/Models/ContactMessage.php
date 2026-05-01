@@ -1,12 +1,14 @@
 <?php
 
+// Šis fails apraksta no kontaktformas saņemtos ziņojumus.
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
 class ContactMessage extends Model
 {
-    // fillable attributes for contact messages
+    // Šie lauki drīkst tikt aizpildīti no validētiem kontaktformas datiem.
     protected $fillable = [
         'name',
         'email',
@@ -16,13 +18,13 @@ class ContactMessage extends Model
         'user_id'
     ];
 
-    // attribute casts for date fields
+    // Datuma lauki tiek pārvērsti Carbon objektos ērtākai attēlošanai.
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
 
-    // relationship to the user who sent the message
+    // Definē saiti ar lietotāju, kurš nosūtīja ziņojumu.
     public function user()
     {
         return $this->belongsTo(User::class);

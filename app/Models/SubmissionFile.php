@@ -1,5 +1,7 @@
 <?php
 
+// Šis fails apraksta pieteikumam pievienotos darba izpildes failus.
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -10,10 +12,10 @@ class SubmissionFile extends Model
 {
     use HasFactory;
 
-    // table name for submission files
+    // Modelis izmanto atsevišķu tabulu pieteikumu failiem.
     protected $table = 'submission_files';
 
-    // fillable attributes for submission files
+    // Šie lauki drīkst tikt aizpildīti pēc faila augšupielādes.
     protected $fillable = [
         'job_submission_id',
         'file_name',
@@ -22,7 +24,7 @@ class SubmissionFile extends Model
         'file_size'
     ];
 
-    // relationship to the job submission
+    // Definē saiti ar darba pieteikumu, kuram fails pievienots.
     public function jobSubmission()
     {
         return $this->belongsTo(JobSubmission::class);

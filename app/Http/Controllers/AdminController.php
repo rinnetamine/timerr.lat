@@ -1,5 +1,7 @@
 <?php
 
+// Šis fails satur administratora darbības pieteikumu pārskatīšanai un sistēmas pārvaldībai.
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -13,10 +15,10 @@ use App\Models\Review;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 
-// admin controller for handling admin-specific actions
 class AdminController extends Controller
 {
-    // check if current user has admin privileges
+    // Pārbauda, vai pašreizējam lietotājam ir administratora tiesības.
+    // Šo pārbaudi izmanto pirms katras pārvaldības darbības.
     private function checkAdmin()
     {
         if (!auth()->check() || !auth()->user()->isAdmin()) {
@@ -24,12 +26,12 @@ class AdminController extends Controller
         }
     }
     
-    // approve a job submission and transfer credits to the applicant
+    // Administratora vārdā apstiprina pieteikumu un pārskaita kredītus izpildītājam.
     public function approveSubmission(JobSubmission $submission)
     {
         $this->checkAdmin();
         
-        // validate submission status
+        // Pieteikumu drīkst apstiprināt tikai tad, ja tas atrodas administratora pārskatīšanā.
         if ($submission->status !== JobSubmission::STATUS_ADMIN_REVIEW) {
             return back()->withErrors([
                 'error' => 'Šis iesniegums pašlaik nav administratora pārskatīšanā.'
@@ -37,19 +39,19 @@ class AdminController extends Controller
         }
         
         try {
-            // start database transaction
+            // Apstiprināšana notiek transakcijā, jo tiek mainīti vairāki saistīti ieraksti.
             DB::beginTransaction();
             
-            // get job and user information
+            // Tiek iegūta informācija par darbu, pieteicēju un darba autoru.
             $job = $submission->jobListing;
             $applicant = $submission->user;
             $jobCreator = $job->user;
             
-            // transfer credits to applicant
+            // Kredīti tiek pieskaitīti pieteicējam.
             $applicant->time_credits += $job->time_credits;
             $applicant->save();
             
-            // log transaction
+            // Kredītu kustība tiek pierakstīta darījumu vēsturē.
             Transaction::create([
                 'user_id' => $applicant->id,
                 'amount' => $job->time_credits,
@@ -57,21 +59,21 @@ class AdminController extends Controller
                 'type' => 'credit'
             ]);
             
-            // update submission status
+            // Pieteikums tiek atzīmēts kā apstiprināts.
             $submission->status = JobSubmission::STATUS_APPROVED;
             $submission->admin_approved = true;
             $submission->save();
             
-            // complete job by deleting it
+            // Pēc apstiprināšanas darbs tiek pabeigts, dzēšot sludinājumu.
             $job->delete();
             
-            // commit transaction
+            // Transakcija tiek apstiprināta tikai pēc veiksmīgas visu izmaiņu izpildes.
             DB::commit();
             
             return redirect('/profile')->with('success', 'Pieteikums apstiprināts un kredīti pārnesti pieteicējam.');
             
         } catch (\Exception $e) {
-            // rollback transaction on error
+            // Kļūdas gadījumā visas iesāktās izmaiņas tiek atceltas.
             DB::rollBack();
             Log::error('Admin approval failed: ' . $e->getMessage());
             return back()->withErrors([
@@ -80,13 +82,13 @@ class AdminController extends Controller
         }
     }
     
-    // reject a job submission and keep job open
+    // Administratora vārdā noraida pārskatīšanā esošu pieteikumu.
     public function rejectSubmission(JobSubmission $submission)
     {
-        // verify admin access
+        // Tiek pārbaudīts, vai darbību veic administrators.
         $this->checkAdmin();
         
-        // validate submission status
+        // Pieteikumam jāatrodas administratora pārskatīšanas statusā.
         if ($submission->status !== JobSubmission::STATUS_ADMIN_REVIEW) {
             return back()->withErrors([
                 'error' => 'Šis iesniegums pašlaik nav administratora pārskatīšanā.'
@@ -94,7 +96,7 @@ class AdminController extends Controller
         }
         
         try {
-            // update submission status
+            // Pieteikums tiek atzīmēts kā noraidīts.
             $submission->status = JobSubmission::STATUS_DECLINED;
             $submission->admin_approved = false;
             $submission->save();
@@ -109,8 +111,7 @@ class AdminController extends Controller
         }
     }
     
-    //show all contact messages (admin only)
-
+    // Sagatavo administratoram saņemto kontaktziņojumu sarakstu.
     public function contactMessages()
     {
         $this->checkAdmin();
@@ -124,7 +125,7 @@ class AdminController extends Controller
         return view('admin.contact-messages', compact('messages'));
     }
 
-    // delete a contact message
+    // Dzēš izvēlēto kontaktziņojumu.
     public function deleteContact(ContactMessage $message)
     {
         $this->checkAdmin();
@@ -138,7 +139,7 @@ class AdminController extends Controller
         }
     }
 
-    // admin dashboard
+    // Apkopo vadības paneļa statistiku par lietotājiem, darbiem, pieteikumiem, strīdiem un kredītiem.
     public function index()
     {
         $this->checkAdmin();

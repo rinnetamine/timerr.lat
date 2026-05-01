@@ -1,3 +1,4 @@
+{{-- Šis skats rāda publisko cilvēku katalogu ar meklēšanu un kārtošanu. --}}
 <x-layout>
     <x-slot:heading>Cilvēki</x-slot:heading>
 

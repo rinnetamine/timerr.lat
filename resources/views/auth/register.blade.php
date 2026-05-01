@@ -1,3 +1,4 @@
+{{-- Šis skats rāda jauna lietotāja reģistrācijas formu. --}}
 <x-layout>
     <x-slot:heading>
         Reģistrēties

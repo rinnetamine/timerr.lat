@@ -1,3 +1,4 @@
+{{-- Šis skats veido darba pieteikuma PDF dokumenta HTML saturu. --}}
 <!doctype html>
 <html lang="lv">
 <head>

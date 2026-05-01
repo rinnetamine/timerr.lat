@@ -1,5 +1,7 @@
 <?php
 
+// Šis fails izveido lietotāju, paroles atiestatīšanas un sesiju tabulas.
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -7,6 +9,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
 
+    // Izveido lietotāju kontu, paroles atiestatīšanas un sesiju glabāšanas tabulas.
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
@@ -42,6 +45,7 @@ return new class extends Migration
     }
 
 
+    // Dzēš lietotāju, paroles atiestatīšanas un sesiju tabulas.
     public function down(): void
     {
         Schema::dropIfExists('users');

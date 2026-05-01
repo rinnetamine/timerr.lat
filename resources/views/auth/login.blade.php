@@ -1,3 +1,4 @@
+{{-- Šis skats rāda lietotāja pieslēgšanās formu. --}}
 <x-layout>
     <x-slot:heading>
         Ierakstīties

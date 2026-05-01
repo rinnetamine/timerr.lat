@@ -1,3 +1,4 @@
+{{-- Šis skats rāda sākumlapu ar platformas kopsavilkumu, darbiem un aktīviem lietotājiem. --}}
 <x-layout>
     <x-slot:heading>Laipni lūdzam Timerr</x-slot:heading>
 
@@ -9,7 +10,7 @@
     @endphp
 
     <div class="space-y-10">
-        <!-- Hero Section -->
+        <!-- Sākumlapas ievada sadaļa. -->
         <section class="overflow-hidden rounded-lg border border-gray-700 bg-gray-900/50">
             <div class="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr]">
                 <div class="p-6 sm:p-8 lg:p-10">
@@ -113,7 +114,7 @@
             </div>
         </section>
 
-        <!-- Product Insights -->
+        <!-- Platformas kopsavilkuma rādītāji. -->
         <section class="grid grid-cols-1 gap-4 md:grid-cols-3">
             @foreach($insights as $insight)
                 <div class="rounded-lg border border-gray-700 bg-gray-800/40 p-5">
@@ -124,7 +125,7 @@
             @endforeach
         </section>
 
-        <!-- How It Works -->
+        <!-- Pakalpojuma darbības soļi. -->
         <section>
             <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                 <div>
@@ -157,7 +158,7 @@
             </div>
         </section>
 
-        <!-- Popular Categories -->
+        <!-- Populārās kategorijas. -->
         <section>
             <h3 class="mb-4 text-2xl font-semibold text-white/90">Populārās kategorijas</h3>
             <div class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
@@ -172,7 +173,7 @@
             </div>
         </section>
 
-        <!-- Featured Jobs -->
+        <!-- Jaunākie izceltie pakalpojumi. -->
         <section>
             <div class="mb-4 flex items-center justify-between">
                 <h3 class="text-2xl font-semibold text-white/90">Jaunākie pakalpojumi Timerr</h3>
